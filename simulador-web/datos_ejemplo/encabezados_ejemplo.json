@@ -1,0 +1,47 @@
+{
+  "equipo": {
+    "director": {
+      "nombre": "Director Ejemplo",
+      "nombreCorto": "Director E.",
+      "basico": 8000000,
+      "oportunidad": 4000000
+    },
+    "comerciales": [
+      {
+        "nombre": "Comercial Ejemplo",
+        "nombreCorto": "Ejemplo",
+        "nombreOficial": "Comercial Ejemplo",
+        "basico": 5000000,
+        "oportunidad": 5000000,
+        "cargo": "Ejecutivo Comercial II",
+        "metas": {
+          "2026-10": { "educacion": 41250000, "mision": 49600000, "congreso": 0, "cultural": 0 },
+          "2026-11": { "educacion": 33100000, "mision": 0, "congreso": 0, "cultural": 0 },
+          "2026-12": { "educacion": 28700000, "mision": 0, "congreso": 0, "cultural": 34400000 }
+        },
+        "baseSocialInicial": 90,
+        "cartones": 860,
+        "ingresos": 0,
+        "retiros": 0,
+        "btlPagadoAnio": 0
+      },
+      {
+        "nombre": "Comercial A",
+        "nombreCorto": "A",
+        "basico": 3200000,
+        "oportunidad": 2500000,
+        "cargo": "Ejecutivo Comercial Junior",
+        "metas": {
+          "2026-10": { "educacion": 20000000, "mision": 49600000, "congreso": 0, "cultural": 0 },
+          "2026-11": { "educacion": 18000000, "mision": 0, "congreso": 0, "cultural": 0 },
+          "2026-12": { "educacion": 15000000, "mision": 0, "congreso": 0, "cultural": 10000000 }
+        },
+        "baseSocialInicial": 40,
+        "cartones": 250,
+        "ingresos": 0,
+        "retiros": 0,
+        "btlPagadoAnio": 0
+      }
+    ]
+  }
+}

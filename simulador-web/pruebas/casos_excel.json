@@ -1,0 +1,40 @@
+{
+  "fuente": "Simulador_Comercial_2026_con_BTL_REFERENCIA_ANONIMA.xlsx",
+  "generado": "2026-11-24",
+  "nota": "Caso semilla verificado a mano contra el Excel anónimo. Más casos se regeneran con herramientas/generar_casos_excel.*",
+  "casos": [
+    {
+      "id": "c00-semilla-octubre",
+      "variante": "comercial",
+      "comercial": "Comercial A",
+      "mes": "Octubre",
+      "entradas": {
+        "Inp_EAT_Oct": 41250000,
+        "Inp_Mis_Oct": 3,
+        "Inp_BS_Base": 90,
+        "Inp_BS_Ingresos": 0,
+        "Inp_BS_Retiros": 0,
+        "Inp_SER_Ventas": 12,
+        "Inp_SER_Meta": 10,
+        "Inp_Inn_Oferta1": "SÍ",
+        "Inp_Inn_Venta1": 5000000,
+        "Inp_Sat": 85,
+        "Inp_Anterior": 1500000,
+        "Inp_BTL_Ingreso": 100000000,
+        "Inp_BTL_Costo": 80000000,
+        "Inp_BTL_Presup": 15000000
+      },
+      "esperado": {
+        "Score_vista": 76.402,
+        "Factor_vista": 0,
+        "Comision_vista": 0,
+        "transicion": 1500000,
+        "BTL_Estimado_excel": 4678488.95,
+        "BTL_Estimado_web": 0,
+        "BTL_diferenciaEsperada": "Web exige puntaje ≥ 80 para BTL comercial; Excel anónimo liquidaba con 76,40",
+        "Pts_V_vista": 43.4645,
+        "Pts_BS": 0
+      }
+    }
+  ]
+}

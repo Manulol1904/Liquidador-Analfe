@@ -1,0 +1,7 @@
+﻿privado/
+salida_perfiles/
+datos/
+dist/
+*.analfe
+*.perfil.json
+node_modules/

@@ -1,0 +1,20 @@
+{
+ "Liquidación!A1": "ANALFE  –  Liquidación de Compensación Variable  –  {Mes} {anio}",
+ "Explicación!A1": "Explicación de la liquidación del Director  ·  {Mes} {anio}",
+ "Explicación!A5": "Es la liquidación de {nombre} con la misma forma que el libro de un comercial: la primera hoja tiene el mismo encabezado, el resultado 5.8, la política anterior, la política nueva y el comparativo de transición en las mismas filas y columnas. Así se pueden poner los dos libros lado a lado.",
+ "Explicación!A8": "El director no tiene venta propia en la política nueva. Su real es el agregado del equipo (núm. 5.9, método «{metodo}»): ventas por cumplimiento del equipo ponderado por meta de cada producto, y base social del equipo frente a la meta del equipo. Diversificación, innovación y satisfacción son el promedio del equipo.",
+ "Explicación!A11": "Resultado de {mes}",
+ "Explicación!A12": "Score {score}, factor {factorPct}: la política nueva paga {pagoNueva}. El esquema anterior paga {comisionAnterior} ({tasaAnterior} de {baseAnterior}). En la transición rige {rige}.",
+ "Explicación!A15": "El director recibe {tasaAnterior} fijo sobre la facturación del mes ({nLineas} líneas, hoja «Facturas») y, aparte, {tasaBtl} sobre el ingreso de ejecución de los eventos BTL ({btlAnterior}). No hay meta ni tramos.",
+ "Detalle del equipo!A1": "Detalle del equipo  ·  aporte de cada comercial al agregado del director  ·  {Mes} {anio}",
+ "Facturas!A1": "Facturas del mes  ·  base del esquema anterior del director  ·  {Mes} {anio}",
+ "Facturas!A2": "{nLineas} líneas de la hoja «{hojaFacturacion}» del archivo cargado. La comisión del director es Base × % Dirección.  ·  Simulación. No es un pago oficial.",
+ "Supuestos y pendientes!A2": "Director  ·  {Mes} {anio}  ·  Simulación. No es un pago oficial.",
+ "Supuestos y pendientes!B4": "El real del director es el agregado del equipo (núm. 5.9). Método usado: {metodo}. Regla del 100 %: {regla100}.",
+ "Supuestos y pendientes!B5": "Meta de Misión del equipo: {metaMision} (Anexo 2). Meta de base social del equipo: {metaBaseSocial}. Son celdas amarillas en la Liquidación.",
+ "Supuestos y pendientes!B6": "Esquema anterior: {tasaAnterior} sobre toda la facturación del mes ({baseAnterior}, {nLineas} líneas) y {tasaBtl} sobre el ingreso de ejecución BTL.",
+ "Supuestos y pendientes!B8": "BTL del director: Pendiente hasta confirmar participación material, certificación financiera y satisfacción del cliente del evento {eventoBtl}.",
+ "Supuestos y pendientes!B9": "Canal nacional (Dirección Comercial): base {canalProduccion}. Solo entra en la base del esquema anterior; no suma al score ni a las metas de los comerciales.",
+ "Supuestos y pendientes!B10": "Pendiente con la jefa: método del score, regla del 100 % y si la meta de base social queda en {metaBaseSocial} o en la suma de metas individuales ({metaBaseSuma}).",
+ "Supuestos y pendientes!B11": "Datos que la app aún no trae: {faltantes}."
+}

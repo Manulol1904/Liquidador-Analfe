@@ -1,0 +1,28 @@
+# Datos personales / nómina — no subir
+encabezados_comerciales.json
+**/encabezados_comerciales.json
+liquidador-web/js/equipo.js
+liquidador-web/datos/encabezados*.json
+simulador-web/salida_perfiles/
+**/salida_perfiles/
+
+# Empaquetados y respaldos locales
+*.zip
+*.rar
+*.7z
+
+# Dependencias y entorno
+node_modules/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+
+# Cursor / IDE
+.cursor/
+agent-transcripts/
+*.local
+
+# Logs
+*.log
+npm-debug.log*

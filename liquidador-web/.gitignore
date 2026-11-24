@@ -1,0 +1,9 @@
+# Datos personales de los comerciales: no se versionan ni se comparten
+datos/encabezados_comerciales.json
+
+# v16
+js/equipo.js
+js/parametros.js.antes_v16
+dist/
+entregas/
+node_modules/

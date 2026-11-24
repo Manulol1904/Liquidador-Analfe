@@ -1,0 +1,69 @@
+/* css/tokens.css. Tomado de las variables de Figma "Liquidador ANALFE – Sistema visual". */
+:root {
+  /* Primario (azul institucional) */
+  --color-primario-900: #0B2545;
+  --color-primario-700: #13315C;
+  --color-primario-500: #1F4E8C;
+  --color-primario-100: #E3ECF7;
+  --color-primario-50:  #F2F6FB;
+  /* Neutros */
+  --color-neutro-900: #1A2230;
+  --color-neutro-700: #3D4756;
+  --color-neutro-500: #6B7585;
+  --color-neutro-300: #C9D0DA;
+  --color-neutro-200: #E2E7EE;
+  --color-neutro-100: #F1F4F8;
+  --color-neutro-0:   #FFFFFF;
+  /* Estados */
+  --color-exito-700:   #1E7B4B;  --color-exito-100:   #E3F4EA;
+  --color-aviso-700:   #9A6400;  --color-aviso-100:   #FFF1D6;
+  --color-peligro-700: #B42318;  --color-peligro-100: #FDE7E5;
+  /* Parámetros editables (amarillo) */
+  --color-editable-fondo: #FFF8D6;
+  --color-editable-borde: #E8C547;
+  /* Acento */
+  --color-acento-oro: #C9A227;
+
+  /* Espaciado (grilla de 4/8) */
+  --espacio-1: 4px;  --espacio-2: 8px;  --espacio-3: 12px; --espacio-4: 16px;
+  --espacio-5: 24px; --espacio-6: 32px; --espacio-7: 48px;
+
+  /* Radios */
+  --radio-sm: 4px; --radio-md: 8px; --radio-lg: 12px; --radio-pill: 999px;
+
+  /* Tipografía (escala en px; Inter o la fuente del sistema) */
+  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tipo-xs: clamp(12px, 0.15vw + 10px, 13px);
+  --tipo-sm: clamp(13px, 0.25vw + 9.6px, 15px);
+  --tipo-base: clamp(14px, 0.35vw + 9.5px, 16px);
+  --tipo-lg: 18px;
+  --tipo-xl: 22px; --tipo-2xl: 28px; --tipo-kpi: 32px;
+  --peso-regular: 400; --peso-medio: 500; --peso-semibold: 600; --peso-bold: 700;
+
+  /* Sombra de tarjeta */
+  --sombra-tarjeta: 0 2px 8px rgba(10, 23, 51, 0.07), 0 1px 2px rgba(10, 23, 51, 0.05);
+
+  /* v21: alias de armonía visual (azul marino, grises, radio 12 y sombra suave) */
+  --color-primario: var(--color-primario-700);
+  --gris-1: var(--color-neutro-100);
+  --gris-2: var(--color-neutro-200);
+  --gris-3: var(--color-neutro-300);
+  --gris-4: var(--color-neutro-500);
+  --gris-5: var(--color-neutro-700);
+  --exito: var(--color-exito-700);
+  --alerta: var(--color-peligro-700);
+  --radio: 12px;
+  --sombra: var(--sombra-tarjeta);
+
+  /* v21: colores de apoyo que antes estaban sueltos en estilos.css */
+  --color-aviso-fondo: #FFF4CC;
+  --color-aviso-texto: #8A4B00;
+  --color-aviso-borde: #C98A00;
+  --color-sobrecumple-fondo: #FFE3C2;
+  --color-sobrecumple-texto: #7A3D00;
+  --color-sobrecumple-marca: #F5A04A;
+  --color-sobrecumple-marca-texto: #3D1F00;
+
+  /* Contenedor */
+  --ancho-contenido: min(1680px, 100% - 2 * clamp(16px, 3vw, 48px));
+}

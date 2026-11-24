@@ -1,0 +1,605 @@
+diff -ruN '--exclude=node_modules' '--exclude=lib' '--exclude=*.xlsx' '--exclude=encabezados_comerciales.json' '--exclude=construir_plantilla_director.py' src_v14/herramientas/verificar_director.py src_v15/herramientas/verificar_director.py
+--- src_v14/herramientas/verificar_director.py	1969-12-31 19:00:00.000000000 -0500
++++ src_v15/herramientas/verificar_director.py	2026-11-20 14:16:25.566469024 -0500
+@@ -0,0 +1,36 @@
++"""
++Verifica el Excel del Director v15.
++Uso: python3 herramientas/verificar_director.py <Director.xlsx> <Comercial.xlsx> [--esperado score=91.83 nueva=7208412 anterior=3792727 btl=2586654]
++1) Recalcula con LibreOffice y cuenta errores (#NAME?, #VALUE!, Err:…).  2) Compara la forma de la hoja Liquidación con la
++de un comercial (anchos, combinaciones, rótulos).  3) Muestra y compara las cifras clave. Sale con código 1 si algo falla.
++"""
++import sys, os, subprocess, tempfile, warnings
++import openpyxl
++warnings.filterwarnings("ignore")
++dir_x, com_x = sys.argv[1], sys.argv[2]
++esperado = dict(a.split("=") for a in sys.argv[3:] if "=" in a)
++tmp = tempfile.mkdtemp()
++subprocess.run(["soffice", "--headless", "--calc", "--convert-to", "xlsx", "--outdir", tmp, dir_x], capture_output=True)
++rc = os.path.join(tmp, os.path.basename(dir_x))
++v = openpyxl.load_workbook(rc, data_only=True); f = openpyxl.load_workbook(dir_x); c = openpyxl.load_workbook(com_x)["Liquidación"]
++ok = True
++err = [f"{s.title}!{x.coordinate}={x.value}" for s in v for r in s.iter_rows() for x in r if isinstance(x.value, str) and x.value.startswith(("#", "Err:"))]
++print(f"1) Errores después de recalcular: {len(err)}", err[:10]); ok &= not err
++d = f["Liquidación"]
++anchos = all(c.column_dimensions[k].width == d.column_dimensions[k].width for k in "ABCDEFGHIJKLMNO")
++mc = {str(m) for m in c.merged_cells.ranges if m.max_row <= 85}; md = {str(m) for m in d.merged_cells.ranges}
++secciones = ["A7", "L7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A18", "A19", "A25", "F19", "F20", "F27", "F34", "F38", "F42", "L18", "L19", "L20", "L21", "L22"]
++iguales = [k for k in secciones if str(c[k].value or "").split("  ·  ")[0][:12] == str(d[k].value or "").split("  ·  ")[0][:12]]
++print(f"2) Forma: anchos iguales={anchos} · combinaciones del comercial presentes {len(mc & md)}/{len(mc)} · rótulos clave en la misma celda {len(iguales)}/{len(secciones)}")
++ok &= anchos and len(mc & md) == len(mc) and len(iguales) == len(secciones)
++L = v["Liquidación"]
++cifras = {"score": L["G13"].value, "factor": L["G14"].value, "nueva": L["G15"].value, "anterior": L["C24"].value, "btl": L["C27"].value, "transicion": L["N22"].value,
++          "control_base": v["Detalle del equipo"].cell(v["Detalle del equipo"].max_row, 15).value}
++for r in range(1, v["Detalle del equipo"].max_row + 1):
++    if v["Detalle del equipo"].cell(r, 1).value == "Diferencia (debe ser 0)": cifras["control_base"] = v["Detalle del equipo"].cell(r, 15).value
++print("3) Cifras:", {k: (round(x, 4) if isinstance(x, (int, float)) else x) for k, x in cifras.items()})
++for k, e in esperado.items():
++    x = cifras.get(k); bien = isinstance(x, (int, float)) and abs(x - float(e)) <= (0.01 if k == "score" else 1)
++    print(f"   {k}: {x} vs {e} -> {'✓' if bien else '✗'}"); ok &= bien
++ok &= abs(cifras["control_base"] or 0) < 0.5
++print("RESULTADO:", "✓ OK" if ok else "✗ REVISAR"); sys.exit(0 if ok else 1)
+diff -ruN '--exclude=node_modules' '--exclude=lib' '--exclude=*.xlsx' '--exclude=encabezados_comerciales.json' '--exclude=construir_plantilla_director.py' src_v14/js/encabezados.js src_v15/js/encabezados.js
+--- src_v14/js/encabezados.js	2026-11-20 13:26:15.416431341 -0500
++++ src_v15/js/encabezados.js	2026-11-20 14:11:13.722362005 -0500
+@@ -67,7 +67,7 @@
+     if (d.control?.imr !== undefined && imr !== null && Math.abs(imr - Number(d.control.imr)) > 0.5) avisos.push(`Director: básico + oportunidad = ${imr}, pero el control dice IMR ${d.control.imr}.`);
+     delDirector = {
+       nombreOficial: d.nombreOficial || d.nombre || null, documento: d.documento === null || d.documento === undefined ? "" : String(d.documento),
+-      cargo: d.cargo || "", basico: dir.basico ?? null, oportunidad: dir.oportunidad ?? null,
++      cargo: d.cargo || "", nivel: d.nivel || "", basico: dir.basico ?? null, oportunidad: dir.oportunidad ?? null,
+       referenciaMercado: { tipo: d.referenciaMercado?.tipo ?? null, nombre: d.referenciaMercado?.nombre ?? null, valor: numero(d.referenciaMercado?.valor) },
+       historico: d.historico || null,
+     };
+@@ -120,6 +120,7 @@
+     nombreOficial: del.nombreOficial || director.nombreOficial || director.nombre || "",
+     documento: del.documento || director.documento || "",
+     cargo: del.cargo || director.cargo || "",
++    nivel: del.nivel || director.nivel || "",
+     basico: del.basico ?? director.basico ?? null,
+     oportunidad: del.oportunidad ?? director.oportunidad ?? null,
+     referenciaMercado: del.referenciaMercado || { tipo: null, nombre: null, valor: null },
+diff -ruN '--exclude=node_modules' '--exclude=lib' '--exclude=*.xlsx' '--exclude=encabezados_comerciales.json' '--exclude=construir_plantilla_director.py' src_v14/js/exportarDirector.js src_v15/js/exportarDirector.js
+--- src_v14/js/exportarDirector.js	2026-11-20 13:32:54.895543185 -0500
++++ src_v15/js/exportarDirector.js	2026-11-20 14:14:52.851456511 -0500
+@@ -62,6 +62,12 @@
+     metaEdu: num(r.metas?.eduAt), ventaReconocida: num(r.eduAt?.ventaReconocida),
+     cierreBase: num(r.baseSocial?.cierre), metaBase: num(r.baseSocial?.meta),
+     recaudoMision: num(r.mision?.ventaReconocida), metaMision: num(r.metas?.mision), comisionAnterior: r.comercial?.tieneEsquemaAnterior === false ? null : num(r.pagoAnterior),
++    // v15 · hoja «Detalle del equipo» (lo mismo que suma la app en metodosDirector)
++    recaudadaEdu: num(r.eduAt?.ventaRecaudada), ventaEdu: num(r.ventas?.eduAt), facturasMision: num(r.mision?.facturas), ventaMision: num(r.ventas?.mision),
++    metaCongreso: num(r.metas?.congreso), ventaCongreso: num(r.ventas?.congreso), metaCultural: num(r.metas?.cultural), ventaCultural: num(r.ventas?.cultural),
++    bsInicial: r.baseSocial?.neutral || r.baseSocial?.cierre === null || r.baseSocial?.cierre === undefined ? null : num(r.comercial?.baseSocialInicial),
++    bsCierre: r.baseSocial?.neutral ? null : num(r.baseSocial?.cierre),
++    clave: limpio(r.comercial?.nombreFacturacion || r.nombre),
+   }));
+   const noIncluidos = (p.comerciales || []).filter((c) => !(liquidacion.resultados || []).some((r) => r.nombre === c.nombre))
+     .map((c) => ({ nombre: c.nombre, motivo: c.activoDesde && c.activoDesde > mes ? `aún no liquida en ${MESES[numeroMes - 1]}` : "no liquida en el mes" }));
+@@ -113,6 +119,42 @@
+       lineas: total.lineas.length,
+     },
+     curva: p.curva,
++    ...extrasV15(liquidacion, p, enc, facturas, equipo, canal),
++  };
++}
++
++/** v15: datos para el libro con forma de comercial (encabezado, filas del detalle, puntos del equipo, parámetros). */
++function extrasV15(liquidacion, p, enc, facturas, equipo, canal) {
++  const d = liquidacion.director || {};
++  const claveCanal = canal.length ? limpio(canal[0].asesor) : "Direccion Comercial";
++  const filas = equipo.map((e) => ({ ...e }));
++  filas.push({ nombre: "Canal nacional (Dirección Comercial)", clave: claveCanal });
++  const conocidas = new Set(filas.map((f) => f.clave.toLowerCase()));
++  const otras = facturas.filter((f) => !conocidas.has(String(f.asesor || "").toLowerCase()));
++  if (otras.length) filas.push({ nombre: "Otros asesores o sin asesor", clave: "Otros", baseOtros: otras.reduce((s, f) => s + f.base, 0) });
++  const medidos = (liquidacion.resultados || []).map((r) => num(r.comercial?.satisfaccion)).filter((v) => v !== null);
++  const anclas = [...(p.curva?.anclas || [])].sort((a, b) => a.puntaje - b.puntaje);
++  const pctTxt = (v) => `${Math.round(v * 1000) / 10} %`.replace(".", ",");
++  const curvaTabla = [{ etiqueta: `Menor a ${p.curva.minimo} puntos`, factorTexto: "0 %" }, ...anclas.map((a) => ({ etiqueta: `${a.puntaje} puntos`, factorTexto: pctTxt(a.factor) }))].slice(0, 6);
++  while (curvaTabla.length < 6) curvaTabla.push({ etiqueta: null, factorTexto: null });
++  const nivel = limpio(enc.nivel);
++  return {
++    director: { nombre: enc.nombreOficial || null, documento: enc.documento || null, cargo: enc.cargo || null, cargoNivel: [limpio(enc.cargo), nivel].filter(Boolean).join(" – ") || null,
++      basico: num(enc.basico), oportunidad: num(enc.oportunidad), historico: enc.historico,
++      q2: num(enc.referenciaMercado?.valor), q2Nombre: enc.referenciaMercado?.tipo || "Referencia de mercado" },
++    filasEquipo: filas, nComerciales: equipo.length,
++    puntosEquipo: {
++      serfiscal: num(d.puntos?.serfiscal), innovacion: num(d.puntos?.innovacion), satisfaccion: num(d.puntos?.satisfaccion),
++      satisfaccionTexto: medidos.length ? Math.round(medidos.reduce((s, v) => s + v, 0) / medidos.length * 100) / 100 : "Sin encuesta (neutral)",
++    },
++    curvaTabla, curvaAnclas: anclas,
++    paramV15: {
++      pesoSer: p.pesos.serfiscal, pesoInnovacion: p.pesos.innovacion, topeIndicador: p.topeIndicador, topeCongreso: p.topeCongreso,
++      satisfaccionEsperada: p.satisfaccionEsperada, btlCumpMin: p.btlUmbrales.cumplimientoMinimo, btlCumpAlto: p.btlUmbrales.cumplimientoAlto,
++      btlMargenMedio: p.btlUmbrales.margenMedio, btlMargenAlto: p.btlUmbrales.margenAlto, btlPct90: p.btlDirector.cump90,
++      btlPctMedio: p.btlDirector.cump100MargenMedio, btlPctAlto: p.btlDirector.cump100MargenAlto, btlTopeEvento: p.btlDirector.topeEvento,
++      btlTopeAnio: p.btlDirector.topeAnio, btlSalvaguarda: p.btlComercial.salvaguarda,
++    },
+   };
+ }
+ 
+@@ -176,6 +218,9 @@
+     cartones: datos.cultural.cartones === null ? "(sin dato)" : miles(datos.cultural.cartones), valorCarton: pesos(datos.cultural.valorCarton),
+     metaCultural: pesos(datos.cultural.cartones === null || datos.cultural.valorCarton === null ? null : datos.cultural.cartones * datos.cultural.valorCarton),
+     nEquipoTexto: NUMEROS[n] || String(n),
++    metodo: datos.metodo, regla100: datos.regla100,
++    faltantes: [datos.canal.meta === null ? "meta del canal nacional" : null, b.ingresoPresupuestado === null ? "ingreso presupuestado del evento BTL" : null,
++      b.pagadoDetalle ? null : "detalle del BTL ya pagado en el año", datos.cultural.cartones === null ? "cartones culturales del director" : null].filter(Boolean).join(", ") || "ninguno",
+     fraseNoIncluidos: datos.noIncluidos.length ? ` No se incluye a ${datos.noIncluidos.map((x) => `${x.nombre} (${x.motivo})`).join(" ni a ")}.` : "",
+     fraseGana: ganaNueva === null ? "falta un dato para comparar" : ganaNueva ? "la política nueva es más favorable" : "el esquema anterior es más favorable",
+     rige: ganaNueva === null ? "lo que resulte al completar los datos" : ganaNueva ? "la política nueva" : "el esquema anterior",
+@@ -199,7 +244,10 @@
+ }
+ const escapeTexto = (t) => String(t ?? "").replace(/"/g, '""');
+ 
+-/** Escribe los datos en la plantilla y devuelve el .xlsx (Uint8Array). Recibe la plantilla y los textos para poder usarse fuera del navegador. */
++/**
++ * Escribe los datos en la plantilla v15 (misma forma que el libro de un comercial) y devuelve el .xlsx (Uint8Array).
++ * Recibe la plantilla, los textos y el mapeo para poder usarse fuera del navegador.
++ */
+ export async function libroDirector(datos, { clave, plantilla, textos, mapeo, JSZip = globalThis.JSZip } = {}) {
+   if (!JSZip) throw new Error("No se encontró la librería del Excel individual");
+   plantilla = plantilla || plantillaBytes || (plantillaBytes = await traer("plantillas/plantilla_liquidacion_director.xlsx"));
+@@ -207,58 +255,46 @@
+   mapeo = mapeo || mapeoCache || (mapeoCache = await traer("plantillas/mapeo_celdas_director.json", "json"));
+   const lib = await M.abrirPlantilla(plantilla, JSZip);
+   const valores = valoresDirector(datos);
+-  // 1. Textos con marcadores (posiciones de la plantilla, antes de mover filas).
++  const fuente = { ...datos, param: { ...datos.param, ...datos.paramV15 } };
++  // 1. Textos con marcadores.
+   for (const [celda, texto] of Object.entries(textos)) {
+     const [hoja, ref] = celda.split("!");
+     M.escribirCelda(lib, hoja, ref, llenar(texto, valores), { sobreFormula: false });
+   }
+-  // 2. Celdas de entrada.
+-  const valorDe = (ruta) => {
+-    if (ruta === "periodo") return `${valores.Mes} ${datos.anio}`;
+-    if (ruta.startsWith("director.")) return datos.director[ruta.slice(9)];
+-    return ruta.split(".").reduce((o, k) => (o == null ? null : o[k]), datos);
+-  };
++  // 2. Celdas de entrada (ruta con puntos: «director.basico», «curvaAnclas.0.puntaje»).
++  const valorDe = (ruta) => ruta.split(".").reduce((o, k) => (o == null ? null : o[k]), fuente);
+   for (const [hoja, celdas] of Object.entries(mapeo.entradas)) {
+     for (const [ref, ruta] of Object.entries(celdas)) {
+       const v = valorDe(ruta);
+       M.escribirCelda(lib, hoja, ref, v === undefined ? null : v);
+     }
+   }
+-  // 3. Tablas: de abajo hacia arriba para que las posiciones de arriba no cambien.
++  // La curva usa solo las anclas cargadas (las filas sobrantes de Parámetros quedan vacías).
++  const celdasCurva = Object.entries(mapeo.entradas["Parámetros"] || {}).filter(([, r]) => /^curvaAnclas\.\d+\.puntaje$/.test(r)).map(([ref]) => Number(ref.slice(1)));
++  if (celdasCurva.length && datos.curvaAnclas.length) {
++    const ini = Math.min(...celdasCurva), fin = ini + Math.min(datos.curvaAnclas.length, celdasCurva.length) - 1;
++    M.definirNombre(lib, "Curva_puntos", `'Parámetros'!$A$${ini}:$A$${fin}`);
++    M.definirNombre(lib, "Curva_factor", `'Parámetros'!$B$${ini}:$B$${fin}`);
++  }
++  // 3. Tablas (cada una en su hoja): filas al tamaño de los datos y fórmulas por fila.
++  const llenarTabla = (T, lista) => {
++    M.redimensionarTabla(lib, T.hoja, T.primera, T.ultima, lista.length);
++    lista.forEach((fila, i) => {
++      const r = T.primera + i;
++      for (const [col, campo] of Object.entries(T.columnas)) M.escribirCelda(lib, T.hoja, `${col}${r}`, fila[campo] === undefined ? null : fila[campo], { sobreFormula: true });
++      for (const [col, f] of Object.entries(T.formulas || {})) M.escribirFormula(lib, T.hoja, `${col}${r}`, f.replace(/\{r\}/g, r));
++    });
++  };
+   const T = mapeo.tablas;
+-  // Orden de presentación de los grupos: el de la plantilla (catálogo); los nuevos van al final.
+-  const orden = (T.grupos.orden || []).map(([g, s]) => `${g}|${s}`);
+-  const pos = (g) => { const i = orden.indexOf(`${g.grupo}|${g.subgrupo}`); return i < 0 ? orden.length : i; };
+-  datos = { ...datos, grupos: datos.grupos.map((g, i) => ({ g, i })).sort((a, b) => pos(a.g) - pos(b.g) || a.i - b.i).map((x) => x.g) };
+-  const finBtl = M.redimensionarTabla(lib, "Liquidación", T.eventosBtl.primera, T.eventosBtl.ultima, datos.eventosBtl.length);
+-  const finGrupos = M.redimensionarTabla(lib, "Liquidación", T.grupos.primera, T.grupos.ultima, datos.grupos.length);
+-  const finEquipo = M.redimensionarTabla(lib, "Liquidación", T.equipo.primera, T.equipo.ultima, datos.equipo.length);
+-  const finFact = M.redimensionarTabla(lib, "Facturación", T.facturas.primera, T.facturas.ultima, datos.facturas.length);
+-  const desplazEquipo = finEquipo - T.equipo.ultima;
+-  const iniGrupos = T.grupos.primera + desplazEquipo;
+-  const iniBtl = T.eventosBtl.primera + desplazEquipo + (finGrupos - T.grupos.ultima);
+-  const poner = (hoja, ref, v) => M.escribirCelda(lib, hoja, ref, v === undefined ? null : v, { sobreFormula: true });
+-  datos.equipo.forEach((e, i) => {
+-    const r = T.equipo.primera + i;
+-    for (const [col, campo] of Object.entries(T.equipo.columnas)) poner("Liquidación", `${col}${r}`, e[campo]);
+-  });
+-  datos.grupos.forEach((g, i) => {
+-    const r = iniGrupos + i, G = escapeTexto(g.grupo), S = escapeTexto(g.subgrupo);
+-    poner("Liquidación", `A${r}`, g.grupo); poner("Liquidación", `D${r}`, g.subgrupo);
+-    M.escribirFormula(lib, "Liquidación", `G${r}`, `COUNTIFS(Fac_Grupo,"${G}",Fac_Subgrupo,"${S}")`);
+-    M.escribirFormula(lib, "Liquidación", `H${r}`, `SUMIFS(Fac_Base,Fac_Grupo,"${G}",Fac_Subgrupo,"${S}")`);
+-    M.escribirFormula(lib, "Liquidación", `J${r}`, "Tasa_Dir_Anterior");
+-    M.escribirFormula(lib, "Liquidación", `K${r}`, `H${r}*J${r}`);
+-  });
+-  datos.eventosBtl.forEach((e, i) => {
+-    const r = iniBtl + i;
+-    for (const [col, campo] of Object.entries(T.eventosBtl.columnas)) poner("Liquidación", `${col}${r}`, e[campo]);
+-  });
+-  datos.facturas.forEach((f, i) => {
+-    const r = T.facturas.primera + i;
+-    for (const [col, campo] of Object.entries(T.facturas.columnas)) poner("Facturación", `${col}${r}`, f[campo]);
++  llenarTabla(T.facturas, datos.facturas.map((f) => ({ ...f, producto: [f.grupo, f.subgrupo].filter(Boolean).join(" · ") || null })));
++  llenarTabla(T.equipo, datos.filasEquipo);
++  // Fila «Otros asesores»: su base no tiene clave propia en la facturación.
++  datos.filasEquipo.forEach((f, i) => {
++    if (f.baseOtros !== undefined) {
++      const r = T.equipo.primera + i;
++      M.escribirFormula(lib, T.equipo.hoja, `O${r}`, `SUM(Fac_Base)-SUM(O${T.equipo.primera}:O${r - 1})`);
++    }
+   });
+-  void finBtl; void finFact;
+   if (clave) await M.proteger(lib, clave);
+   return M.guardar(lib);
+ }
+diff -ruN '--exclude=node_modules' '--exclude=lib' '--exclude=*.xlsx' '--exclude=encabezados_comerciales.json' '--exclude=construir_plantilla_director.py' src_v14/plantillas/mapeo_celdas_director.json src_v15/plantillas/mapeo_celdas_director.json
+--- src_v14/plantillas/mapeo_celdas_director.json	2026-11-20 13:34:24.094452488 -0500
++++ src_v15/plantillas/mapeo_celdas_director.json	2026-11-20 14:14:53.747457694 -0500
+@@ -1,157 +1,133 @@
+ {
++ "nota": "Excel del Director v15 (misma forma que el libro de un comercial). La app escribe en estas celdas; el resto son fórmulas.",
+  "entradas": {
+   "Liquidación": {
+-   "B3": "director.nombre",
+-   "F3": "director.cargo",
+-   "K3": "periodo",
+-   "B4": "director.basico",
+-   "E4": "director.oportunidad",
+-   "B19": "metodo",
+-   "G19": "regla100",
+-   "J19": "metaMision",
+-   "D20": "metaBaseSocial",
+-   "E55": "canal.meta",
+-   "E56": "canal.produccion",
+-   "E57": "canal.ventaReconocida",
+-   "E98": "btl.ingreso",
+-   "E99": "btl.utilidadPresupuestada",
+-   "E100": "btl.utilidadReal",
+-   "E103": "btl.participacion",
+-   "E104": "btl.cierre",
+-   "E105": "btl.recaudo",
+-   "E106": "btl.satisfaccion",
+-   "E117": "btl.pagadoAnio",
+-   "E118": "btl.pagadoCuenta",
+-   "E122": "btl.comercialPreliminar",
+-   "E131": "cultural.cartones",
+-   "E132": "cultural.valorCarton",
+-   "E138": "param.pesoVentas",
+-   "E139": "param.pesoBase",
+-   "E140": "param.pesoDiv",
+-   "E141": "param.pesoSat",
+-   "E142": "param.tope",
+-   "E143": "param.minimo",
+-   "E144": "param.tasaAnterior",
+-   "E145": "param.tasaBtlAnterior"
++   "C3": "director.nombre",
++   "C4": "director.documento",
++   "C5": "director.cargoNivel",
++   "I3": "director.basico",
++   "F6": "director.q2Nombre",
++   "I6": "director.q2",
++   "L9": "curvaTabla.0.etiqueta",
++   "N9": "curvaTabla.0.factorTexto",
++   "L10": "curvaTabla.1.etiqueta",
++   "N10": "curvaTabla.1.factorTexto",
++   "L11": "curvaTabla.2.etiqueta",
++   "N11": "curvaTabla.2.factorTexto",
++   "L12": "curvaTabla.3.etiqueta",
++   "N12": "curvaTabla.3.factorTexto",
++   "L13": "curvaTabla.4.etiqueta",
++   "N13": "curvaTabla.4.factorTexto",
++   "L14": "curvaTabla.5.etiqueta",
++   "N14": "curvaTabla.5.factorTexto",
++   "I32": "metaMision",
++   "I51": "metaBaseSocial",
++   "I58": "puntosEquipo.serfiscal",
++   "I63": "puntosEquipo.innovacion",
++   "I71": "puntosEquipo.satisfaccionTexto",
++   "I73": "puntosEquipo.satisfaccion",
++   "I77": "btl.ingreso",
++   "I80": "btl.utilidadPresupuestada",
++   "I81": "btl.utilidadReal",
++   "I86": "btl.pagadoAnio",
++   "I87": "btl.pagadoCuenta",
++   "I88": "btl.participacion",
++   "I89": "btl.cierre",
++   "I90": "btl.recaudo",
++   "I91": "btl.satisfaccion",
++   "I92": "btl.comercialPreliminar"
++  },
++  "Parámetros": {
++   "B3": "director.oportunidad",
++   "B4": "param.pesoVentas",
++   "B5": "param.pesoBase",
++   "B6": "param.pesoSer",
++   "B7": "param.pesoInnovacion",
++   "B8": "param.pesoSat",
++   "B9": "param.topeIndicador",
++   "B10": "param.tope",
++   "B11": "param.minimo",
++   "B12": "param.topeCongreso",
++   "B13": "param.satisfaccionEsperada",
++   "B14": "param.valorFacturaMision",
++   "B15": "param.tasaAnterior",
++   "B16": "param.tasaBtlAnterior",
++   "B17": "regla100",
++   "B18": "param.btlCumpMin",
++   "B19": "param.btlCumpAlto",
++   "B20": "param.btlMargenMedio",
++   "B21": "param.btlMargenAlto",
++   "B22": "param.btlPct90",
++   "B23": "param.btlPctMedio",
++   "B24": "param.btlPctAlto",
++   "B25": "param.btlTopeEvento",
++   "B26": "param.btlTopeAnio",
++   "B27": "param.btlSalvaguarda",
++   "B28": "nComerciales",
++   "A31": "curvaAnclas.0.puntaje",
++   "B31": "curvaAnclas.0.factor",
++   "A32": "curvaAnclas.1.puntaje",
++   "B32": "curvaAnclas.1.factor",
++   "A33": "curvaAnclas.2.puntaje",
++   "B33": "curvaAnclas.2.factor",
++   "A34": "curvaAnclas.3.puntaje",
++   "B34": "curvaAnclas.3.factor",
++   "A35": "curvaAnclas.4.puntaje",
++   "B35": "curvaAnclas.4.factor",
++   "A36": "curvaAnclas.5.puntaje",
++   "B36": "curvaAnclas.5.factor",
++   "A37": "curvaAnclas.6.puntaje",
++   "B37": "curvaAnclas.6.factor",
++   "A38": "curvaAnclas.7.puntaje",
++   "B38": "curvaAnclas.7.factor"
+   }
+  },
+  "tablas": {
+   "equipo": {
+-   "hoja": "Liquidación",
+-   "primera": 32,
+-   "ultima": 38,
++   "hoja": "Detalle del equipo",
++   "primera": 5,
++   "ultima": 12,
+    "columnas": {
+     "A": "nombre",
+-    "B": "ventas",
+-    "C": "base",
+-    "D": "div",
+-    "E": "sat",
+-    "F": "score",
+-    "G": "metaEdu",
+-    "H": "ventaReconocida",
+-    "I": "cierreBase",
+-    "J": "metaBase",
+-    "K": "recaudoMision",
+-    "L": "comisionAnterior"
+-   },
+-   "formulas": [
+-    "N",
+-    "O"
+-   ]
+-  },
+-  "grupos": {
+-   "hoja": "Liquidación",
+-   "primera": 63,
+-   "ultima": 72,
+-   "columnas": {
+-    "A": "grupo",
+-    "D": "subgrupo"
++    "B": "metaEdu",
++    "C": "recaudadaEdu",
++    "D": "ventaEdu",
++    "F": "facturasMision",
++    "G": "ventaMision",
++    "H": "metaCongreso",
++    "I": "ventaCongreso",
++    "J": "metaCultural",
++    "K": "ventaCultural",
++    "L": "bsInicial",
++    "M": "bsCierre",
++    "N": "score",
++    "Q": "clave"
+    },
+-   "formulas": [
+-    "G",
+-    "H",
+-    "J",
+-    "K"
+-   ],
+-   "orden": [
+-    [
+-     "Educación",
+-     "Diplomados"
+-    ],
+-    [
+-     "Educación",
+-     "Cursos"
+-    ],
+-    [
+-     "Educación",
+-     "Seminario"
+-    ],
+-    [
+-     "Educación",
+-     "EVA"
+-    ],
+-    [
+-     "Educación",
+-     "Encuentros"
+-    ],
+-    [
+-     "Asistencia Técnica",
+-     "Asesorías Especiales"
+-    ],
+-    [
+-     "Asistencia Técnica",
+-     "Asambleas"
+-    ],
+-    [
+-     "Jornada Analfista",
+-     "Jornada Analfista Pereira & Bogotá"
+-    ],
+-    [
+-     "Jornada Analfista",
+-     "Jornada Analfista Cali & Barranquilla"
+-    ],
+-    [
+-     "Misión Internacional",
+-     "Misión Internacional"
+-    ]
+-   ]
+-  },
+-  "eventosBtl": {
+-   "hoja": "Liquidación",
+-   "primera": 74,
+-   "ultima": 75,
+-   "columnas": {
+-    "A": "grupo",
+-    "D": "evento",
+-    "G": "facturas",
+-    "H": "ingreso"
+-   },
+-   "formulas": [
+-    "J",
+-    "K"
+-   ]
++   "formulas": {
++    "E": "IF(N(B{r})=0,\"\",D{r}/B{r})",
++    "O": "SUMIF(Fac_Asesor,$Q{r},Fac_Base)",
++    "P": "O{r}*Tasa_Dir_Anterior"
++   }
+   },
+   "facturas": {
+-   "hoja": "Facturación",
++   "hoja": "Facturas",
+    "primera": 5,
+-   "ultima": 208,
++   "ultima": 6,
+    "columnas": {
+-    "A": "fila",
++    "A": "asesor",
+     "B": "factura",
+-    "C": "entidad",
+-    "D": "asesor",
+-    "E": "grupo",
+-    "F": "subgrupo",
+-    "G": "servicio",
+-    "H": "base",
++    "C": "producto",
++    "D": "entidad",
++    "E": "servicio",
++    "F": "base",
++    "G": "estado",
++    "H": "fecha",
+     "I": "pctDireccion",
+-    "K": "fecha",
+-    "L": "estado"
++    "K": "fila"
+    },
+-   "formulas": [
+-    "J"
+-   ]
++   "formulas": {
++    "J": "F{r}*I{r}"
++   }
+   }
+- },
+- "nota": "Celdas de entrada y tablas del Excel del Director. La app escribe aquí; el resto son fórmulas de la plantilla."
++ }
+ }
+\ No newline at end of file
+diff -ruN '--exclude=node_modules' '--exclude=lib' '--exclude=*.xlsx' '--exclude=encabezados_comerciales.json' '--exclude=construir_plantilla_director.py' src_v14/plantillas/textos_director.json src_v15/plantillas/textos_director.json
+--- src_v14/plantillas/textos_director.json	2026-11-20 13:34:24.090452387 -0500
++++ src_v15/plantillas/textos_director.json	2026-11-20 14:14:53.747457694 -0500
+@@ -1,78 +1,20 @@
+ {
+- "Liquidación!A1": "ANALFE  –  Liquidación del Director Comercial y de Marketing  –  {Mes} {anio}",
+- "Liquidación!A7": "El Director no tiene meta individual de ventas. Su score se calcula sobre el resultado agregado del equipo en los cuatro indicadores (núm. 5.9 y matriz, sección 3). Salario básico {basico} y oportunidad variable {oportunidad}, según la matriz individual (Anexo 1 al otrosí). El IMR es la suma de ambos ({imr}), y el ingreso máximo mensual es el básico más la oportunidad por el tope del 120 % ({maximo}).",
+- "Liquidación!F20": "Matriz, num. 4.2: meta agregada inicial de {metaBaseSocial} para el año 1. Si se deja en blanco, se usa la suma de las metas individuales ({metaBaseSuma}).",
+- "Liquidación!A21": "La matriz individual define el agregado: ventas por cumplimiento agregado del equipo ponderado por producto, y base social agregada frente a la meta acumulada (secciones 3 y 4). Por eso el método es «Totales del equipo por indicador»; la lista se deja solo para comparar. La matriz calcula el score como la suma del peso por el cumplimiento, con cada indicador entre 0 % y 120 %, sin umbral del 100 %. Por eso la regla del 100 % queda en NO; se deja la lista para ver el efecto si la Dirección decidiera otra cosa. La meta de Misión del equipo es, por defecto, {metaMision} (Anexo 2 y núm. 5.11.3: 10 % de $496.000.000 en {mes}). Si se usara la suma de las metas individuales ({metaMision} a cada comercial), el valor sería {metaMisionSuma}.",
+- "Liquidación!A28": "La fila resaltada es la del método seleccionado, que alimenta el resultado de arriba. Los métodos de promedio usan las metas individuales de base social, no la meta agregada de {metaBaseSocial}. Si se encendiera la regla del 100 %, la base social daría 0 puntos y el score bajaría de 80.",
+- "Liquidación!A30": "Resultados individuales del equipo  ·  {mes} {anio}",
+- "Liquidación!A40": "Cifras del liquidador del equipo de {mes} de {anio}. Participan los {nEquipoTexto} comerciales que liquidan en el mes.{fraseNoIncluidos} La diversificación e innovación queda en 20 puntos temporales, y la satisfacción en 15 puntos neutrales, porque todavía no hay rúbrica de SERFISCAL, evidencia de innovación ni encuesta (circular del 19 de octubre, pts. 4 y 9; núms. 5.7 y 5.10).",
+- "Liquidación!I46": "Suma del recaudo de Misión de {mes}, a {valorFacturaMision} por factura elegible.",
+- "Liquidación!I47": "Meta institucional de {mes} (celda editable de arriba). Congreso y actividad cultural no participan en {mes} (núms. 5.11.2 y 5.11.4).",
+- "Liquidación!I49": "Suma de la base computable al cierre de {mes} (base al 30 de septiembre + ingresos − retiros).",
+- "Liquidación!I50": "Meta agregada de la matriz ({metaBaseSocial}). La suma de las metas individuales sería {metaBaseSuma}.",
+- "Liquidación!A51": "En {mes}, con la meta institucional de Misión, el cumplimiento de educación queda en {cumpEdu} y el de Misión en {cumpMision}. El cumplimiento ponderado de ventas es {cumpVentas} y aporta {ptsVentas} puntos. La base social del equipo queda en {cumpBase} ({cierreBase} de {metaBaseSocial}) y aporta {ptsBase} puntos. Diversificación e innovación aportan 20 y satisfacción 15. El score por totales es {score}. Si la meta de base social de {mes} fuera {metaBaseSuma}, el score sería {scoreConSuma}.",
+- "Liquidación!I56": "Base facturada a nombre de Dirección Comercial en el archivo de comisiones de {mes}: {canalEdu} de educación y {canalJornada} de Jornada Analfista. Ya está incluida en la base de la política anterior.",
+- "Liquidación!I57": "Venta reconocida del canal en el liquidador de {mes} (educación y asistencia técnica recaudada, con factor de margen). No reduce las metas de los comerciales (núm. 5.9).",
+- "Liquidación!A61": "En el esquema anterior, el director recibe un porcentaje fijo sobre toda la facturación del mes, sin importar el asesor: {tasaAnterior} sobre la facturación del mes y, aparte, {tasaBtl} sobre el ingreso de ejecución de los eventos BTL. No se incluye la carga prestacional. La base sale de la hoja «Facturación», que reúne las {nLineas} líneas del mes del archivo de facturación cargado, y las tasas son las de los parámetros.",
+- "Liquidación!A73": "Total facturación del mes",
+- "Liquidación!A76": "Total BTL (ingreso de ejecución, aparte)",
+- "Liquidación!A78": "Base facturada del mes (esquema anterior)",
+- "Liquidación!I78": "Suma de la columna Base de la hoja «Facturación»: todas las líneas del mes, igual al total de la tabla dinámica Hoja4.",
+- "Liquidación!I80": "Base del mes × {tasaAnterior}. Es el valor que entra a la comparación de la transición.",
+- "Liquidación!I81": "Ingreso de ejecución de los eventos BTL del mes, según los parámetros BTL ({eventosBtl}). No usa el recaudo.",
+- "Liquidación!I82": "Base BTL × {tasaBtl}. Se muestra aparte, como la bonificación BTL de la política nueva (núm. 5.11.5).",
+- "Liquidación!I84": "Base × «% Dirección» de cada línea (si el archivo no trae el %, la tasa de los parámetros). Debe coincidir con la comisión de arriba ({comisionAnterior}).",
+- "Liquidación!A86": "Líneas con un % de dirección distinto de la tasa de los parámetros",
+- "Liquidación!I86": "Debe ser 0.",
+- "Liquidación!A87": "La base del esquema anterior es el total de la facturación del mes ({nLineas} líneas, {baseAnterior}), igual al total de la tabla dinámica Hoja4 del archivo, como confirmó la Dirección. {tasaAnterior} × {baseAnterior} = {comisionAnterior}.",
+- "Liquidación!I92": "{tasaAnterior} sobre la facturación del mes. El BTL de cada esquema se trata aparte.",
+- "Liquidación!I93": "El mayor entre ambos. En {mes} {fraseGana}.",
+- "Liquidación!I94": "Ingreso mensual total aplicable: salario básico de la matriz ({basico}) + variable aplicable.",
+- "Liquidación!A96": "5.11.5  Bonificación BTL del director  ·  evento {eventoBtl}",
+- "Liquidación!A97": "La bonificación BTL es salarial, independiente de la compensación variable ordinaria, y no es automática. No se genera por la aprobación, la coordinación o la supervisión propias del cargo. Exige una participación material y verificable en la estructuración, negociación, promoción o cierre comercial (núm. 5.11.5). También exige un score mínimo de 80 puntos, el cierre financiero certificado, haber alcanzado la meta de recaudo y la satisfacción del cliente (matriz, sección 6), la salvaguarda conjunta y los topes: 0,25 veces el IMR por evento ({btlTopeEvento}) y 1 vez el IMR en el año ({imr}).",
+- "Liquidación!I98": "Ingreso de ejecución del archivo {eventoBtl}.",
+- "Liquidación!I101": "Utilidad real ejecutada ÷ utilidad presupuestada.{fraseCumpUtil}",
+- "Liquidación!I102": "Utilidad real ejecutada ÷ ingreso del evento.{fraseMargen}",
+- "Liquidación!I105": "{fraseRecaudo}",
+- "Liquidación!A111": "La fila resaltada es la que aplica a {eventoBtl} si se confirman el cumplimiento (más del 100 %) y el margen (más del 15 %): 25 % del IMR, que coincide con el tope por evento de 0,25 veces el IMR. El ICA y el gravamen se descuentan por dentro de la utilidad y no se muestran en esta vista.",
+- "Liquidación!A117": "BTL ya pagado  ·  {btlPagadoEvento}",
+- "Liquidación!I117": "Pago en nómina del {btlPagadoFecha}, documento {btlPagadoDoc}, probablemente bajo el esquema anterior.",
+- "Liquidación!A118": "¿El pago de {btlPagadoEvento} cuenta para el tope anual?",
+- "Liquidación!I119": "1 × IMR menos lo ya pagado de {btlPagadoEvento}, salvo que se indique que no cuenta.",
+- "Liquidación!A122": "Bonificación preliminar del comercial ({comercialBtl})",
+- "Liquidación!I122": "Bonificación de {comercialBtl} en la política nueva por {eventoBtl} (0,8 × su IMR). Se toma del liquidador del equipo y es editable.",
+- "Liquidación!I133": "{cartones} cartones × {valorCarton} = {metaCultural}. No entra al score de {mes} (núm. 5.11.4: la actividad se asigna a diciembre).",
+- "Liquidación!A134": "El Anexo 2 fija una meta cultural de equipo de $600.000.000 en diciembre, distribuida por potencial. Esta cuota de Dirección Comercial se deja cargada a futuro y no afecta la liquidación de {mes}.",
+- "Liquidación!G144": "Columna «% Dirección» del archivo de comisiones: {tasaAnterior} fijo por factura, sobre toda la facturación del mes.",
+- "Liquidación!A147": "Simulación elaborada a partir de la Política PCV-COM-001 (25 de septiembre de 2026), de la circular al equipo comercial del 19 de {mes} de {anio} y de los resultados del liquidador del equipo de {mes}. No es un pago oficial.",
+- "Explicación!A1": "ANALFE  –  Explicación de la liquidación del Director Comercial  –  {Mes} {anio}",
+- "Explicación!A5": "Este archivo es una simulación de la liquidación de compensación variable de {mes} de {anio} para {nombre}, {cargo}. Usa la política, la circular del 19 de octubre y su matriz individual (Anexo 1 al otrosí, aplicable desde octubre de 2026).",
+- "Explicación!A6": "No es un pago oficial. Las cifras del equipo se toman del liquidador de {mes} de {anio}. Varios soportes de BTL siguen pendientes.",
+- "Explicación!A9": "Salario básico mensual: {basico}. Oportunidad variable a 100 puntos: {oportunidad}. Ingreso objetivo a 100 puntos e IMR: {imr}, igual a la mediana de mercado (Q2) del cargo. Tope individual: 120 %. Variable máxima a 120 puntos: {variableMaxima}. Ingreso mensual máximo: {maximo}.",
+- "Explicación!A10": "Referencia: ingreso histórico normalizado de {historico} (básico {basico} más variable promedio de {variablePromedio}, agosto de 2025 a julio de 2026). El ingreso objetivo lo mejora en {mejoraHistorico} al mes ({mejoraHistoricoPct}).",
+- "Explicación!A19": "Menos de 80 puntos, 0 %; 80 puntos, 70 % ({curva80}); 90, 90 % ({curva90}); 100, 100 % ({oportunidad}); 110, 110 % ({curva110}); y 120, 120 % ({variableMaxima}). Entre los puntos se interpola de forma lineal. Pago variable = oportunidad × factor, con tope del 120 %. Un score menor a 80 no constituye por sí solo bajo rendimiento ni justa causa de terminación.",
+- "Explicación!A24": "La meta de Misión del equipo es {metaMision}, el 10 % de la meta anual de $496.000.000 (Anexo 2). La meta de base social es la agregada de la matriz: {metaBaseSocial} fondos para el año 1. La matriz no trae el escalonamiento mensual, así que el archivo usa {metaBaseSocial} desde {mes}; la celda es editable.",
+- "Explicación!A25": "{Mes} por totales: ventas {cumpVentas} y {ptsVentas} puntos; base social {cierreBase} de {metaBaseSocial}, {cumpBase} y {ptsBase} puntos; diversificación e innovación 20 puntos temporales; satisfacción 15 puntos neutrales. Score {score}, factor {factorPct} y variable de {pagoNueva}. Si la meta de base social de {mes} fuera {metaBaseSuma} (suma de metas individuales), el score sería {scoreConSuma} y la variable {pagoConSuma}.",
+- "Explicación!A29": "Los {canalMeta} que aparecen como Dirección Comercial en el liquidador de la política anterior son la meta registrada para el canal nacional, no una meta individual del director. La producción de ese canal en el esquema anterior (base facturada en el archivo de comisiones) es {canalProduccion}, igual a la venta reconocida en la política nueva. Estos valores se reportan aparte, no entran al score del director y no reducen las metas de los comerciales.",
+- "Explicación!A32": "En el esquema anterior, el director recibe un {tasaAnterior} fijo sobre toda la facturación del mes, sin importar el asesor, y un {tasaBtl} sobre el ingreso de ejecución de los eventos BTL. No se incluye la carga prestacional. En {mes} la base es {baseAnterior} y la comisión, {comisionAnterior}. El BTL de {eventoBtl} ({baseBtl}) da {btlAnterior} y se muestra aparte. Las bases se calculan con fórmulas sobre la hoja «Facturación» y las tasas son editables en los parámetros.",
+- "Explicación!A34": "{Mes}: política nueva {pagoNueva} frente a {comisionAnterior} del esquema anterior. Rige {rige}. Ingreso mensual total: {ingresoTotal}. {fraseBtlTransicion} Desde el 1 de enero de 2027 solo aplica el modelo nuevo.",
+- "Explicación!A38": "Escala sobre el IMR: con margen inferior al 10 %, 0. Con cumplimiento de utilidad desde el 90 % y menor al 100 %, 10 % del IMR. Con cumplimiento del 100 % o más, 20 % del IMR si el margen está desde 10 % y hasta 15 %, y 25 % si es superior al 15 %. Topes: {btlTopeEvento} por evento (0,25 × IMR) y {imr} al año (1 × IMR).",
+- "Explicación!A39": "En {eventoBtl}, la utilidad presupuestada es {utilPresup} y la real ejecutada {utilReal} ({cumpUtil} y margen de {margenBtl}). La escala da 25 % del IMR, {btlTopeEvento}, igual al tope por evento. La salvaguarda permite hasta {limiteConjunto} entre {comercialBtl} ({btlComercial}) y el director, así que no hay prorrateo. El score de {score} cumple el mínimo.",
+- "Explicación!A40": "Ya se le pagaron {btlPagado} por BTL de la {btlPagadoEvento} (nómina del {btlPagadoFecha}, documento {btlPagadoDoc}). Mientras no se decida si cuenta para el tope anual, se descuenta por prudencia; en {eventoBtl} no cambia el resultado. La bonificación queda Pendiente hasta confirmar la participación material, la certificación financiera y la satisfacción del cliente. Si se confirman, serían {btlTopeEvento}.",
+- "Explicación!A43": "La actividad cultural se asigna al mes aprobado en el plan anual, actualmente diciembre, y no participa en {mes}. La cuota de Dirección Comercial es {cartones} cartones a {valorCarton} cada uno, es decir {metaCultural}. Se deja cargada a futuro. El Anexo 2 fija una meta cultural de equipo de $600.000.000, distribuida por potencial.",
+- "Explicación!A46": "Las celdas amarillas son para digitar o confirmar: salario básico, oportunidad, meta de Misión, meta de base social, cifras de la política anterior, participación material en {eventoBtl}, certificación financiera, satisfacción del cliente, si el pago de {btlPagadoEvento} cuenta para el tope anual, y los parámetros de pesos y tope. La lista completa está en la hoja Pendientes.",
+- "Pendientes!A1": "ANALFE  –  Pendientes de la liquidación del Director Comercial  –  {Mes} {anio}",
+- "Pendientes!B7": "La matriz fija una meta agregada inicial de {metaBaseSocial} fondos para el año 1 (num. 4.2 y Anexo 2), con medición mensual contra la meta acumulada, pero no trae el escalonamiento mes a mes. El archivo usa {metaBaseSocial} desde {mes}: {cierreBase} de {metaBaseSocial} es {cumpBase} y aporta {ptsBase} puntos. Si la meta acumulada de {mes} fuera la suma de las metas individuales ({metaBaseSuma}), el cumplimiento sería {cumpBaseSuma}, aportaría {ptsBaseSuma} puntos y el score subiría de {score} a {scoreConSuma}.",
+- "Pendientes!B10": "Participación material del director en {eventoBtl}",
+- "Pendientes!B12": "Certificación financiera definitiva de {eventoBtl}",
+- "Pendientes!B14": "Satisfacción del cliente en {eventoBtl}",
+- "Pendientes!B16": "Si el pago de {btlPagadoEvento} cuenta para el tope anual",
+- "Pendientes!B17": "Se le pagaron {btlPagado} por BTL de la {btlPagadoEvento} (nómina del {btlPagadoFecha}, documento {btlPagadoDoc}). Mientras no se decida, el archivo lo descuenta del tope anual por prudencia. En {eventoBtl} no cambia el resultado: el tope que manda es el de 0,25 veces el IMR por evento ({btlTopeEvento}).",
+- "Pendientes!B19": "La matriz dice que la transición se compara sobre el ingreso mensual total. Como el salario básico es el mismo en los dos esquemas, el resultado equivale a comparar la parte variable. El archivo compara la comisión sin BTL y muestra el BTL aparte. En {mes} la política nueva es más favorable con o sin BTL.",
+- "Pendientes!B22": "Evidencia de SERFISCAL e innovación de {mes}",
+- "Pendientes!B25": "El valor predeterminado es {metaMision} (Anexo 2, 10 % de la meta anual). Si se usara la suma de las metas individuales, sería {metaMisionSuma} y el cumplimiento de ventas bajaría.",
+- "Pendientes!B27": "La matriz dice que forma parte del indicador de ventas con meta propia. En {mes} no hay meta cargada.",
+- "Pendientes!B29": "Ya está cargada a futuro: {cartones} cartones × {valorCarton} = {metaCultural}. No afecta {mes} (núm. 5.11.4).",
+- "Facturación!A1": "Facturación de {mes} de {anio}  ·  base del esquema anterior del director",
+- "Facturación!A2": "Fuente: hoja «{hojaFacturacion}» del archivo de facturación cargado en la app. Se cargan las {nLineas} líneas facturadas del mes, sin la carga prestacional. La comisión del director se calcula con las tasas de los parámetros, no con valores pegados."
++ "Liquidación!A1": "ANALFE  –  Liquidación de Compensación Variable  –  {Mes} {anio}",
++ "Explicación!A1": "Explicación de la liquidación del Director  ·  {Mes} {anio}",
++ "Explicación!A5": "Es la liquidación de {nombre} con la misma forma que el libro de un comercial: la primera hoja tiene el mismo encabezado, el resultado 5.8, la política anterior, la política nueva y el comparativo de transición en las mismas filas y columnas. Así se pueden poner los dos libros lado a lado.",
++ "Explicación!A8": "El director no tiene venta propia en la política nueva. Su real es el agregado del equipo (núm. 5.9, método «{metodo}»): ventas por cumplimiento del equipo ponderado por meta de cada producto, y base social del equipo frente a la meta del equipo. Diversificación, innovación y satisfacción son el promedio del equipo.",
++ "Explicación!A11": "Resultado de {mes}",
++ "Explicación!A12": "Score {score}, factor {factorPct}: la política nueva paga {pagoNueva}. El esquema anterior paga {comisionAnterior} ({tasaAnterior} de {baseAnterior}). En la transición rige {rige}.",
++ "Explicación!A15": "El director recibe {tasaAnterior} fijo sobre la facturación del mes ({nLineas} líneas, hoja «Facturas») y, aparte, {tasaBtl} sobre el ingreso de ejecución de los eventos BTL ({btlAnterior}). No hay meta ni tramos.",
++ "Detalle del equipo!A1": "Detalle del equipo  ·  aporte de cada comercial al agregado del director  ·  {Mes} {anio}",
++ "Facturas!A1": "Facturas del mes  ·  base del esquema anterior del director  ·  {Mes} {anio}",
++ "Facturas!A2": "{nLineas} líneas de la hoja «{hojaFacturacion}» del archivo cargado. La comisión del director es Base × % Dirección.  ·  Simulación. No es un pago oficial.",
++ "Supuestos y pendientes!A2": "Director  ·  {Mes} {anio}  ·  Simulación. No es un pago oficial.",
++ "Supuestos y pendientes!B4": "El real del director es el agregado del equipo (núm. 5.9). Método usado: {metodo}. Regla del 100 %: {regla100}.",
++ "Supuestos y pendientes!B5": "Meta de Misión del equipo: {metaMision} (Anexo 2). Meta de base social del equipo: {metaBaseSocial}. Son celdas amarillas en la Liquidación.",
++ "Supuestos y pendientes!B6": "Esquema anterior: {tasaAnterior} sobre toda la facturación del mes ({baseAnterior}, {nLineas} líneas) y {tasaBtl} sobre el ingreso de ejecución BTL.",
++ "Supuestos y pendientes!B8": "BTL del director: Pendiente hasta confirmar participación material, certificación financiera y satisfacción del cliente del evento {eventoBtl}.",
++ "Supuestos y pendientes!B9": "Canal nacional (Dirección Comercial): base {canalProduccion}. Solo entra en la base del esquema anterior; no suma al score ni a las metas de los comerciales.",
++ "Supuestos y pendientes!B10": "Pendiente con la jefa: método del score, regla del 100 % y si la meta de base social queda en {metaBaseSocial} o en la suma de metas individuales ({metaBaseSuma}).",
++ "Supuestos y pendientes!B11": "Datos que la app aún no trae: {faltantes}."
+ }
+\ No newline at end of file

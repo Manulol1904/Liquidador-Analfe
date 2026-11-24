@@ -1,0 +1,1 @@
+Paquete sin datos personales. El encabezado real del director vive solo en datos/encabezados_comerciales.json (en .gitignore). Las imágenes con datos reales están en entregables/director_rediseno/ y no van en este paquete.

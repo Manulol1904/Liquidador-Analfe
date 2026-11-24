@@ -1,0 +1,2430 @@
+{
+  "generado": "2026-11-24",
+  "nota": "Mapa nombre definido Excel → celda → campo del motor. Valores son los del archivo anónimo de referencia (pueden ser caché; las pruebas regeneran casos con Excel/LibreOffice).",
+  "comercial": {
+    "archivo": "Simulador_Comercial_2026_con_BTL_REFERENCIA_ANONIMA.xlsx",
+    "hojas": [
+      {
+        "nombre": "Instrucciones",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Cómo se calcula",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Modelo",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Sensibilidad",
+        "estado": "hidden"
+      },
+      {
+        "nombre": "Parámetros",
+        "estado": "hidden"
+      },
+      {
+        "nombre": "_Listas",
+        "estado": "hidden"
+      },
+      {
+        "nombre": "_Datos",
+        "estado": "hidden"
+      }
+    ],
+    "cantidadNombres": 196,
+    "nombres": {
+      "Base_Mision_factura": {
+        "ref": "Parámetros!$B$44",
+        "hoja": "Parámetros",
+        "celda": "B44",
+        "valorEnArchivo": 15500000,
+        "campoMotor": "parametros.mision.valorFactura"
+      },
+      "BS_Meta": {
+        "ref": "Modelo!$B$58",
+        "hoja": "Modelo",
+        "celda": "B58",
+        "valorEnArchivo": 91,
+        "campoMotor": "motor.baseSocial.BS_Meta"
+      },
+      "BS_Meta_Dic": {
+        "ref": "Modelo!$AA$25",
+        "hoja": "Modelo",
+        "celda": "AA25",
+        "valorEnArchivo": 93,
+        "campoMotor": "motor.baseSocial.BS_Meta_Dic"
+      },
+      "BS_Meta_Nov": {
+        "ref": "Modelo!$AA$24",
+        "hoja": "Modelo",
+        "celda": "AA24",
+        "valorEnArchivo": 92,
+        "campoMotor": "motor.baseSocial.BS_Meta_Nov"
+      },
+      "BS_Meta_Oct": {
+        "ref": "Modelo!$AA$23",
+        "hoja": "Modelo",
+        "celda": "AA23",
+        "valorEnArchivo": 91,
+        "campoMotor": "motor.baseSocial.BS_Meta_Oct"
+      },
+      "BTL_Calc": {
+        "ref": "Modelo!$B$93",
+        "hoja": "Modelo",
+        "celda": "B93",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Calc"
+      },
+      "BTL_Cump": {
+        "ref": "Modelo!$B$91",
+        "hoja": "Modelo",
+        "celda": "B91",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Cump"
+      },
+      "BTL_Cump_min": {
+        "ref": "Parámetros!$B$74",
+        "hoja": "Parámetros",
+        "celda": "B74",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "motor.btl.BTL_Cump_min"
+      },
+      "BTL_Estimado": {
+        "ref": "Modelo!$B$98",
+        "hoja": "Modelo",
+        "celda": "B98",
+        "valorEnArchivo": "",
+        "campoMotor": "resultado.btl.estimado"
+      },
+      "BTL_GMF": {
+        "ref": "Modelo!$B$88",
+        "hoja": "Modelo",
+        "celda": "B88",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_GMF"
+      },
+      "BTL_ICA": {
+        "ref": "Modelo!$B$87",
+        "hoja": "Modelo",
+        "celda": "B87",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_ICA"
+      },
+      "BTL_Margen": {
+        "ref": "Modelo!$B$90",
+        "hoja": "Modelo",
+        "celda": "B90",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Margen"
+      },
+      "BTL_Margen_alto": {
+        "ref": "Parámetros!$B$77",
+        "hoja": "Parámetros",
+        "celda": "B77",
+        "valorEnArchivo": 0.151,
+        "campoMotor": "motor.btl.BTL_Margen_alto"
+      },
+      "BTL_Margen_med": {
+        "ref": "Parámetros!$B$76",
+        "hoja": "Parámetros",
+        "celda": "B76",
+        "valorEnArchivo": 0.101,
+        "campoMotor": "motor.btl.BTL_Margen_med"
+      },
+      "BTL_Margen_min": {
+        "ref": "Parámetros!$B$75",
+        "hoja": "Parámetros",
+        "celda": "B75",
+        "valorEnArchivo": 0.051,
+        "campoMotor": "motor.btl.BTL_Margen_min"
+      },
+      "BTL_P100_M1": {
+        "ref": "Parámetros!$B$83",
+        "hoja": "Parámetros",
+        "celda": "B83",
+        "valorEnArchivo": 0.35,
+        "campoMotor": "motor.btl.BTL_P100_M1"
+      },
+      "BTL_P100_M2": {
+        "ref": "Parámetros!$B$84",
+        "hoja": "Parámetros",
+        "celda": "B84",
+        "valorEnArchivo": 0.6,
+        "campoMotor": "motor.btl.BTL_P100_M2"
+      },
+      "BTL_P100_M3": {
+        "ref": "Parámetros!$B$85",
+        "hoja": "Parámetros",
+        "celda": "B85",
+        "valorEnArchivo": 0.8,
+        "campoMotor": "motor.btl.BTL_P100_M3"
+      },
+      "BTL_P90_M1": {
+        "ref": "Parámetros!$B$80",
+        "hoja": "Parámetros",
+        "celda": "B80",
+        "valorEnArchivo": 0.2,
+        "campoMotor": "motor.btl.BTL_P90_M1"
+      },
+      "BTL_P90_M2": {
+        "ref": "Parámetros!$B$81",
+        "hoja": "Parámetros",
+        "celda": "B81",
+        "valorEnArchivo": 0.3,
+        "campoMotor": "motor.btl.BTL_P90_M2"
+      },
+      "BTL_P90_M3": {
+        "ref": "Parámetros!$B$82",
+        "hoja": "Parámetros",
+        "celda": "B82",
+        "valorEnArchivo": 0.4,
+        "campoMotor": "motor.btl.BTL_P90_M3"
+      },
+      "BTL_Pct": {
+        "ref": "Modelo!$B$92",
+        "hoja": "Modelo",
+        "celda": "B92",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Pct"
+      },
+      "BTL_Salvaguarda": {
+        "ref": "Parámetros!$B$72",
+        "hoja": "Parámetros",
+        "celda": "B72",
+        "valorEnArchivo": 0.25,
+        "campoMotor": "motor.btl.BTL_Salvaguarda"
+      },
+      "BTL_Tope25": {
+        "ref": "Modelo!$B$97",
+        "hoja": "Modelo",
+        "celda": "B97",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Tope25"
+      },
+      "BTL_TopeAn": {
+        "ref": "Modelo!$B$95",
+        "hoja": "Modelo",
+        "celda": "B95",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_TopeAn"
+      },
+      "BTL_TopeEvt": {
+        "ref": "Modelo!$B$94",
+        "hoja": "Modelo",
+        "celda": "B94",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_TopeEvt"
+      },
+      "BTL_Tope_anual": {
+        "ref": "Parámetros!$B$71",
+        "hoja": "Parámetros",
+        "celda": "B71",
+        "valorEnArchivo": 2,
+        "campoMotor": "motor.btl.BTL_Tope_anual"
+      },
+      "BTL_Tope_evento": {
+        "ref": "Parámetros!$B$70",
+        "hoja": "Parámetros",
+        "celda": "B70",
+        "valorEnArchivo": 0.8,
+        "campoMotor": "motor.btl.BTL_Tope_evento"
+      },
+      "BTL_Utilidad": {
+        "ref": "Modelo!$B$89",
+        "hoja": "Modelo",
+        "celda": "B89",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Utilidad"
+      },
+      "Calc_Factor": {
+        "ref": "Modelo!$D$50",
+        "hoja": "Modelo",
+        "celda": "D50",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.calculadoraMargen.Calc_Factor"
+      },
+      "Calc_Margen": {
+        "ref": "Modelo!$B$50",
+        "hoja": "Modelo",
+        "celda": "B50",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.calculadoraMargen.Calc_Margen"
+      },
+      "Cartones_Equipo": {
+        "ref": "Parámetros!$B$52",
+        "hoja": "Parámetros",
+        "celda": "B52",
+        "valorEnArchivo": 6000,
+        "campoMotor": "perfil.cartones"
+      },
+      "Comerciales_nombres": {
+        "ref": "_Datos!$A$2:$A$9",
+        "hoja": "_Datos",
+        "celda": "A2:A9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Comercial_sel": {
+        "ref": "Modelo!$B$3",
+        "hoja": "Modelo",
+        "celda": "B3",
+        "valorEnArchivo": "Comercial A",
+        "campoMotor": "entradas.comercial"
+      },
+      "Comision_Dic": {
+        "ref": "Modelo!$AA$16",
+        "hoja": "Modelo",
+        "celda": "AA16",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.comision.Comision_Dic"
+      },
+      "Comision_Nov": {
+        "ref": "Modelo!$AA$15",
+        "hoja": "Modelo",
+        "celda": "AA15",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.comision.Comision_Nov"
+      },
+      "Comision_Oct": {
+        "ref": "Modelo!$AA$14",
+        "hoja": "Modelo",
+        "celda": "AA14",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.comision.Comision_Oct"
+      },
+      "Comision_Trim": {
+        "ref": "Modelo!$AA$17",
+        "hoja": "Modelo",
+        "celda": "AA17",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.comision.Comision_Trim"
+      },
+      "Comision_vista": {
+        "ref": "Modelo!$AA$20",
+        "hoja": "Modelo",
+        "celda": "AA20",
+        "valorEnArchivo": "",
+        "campoMotor": "resultado.comision"
+      },
+      "Cump_BS": {
+        "ref": "Modelo!$B$59",
+        "hoja": "Modelo",
+        "celda": "B59",
+        "valorEnArchivo": 0.989010989010989,
+        "campoMotor": "motor.cumplimiento.Cump_BS"
+      },
+      "Cump_Dic": {
+        "ref": "Modelo!$D$45",
+        "hoja": "Modelo",
+        "celda": "D45",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Dic"
+      },
+      "Cump_Inn": {
+        "ref": "Modelo!$D$74",
+        "hoja": "Modelo",
+        "celda": "D74",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Inn"
+      },
+      "Cump_Nov": {
+        "ref": "Modelo!$C$45",
+        "hoja": "Modelo",
+        "celda": "C45",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Nov"
+      },
+      "Cump_Oct": {
+        "ref": "Modelo!$B$45",
+        "hoja": "Modelo",
+        "celda": "B45",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Oct"
+      },
+      "Cump_Sat": {
+        "ref": "Modelo!$B$79",
+        "hoja": "Modelo",
+        "celda": "B79",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Sat"
+      },
+      "Cump_SER": {
+        "ref": "Modelo!$B$66",
+        "hoja": "Modelo",
+        "celda": "B66",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_SER"
+      },
+      "Cump_Trim": {
+        "ref": "Modelo!$E$45",
+        "hoja": "Modelo",
+        "celda": "E45",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_Trim"
+      },
+      "Cump_V_vista": {
+        "ref": "Modelo!$AA$22",
+        "hoja": "Modelo",
+        "celda": "AA22",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.cumplimiento.Cump_V_vista"
+      },
+      "Curva_F1": {
+        "ref": "Parámetros!$B$19",
+        "hoja": "Parámetros",
+        "celda": "B19",
+        "valorEnArchivo": 0.7,
+        "campoMotor": "parametros.curva.anclas[0].factor"
+      },
+      "Curva_F2": {
+        "ref": "Parámetros!$B$21",
+        "hoja": "Parámetros",
+        "celda": "B21",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "parametros.curva.anclas[1].factor"
+      },
+      "Curva_F3": {
+        "ref": "Parámetros!$B$23",
+        "hoja": "Parámetros",
+        "celda": "B23",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.curva.anclas[2].factor"
+      },
+      "Curva_F4": {
+        "ref": "Parámetros!$B$25",
+        "hoja": "Parámetros",
+        "celda": "B25",
+        "valorEnArchivo": 1.1,
+        "campoMotor": "parametros.curva.anclas[3].factor"
+      },
+      "Curva_F5": {
+        "ref": "Parámetros!$B$27",
+        "hoja": "Parámetros",
+        "celda": "B27",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.curva.anclas[4].factor"
+      },
+      "Curva_P1": {
+        "ref": "Parámetros!$B$18",
+        "hoja": "Parámetros",
+        "celda": "B18",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.curva.anclas[0].puntaje"
+      },
+      "Curva_P2": {
+        "ref": "Parámetros!$B$20",
+        "hoja": "Parámetros",
+        "celda": "B20",
+        "valorEnArchivo": 90,
+        "campoMotor": "parametros.curva.anclas[1].puntaje"
+      },
+      "Curva_P3": {
+        "ref": "Parámetros!$B$22",
+        "hoja": "Parámetros",
+        "celda": "B22",
+        "valorEnArchivo": 100,
+        "campoMotor": "parametros.curva.anclas[2].puntaje"
+      },
+      "Curva_P4": {
+        "ref": "Parámetros!$B$24",
+        "hoja": "Parámetros",
+        "celda": "B24",
+        "valorEnArchivo": 110,
+        "campoMotor": "parametros.curva.anclas[3].puntaje"
+      },
+      "Curva_P5": {
+        "ref": "Parámetros!$B$26",
+        "hoja": "Parámetros",
+        "celda": "B26",
+        "valorEnArchivo": 120,
+        "campoMotor": "parametros.curva.anclas[4].puntaje"
+      },
+      "Eq_Banda": {
+        "ref": "_Datos!$E$2:$E$9",
+        "hoja": "_Datos",
+        "celda": "E2:E9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Basico": {
+        "ref": "_Datos!$G$2:$G$9",
+        "hoja": "_Datos",
+        "celda": "G2:G9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_BS_Base": {
+        "ref": "_Datos!$Y$2:$Y$9",
+        "hoja": "_Datos",
+        "celda": "Y2:Y9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_BS_Ingresos": {
+        "ref": "_Datos!$Z$2:$Z$9",
+        "hoja": "_Datos",
+        "celda": "Z2:Z9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_BS_Ok": {
+        "ref": "_Datos!$AB$2:$AB$9",
+        "hoja": "_Datos",
+        "celda": "AB2:AB9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_BS_Retiros": {
+        "ref": "_Datos!$AA$2:$AA$9",
+        "hoja": "_Datos",
+        "celda": "AA2:AA9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Cargo": {
+        "ref": "_Datos!$C$2:$C$9",
+        "hoja": "_Datos",
+        "celda": "C2:C9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Cartones": {
+        "ref": "_Datos!$X$2:$X$9",
+        "hoja": "_Datos",
+        "celda": "X2:X9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Completo": {
+        "ref": "_Datos!$B$2:$B$9",
+        "hoja": "_Datos",
+        "celda": "B2:B9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Documento": {
+        "ref": "_Datos!$D$2:$D$9",
+        "hoja": "_Datos",
+        "celda": "D2:D9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_IMR": {
+        "ref": "_Datos!$I$2:$I$9",
+        "hoja": "_Datos",
+        "celda": "I2:I9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_IngMax": {
+        "ref": "_Datos!$J$2:$J$9",
+        "hoja": "_Datos",
+        "celda": "J2:J9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCong_Dic": {
+        "ref": "_Datos!$T$2:$T$9",
+        "hoja": "_Datos",
+        "celda": "T2:T9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCong_Nov": {
+        "ref": "_Datos!$S$2:$S$9",
+        "hoja": "_Datos",
+        "celda": "S2:S9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCong_Oct": {
+        "ref": "_Datos!$R$2:$R$9",
+        "hoja": "_Datos",
+        "celda": "R2:R9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCult_Dic": {
+        "ref": "_Datos!$W$2:$W$9",
+        "hoja": "_Datos",
+        "celda": "W2:W9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCult_Nov": {
+        "ref": "_Datos!$V$2:$V$9",
+        "hoja": "_Datos",
+        "celda": "V2:V9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaCult_Oct": {
+        "ref": "_Datos!$U$2:$U$9",
+        "hoja": "_Datos",
+        "celda": "U2:U9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaEAT_Dic": {
+        "ref": "_Datos!$N$2:$N$9",
+        "hoja": "_Datos",
+        "celda": "N2:N9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaEAT_Nov": {
+        "ref": "_Datos!$M$2:$M$9",
+        "hoja": "_Datos",
+        "celda": "M2:M9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaEAT_Oct": {
+        "ref": "_Datos!$L$2:$L$9",
+        "hoja": "_Datos",
+        "celda": "L2:L9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaMis_Dic": {
+        "ref": "_Datos!$Q$2:$Q$9",
+        "hoja": "_Datos",
+        "celda": "Q2:Q9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaMis_Nov": {
+        "ref": "_Datos!$P$2:$P$9",
+        "hoja": "_Datos",
+        "celda": "P2:P9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_MetaMis_Oct": {
+        "ref": "_Datos!$O$2:$O$9",
+        "hoja": "_Datos",
+        "celda": "O2:O9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Oportunidad": {
+        "ref": "_Datos!$H$2:$H$9",
+        "hoja": "_Datos",
+        "celda": "H2:H9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_Qvalor": {
+        "ref": "_Datos!$F$2:$F$9",
+        "hoja": "_Datos",
+        "celda": "F2:F9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Eq_TopeInd": {
+        "ref": "_Datos!$K$2:$K$9",
+        "hoja": "_Datos",
+        "celda": "K2:K9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Factor_alto": {
+        "ref": "Parámetros!$B$39",
+        "hoja": "Parámetros",
+        "celda": "B39",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.factor.Factor_alto"
+      },
+      "Factor_bajo": {
+        "ref": "Parámetros!$B$37",
+        "hoja": "Parámetros",
+        "celda": "B37",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.factor.Factor_bajo"
+      },
+      "Factor_Dic": {
+        "ref": "Modelo!$AA$12",
+        "hoja": "Modelo",
+        "celda": "AA12",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.factor.Factor_Dic"
+      },
+      "Factor_medio": {
+        "ref": "Parámetros!$B$38",
+        "hoja": "Parámetros",
+        "celda": "B38",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "motor.factor.Factor_medio"
+      },
+      "Factor_Nov": {
+        "ref": "Modelo!$AA$11",
+        "hoja": "Modelo",
+        "celda": "AA11",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.factor.Factor_Nov"
+      },
+      "Factor_Oct": {
+        "ref": "Modelo!$AA$10",
+        "hoja": "Modelo",
+        "celda": "AA10",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.factor.Factor_Oct"
+      },
+      "Factor_Trim": {
+        "ref": "Modelo!$AA$13",
+        "hoja": "Modelo",
+        "celda": "AA13",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.factor.Factor_Trim"
+      },
+      "Factor_vista": {
+        "ref": "Modelo!$AA$19",
+        "hoja": "Modelo",
+        "celda": "AA19",
+        "valorEnArchivo": "",
+        "campoMotor": "resultado.factor"
+      },
+      "Falta_80": {
+        "ref": "Modelo!$B$12",
+        "hoja": "Modelo",
+        "celda": "B12",
+        "valorEnArchivo": "",
+        "campoMotor": null
+      },
+      "Has_Dic": {
+        "ref": "Modelo!$AA$4",
+        "hoja": "Modelo",
+        "celda": "AA4",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.has.Has_Dic"
+      },
+      "Has_Nov": {
+        "ref": "Modelo!$AA$3",
+        "hoja": "Modelo",
+        "celda": "AA3",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.has.Has_Nov"
+      },
+      "Has_Oct": {
+        "ref": "Modelo!$AA$2",
+        "hoja": "Modelo",
+        "celda": "AA2",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.has.Has_Oct"
+      },
+      "Incremento_BS": {
+        "ref": "Parámetros!$B$63",
+        "hoja": "Parámetros",
+        "celda": "B63",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.baseSocial.incremento"
+      },
+      "Inp_Anterior": {
+        "ref": "Modelo!$B$13",
+        "hoja": "Modelo",
+        "celda": "B13",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Anterior"
+      },
+      "Inp_BS_Base": {
+        "ref": "Modelo!$B$54",
+        "hoja": "Modelo",
+        "celda": "B54",
+        "valorEnArchivo": 90,
+        "campoMotor": "entradas.Inp_BS_Base"
+      },
+      "Inp_BS_Cierre": {
+        "ref": "Modelo!$B$57",
+        "hoja": "Modelo",
+        "celda": "B57",
+        "valorEnArchivo": 90,
+        "campoMotor": "entradas.Inp_BS_Cierre"
+      },
+      "Inp_BS_Ingresos": {
+        "ref": "Modelo!$B$56",
+        "hoja": "Modelo",
+        "celda": "B56",
+        "valorEnArchivo": 0,
+        "campoMotor": "entradas.Inp_BS_Ingresos"
+      },
+      "Inp_BS_Retiros": {
+        "ref": "Modelo!$B$55",
+        "hoja": "Modelo",
+        "celda": "B55",
+        "valorEnArchivo": 0,
+        "campoMotor": "entradas.Inp_BS_Retiros"
+      },
+      "Inp_BTL_Costo": {
+        "ref": "Modelo!$B$85",
+        "hoja": "Modelo",
+        "celda": "B85",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Costo"
+      },
+      "Inp_BTL_Ingreso": {
+        "ref": "Modelo!$B$84",
+        "hoja": "Modelo",
+        "celda": "B84",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Ingreso"
+      },
+      "Inp_BTL_Pagado": {
+        "ref": "Modelo!$B$96",
+        "hoja": "Modelo",
+        "celda": "B96",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Pagado"
+      },
+      "Inp_BTL_Presup": {
+        "ref": "Modelo!$B$86",
+        "hoja": "Modelo",
+        "celda": "B86",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Presup"
+      },
+      "Inp_Calc_Costo": {
+        "ref": "Modelo!$D$49",
+        "hoja": "Modelo",
+        "celda": "D49",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Calc_Costo"
+      },
+      "Inp_Calc_Ingreso": {
+        "ref": "Modelo!$B$49",
+        "hoja": "Modelo",
+        "celda": "B49",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Calc_Ingreso"
+      },
+      "Inp_Cong_Dic": {
+        "ref": "Modelo!$D$34",
+        "hoja": "Modelo",
+        "celda": "D34",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cong_Dic"
+      },
+      "Inp_Cong_Nov": {
+        "ref": "Modelo!$C$34",
+        "hoja": "Modelo",
+        "celda": "C34",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cong_Nov"
+      },
+      "Inp_Cong_Oct": {
+        "ref": "Modelo!$B$34",
+        "hoja": "Modelo",
+        "celda": "B34",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cong_Oct"
+      },
+      "Inp_Cult_Dic": {
+        "ref": "Modelo!$D$40",
+        "hoja": "Modelo",
+        "celda": "D40",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cult_Dic"
+      },
+      "Inp_Cult_Nov": {
+        "ref": "Modelo!$C$40",
+        "hoja": "Modelo",
+        "celda": "C40",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cult_Nov"
+      },
+      "Inp_Cult_Oct": {
+        "ref": "Modelo!$B$40",
+        "hoja": "Modelo",
+        "celda": "B40",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Cult_Oct"
+      },
+      "Inp_EAT_Dic": {
+        "ref": "Modelo!$D$20",
+        "hoja": "Modelo",
+        "celda": "D20",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_EAT_Dic"
+      },
+      "Inp_EAT_Nov": {
+        "ref": "Modelo!$C$20",
+        "hoja": "Modelo",
+        "celda": "C20",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_EAT_Nov"
+      },
+      "Inp_EAT_Oct": {
+        "ref": "Modelo!$B$20",
+        "hoja": "Modelo",
+        "celda": "B20",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_EAT_Oct"
+      },
+      "Inp_Fac_Dic": {
+        "ref": "Modelo!$D$21",
+        "hoja": "Modelo",
+        "celda": "D21",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Fac_Dic"
+      },
+      "Inp_Fac_Nov": {
+        "ref": "Modelo!$C$21",
+        "hoja": "Modelo",
+        "celda": "C21",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Fac_Nov"
+      },
+      "Inp_Fac_Oct": {
+        "ref": "Modelo!$B$21",
+        "hoja": "Modelo",
+        "celda": "B21",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Fac_Oct"
+      },
+      "Inp_Inn_Oferta1": {
+        "ref": "Modelo!$B$70",
+        "hoja": "Modelo",
+        "celda": "B70",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Inn_Oferta1"
+      },
+      "Inp_Inn_Oferta2": {
+        "ref": "Modelo!$B$72",
+        "hoja": "Modelo",
+        "celda": "B72",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Inn_Oferta2"
+      },
+      "Inp_Inn_Venta1": {
+        "ref": "Modelo!$B$71",
+        "hoja": "Modelo",
+        "celda": "B71",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Inn_Venta1"
+      },
+      "Inp_Inn_Venta2": {
+        "ref": "Modelo!$B$73",
+        "hoja": "Modelo",
+        "celda": "B73",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Inn_Venta2"
+      },
+      "Inp_Insc_Dic": {
+        "ref": "Modelo!$D$35",
+        "hoja": "Modelo",
+        "celda": "D35",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Insc_Dic"
+      },
+      "Inp_Insc_Nov": {
+        "ref": "Modelo!$C$35",
+        "hoja": "Modelo",
+        "celda": "C35",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Insc_Nov"
+      },
+      "Inp_Insc_Oct": {
+        "ref": "Modelo!$B$35",
+        "hoja": "Modelo",
+        "celda": "B35",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Insc_Oct"
+      },
+      "Inp_Mis_Dic": {
+        "ref": "Modelo!$D$27",
+        "hoja": "Modelo",
+        "celda": "D27",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Mis_Dic"
+      },
+      "Inp_Mis_Nov": {
+        "ref": "Modelo!$C$27",
+        "hoja": "Modelo",
+        "celda": "C27",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Mis_Nov"
+      },
+      "Inp_Mis_Oct": {
+        "ref": "Modelo!$B$27",
+        "hoja": "Modelo",
+        "celda": "B27",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Mis_Oct"
+      },
+      "Inp_Sat": {
+        "ref": "Modelo!$B$78",
+        "hoja": "Modelo",
+        "celda": "B78",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Sat"
+      },
+      "Inp_SER_Meta": {
+        "ref": "Modelo!$B$65",
+        "hoja": "Modelo",
+        "celda": "B65",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_SER_Meta"
+      },
+      "Inp_SER_Ventas": {
+        "ref": "Modelo!$B$64",
+        "hoja": "Modelo",
+        "celda": "B64",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_SER_Ventas"
+      },
+      "Limitar_ventas": {
+        "ref": "Parámetros!$B$30",
+        "hoja": "Parámetros",
+        "celda": "B30",
+        "valorEnArchivo": "SÍ",
+        "campoMotor": null
+      },
+      "Lista_Comerciales": {
+        "ref": "_Datos!$A$2:$A$9",
+        "hoja": "_Datos",
+        "celda": "A2:A9",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_FactorMargen": {
+        "ref": "_Listas!$C$2:$C$4",
+        "hoja": "_Listas",
+        "celda": "C2:C4",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_Meses": {
+        "ref": "_Listas!$E$2:$E$5",
+        "hoja": "_Listas",
+        "celda": "E2:E5",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_SiNo": {
+        "ref": "_Listas!$B$2:$B$3",
+        "hoja": "_Listas",
+        "celda": "B2:B3",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_TipoCurva": {
+        "ref": "_Listas!$D$2:$D$3",
+        "hoja": "_Listas",
+        "celda": "D2:D3",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Mes_sel": {
+        "ref": "Modelo!$D$3",
+        "hoja": "Modelo",
+        "celda": "D3",
+        "valorEnArchivo": "Octubre",
+        "campoMotor": "entradas.mes"
+      },
+      "Meta_Congreso_dic": {
+        "ref": "Parámetros!$B$50",
+        "hoja": "Parámetros",
+        "celda": "B50",
+        "valorEnArchivo": 0,
+        "campoMotor": "perfil.metas.Meta_Congreso_dic"
+      },
+      "Meta_Congreso_nov": {
+        "ref": "Parámetros!$B$49",
+        "hoja": "Parámetros",
+        "celda": "B49",
+        "valorEnArchivo": 0,
+        "campoMotor": "perfil.metas.Meta_Congreso_nov"
+      },
+      "Meta_Congreso_oct": {
+        "ref": "Parámetros!$B$48",
+        "hoja": "Parámetros",
+        "celda": "B48",
+        "valorEnArchivo": 0,
+        "campoMotor": "perfil.metas.Meta_Congreso_oct"
+      },
+      "Meta_Cultural_anual": {
+        "ref": "Parámetros!$B$53",
+        "hoja": "Parámetros",
+        "celda": "B53",
+        "valorEnArchivo": 240000000,
+        "campoMotor": "perfil.metas.Meta_Cultural_anual"
+      },
+      "Meta_Mision_dic": {
+        "ref": "Parámetros!$B$47",
+        "hoja": "Parámetros",
+        "celda": "B47",
+        "valorEnArchivo": 0,
+        "campoMotor": "perfil.metas.Meta_Mision_dic"
+      },
+      "Meta_Mision_nov": {
+        "ref": "Parámetros!$B$46",
+        "hoja": "Parámetros",
+        "celda": "B46",
+        "valorEnArchivo": 0,
+        "campoMotor": "perfil.metas.Meta_Mision_nov"
+      },
+      "Meta_Mision_oct": {
+        "ref": "Parámetros!$B$45",
+        "hoja": "Parámetros",
+        "celda": "B45",
+        "valorEnArchivo": 49600000,
+        "campoMotor": "perfil.metas.Meta_Mision_oct"
+      },
+      "Peso_Base": {
+        "ref": "Parámetros!$B$8",
+        "hoja": "Parámetros",
+        "celda": "B8",
+        "valorEnArchivo": 20,
+        "campoMotor": "parametros.pesos.baseSocial"
+      },
+      "Peso_Innovacion": {
+        "ref": "Parámetros!$B$10",
+        "hoja": "Parámetros",
+        "celda": "B10",
+        "valorEnArchivo": 10,
+        "campoMotor": "parametros.pesos.innovacion"
+      },
+      "Peso_Satisfaccion": {
+        "ref": "Parámetros!$B$11",
+        "hoja": "Parámetros",
+        "celda": "B11",
+        "valorEnArchivo": 15,
+        "campoMotor": "parametros.pesos.satisfaccion"
+      },
+      "Peso_SER": {
+        "ref": "Parámetros!$B$9",
+        "hoja": "Parámetros",
+        "celda": "B9",
+        "valorEnArchivo": 10,
+        "campoMotor": "parametros.pesos.serfiscal"
+      },
+      "Peso_Ventas": {
+        "ref": "Parámetros!$B$7",
+        "hoja": "Parámetros",
+        "celda": "B7",
+        "valorEnArchivo": 45,
+        "campoMotor": "parametros.pesos.ventas"
+      },
+      "Pts_BS": {
+        "ref": "Modelo!$B$60",
+        "hoja": "Modelo",
+        "celda": "B60",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.puntos.Pts_BS"
+      },
+      "Pts_Inn": {
+        "ref": "Modelo!$B$74",
+        "hoja": "Modelo",
+        "celda": "B74",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Inn"
+      },
+      "Pts_Oferta": {
+        "ref": "Parámetros!$B$64",
+        "hoja": "Parámetros",
+        "celda": "B64",
+        "valorEnArchivo": 2,
+        "campoMotor": "motor.puntos.Pts_Oferta"
+      },
+      "Pts_Oferta1": {
+        "ref": "Modelo!$D$70",
+        "hoja": "Modelo",
+        "celda": "D70",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Oferta1"
+      },
+      "Pts_Oferta2": {
+        "ref": "Modelo!$D$72",
+        "hoja": "Modelo",
+        "celda": "D72",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Oferta2"
+      },
+      "Pts_PrimeraVenta": {
+        "ref": "Parámetros!$B$65",
+        "hoja": "Parámetros",
+        "celda": "B65",
+        "valorEnArchivo": 3,
+        "campoMotor": "motor.puntos.Pts_PrimeraVenta"
+      },
+      "Pts_Sat": {
+        "ref": "Modelo!$B$80",
+        "hoja": "Modelo",
+        "celda": "B80",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Sat"
+      },
+      "Pts_SER": {
+        "ref": "Modelo!$B$67",
+        "hoja": "Modelo",
+        "celda": "B67",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_SER"
+      },
+      "Pts_Venta1": {
+        "ref": "Modelo!$D$71",
+        "hoja": "Modelo",
+        "celda": "D71",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Venta1"
+      },
+      "Pts_Venta2": {
+        "ref": "Modelo!$D$73",
+        "hoja": "Modelo",
+        "celda": "D73",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_Venta2"
+      },
+      "Pts_V_Dic": {
+        "ref": "Modelo!$D$46",
+        "hoja": "Modelo",
+        "celda": "D46",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_Dic"
+      },
+      "Pts_V_Nov": {
+        "ref": "Modelo!$C$46",
+        "hoja": "Modelo",
+        "celda": "C46",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_Nov"
+      },
+      "Pts_V_Oct": {
+        "ref": "Modelo!$B$46",
+        "hoja": "Modelo",
+        "celda": "B46",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_Oct"
+      },
+      "Pts_V_Trim": {
+        "ref": "Modelo!$E$46",
+        "hoja": "Modelo",
+        "celda": "E46",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_Trim"
+      },
+      "Pts_V_vista": {
+        "ref": "Modelo!$AA$21",
+        "hoja": "Modelo",
+        "celda": "AA21",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_vista"
+      },
+      "Rango_curva": {
+        "ref": "Modelo!$B$11",
+        "hoja": "Modelo",
+        "celda": "B11",
+        "valorEnArchivo": "Escriba su producción en las casillas amarillas para ver el resultado.",
+        "campoMotor": null
+      },
+      "Sat_Esperada": {
+        "ref": "Parámetros!$B$67",
+        "hoja": "Parámetros",
+        "celda": "B67",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.satisfaccion.esperada"
+      },
+      "Score_Dic": {
+        "ref": "Modelo!$AA$8",
+        "hoja": "Modelo",
+        "celda": "AA8",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.score.Score_Dic"
+      },
+      "Score_minimo": {
+        "ref": "Parámetros!$B$15",
+        "hoja": "Parámetros",
+        "celda": "B15",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.curva.minimo"
+      },
+      "Score_Nov": {
+        "ref": "Modelo!$AA$7",
+        "hoja": "Modelo",
+        "celda": "AA7",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.score.Score_Nov"
+      },
+      "Score_Oct": {
+        "ref": "Modelo!$AA$6",
+        "hoja": "Modelo",
+        "celda": "AA6",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.score.Score_Oct"
+      },
+      "Score_Trim": {
+        "ref": "Modelo!$AA$9",
+        "hoja": "Modelo",
+        "celda": "AA9",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.score.Score_Trim"
+      },
+      "Score_vista": {
+        "ref": "Modelo!$AA$18",
+        "hoja": "Modelo",
+        "celda": "AA18",
+        "valorEnArchivo": "",
+        "campoMotor": "resultado.puntaje"
+      },
+      "Sens_Otros": {
+        "ref": "Sensibilidad!$B$5",
+        "hoja": "Sensibilidad",
+        "celda": "B5",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.sensibilidad.Sens_Otros"
+      },
+      "Sens_Prueba": {
+        "ref": "Sensibilidad!$B$8",
+        "hoja": "Sensibilidad",
+        "celda": "B8",
+        "valorEnArchivo": null,
+        "campoMotor": "motor.sensibilidad.Sens_Prueba"
+      },
+      "Sens_Prueba_Score": {
+        "ref": "Sensibilidad!$D$8",
+        "hoja": "Sensibilidad",
+        "celda": "D8",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.sensibilidad.Sens_Prueba_Score"
+      },
+      "Sim_Basico": {
+        "ref": "Modelo!$AA$26",
+        "hoja": "Modelo",
+        "celda": "AA26",
+        "valorEnArchivo": 5000000,
+        "campoMotor": "perfil.compensacion.basico"
+      },
+      "Sim_Cargo": {
+        "ref": "Modelo!$AA$32",
+        "hoja": "Modelo",
+        "celda": "AA32",
+        "valorEnArchivo": "Director Regional III – Regional Norte",
+        "campoMotor": null
+      },
+      "Sim_Completo": {
+        "ref": "Modelo!$AA$31",
+        "hoja": "Modelo",
+        "celda": "AA31",
+        "valorEnArchivo": "Comercial A (nombre inventado)",
+        "campoMotor": null
+      },
+      "Sim_IMR": {
+        "ref": "Modelo!$AA$28",
+        "hoja": "Modelo",
+        "celda": "AA28",
+        "valorEnArchivo": 10000000,
+        "campoMotor": "perfil.compensacion.imr"
+      },
+      "Sim_IngMax": {
+        "ref": "Modelo!$AA$29",
+        "hoja": "Modelo",
+        "celda": "AA29",
+        "valorEnArchivo": 11000000,
+        "campoMotor": "perfil.compensacion.ingresoMaximo"
+      },
+      "Sim_Opp": {
+        "ref": "Modelo!$AA$27",
+        "hoja": "Modelo",
+        "celda": "AA27",
+        "valorEnArchivo": 5000000,
+        "campoMotor": "perfil.compensacion.oportunidad"
+      },
+      "Sim_TopeInd": {
+        "ref": "Modelo!$AA$30",
+        "hoja": "Modelo",
+        "celda": "AA30",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "perfil.compensacion.topeIndividual"
+      },
+      "Suma_pesos": {
+        "ref": "Parámetros!$B$12",
+        "hoja": "Parámetros",
+        "celda": "B12",
+        "valorEnArchivo": 100,
+        "campoMotor": null
+      },
+      "Tasa_GMF": {
+        "ref": "Parámetros!$B$41",
+        "hoja": "Parámetros",
+        "celda": "B41",
+        "valorEnArchivo": 0.004,
+        "campoMotor": "parametros.Tasa_GMF"
+      },
+      "Tasa_ICA": {
+        "ref": "Parámetros!$B$40",
+        "hoja": "Parámetros",
+        "celda": "B40",
+        "valorEnArchivo": 0.009660442,
+        "campoMotor": "parametros.Tasa_ICA"
+      },
+      "Tipo_curva": {
+        "ref": "Parámetros!$B$17",
+        "hoja": "Parámetros",
+        "celda": "B17",
+        "valorEnArchivo": "LINEAL",
+        "campoMotor": "parametros.curva.tipo"
+      },
+      "Tope_Congreso": {
+        "ref": "Parámetros!$B$32",
+        "hoja": "Parámetros",
+        "celda": "B32",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.Tope_Congreso"
+      },
+      "Tope_pago": {
+        "ref": "Parámetros!$B$16",
+        "hoja": "Parámetros",
+        "celda": "B16",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.curva.tope"
+      },
+      "Tope_ventas": {
+        "ref": "Parámetros!$B$31",
+        "hoja": "Parámetros",
+        "celda": "B31",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.Tope_ventas"
+      },
+      "Umbral_alto": {
+        "ref": "Parámetros!$B$36",
+        "hoja": "Parámetros",
+        "celda": "B36",
+        "valorEnArchivo": 0.2,
+        "campoMotor": "parametros.margen.Umbral_alto"
+      },
+      "Umbral_bajo": {
+        "ref": "Parámetros!$B$35",
+        "hoja": "Parámetros",
+        "celda": "B35",
+        "valorEnArchivo": 0.1,
+        "campoMotor": "parametros.margen.Umbral_bajo"
+      },
+      "Valor_Carton": {
+        "ref": "Parámetros!$B$51",
+        "hoja": "Parámetros",
+        "celda": "B51",
+        "valorEnArchivo": 40000,
+        "campoMotor": "parametros.cultural.valorCarton"
+      }
+    }
+  },
+  "nuevoIngreso": {
+    "archivo": "Simulador_Nuevo_Ingreso_2026_REFERENCIA_ANONIMA.xlsx",
+    "hojas": [
+      {
+        "nombre": "Instrucciones",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Modelo",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Cómo se calcula",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Sensibilidad",
+        "estado": "visible"
+      },
+      {
+        "nombre": "Parámetros",
+        "estado": "visible"
+      },
+      {
+        "nombre": "_Listas",
+        "estado": "hidden"
+      },
+      {
+        "nombre": "_Datos",
+        "estado": "hidden"
+      }
+    ],
+    "cantidadNombres": 136,
+    "nombres": {
+      "Base_Mision_factura": {
+        "ref": "Parámetros!$B$45",
+        "hoja": "Parámetros",
+        "celda": "B45",
+        "valorEnArchivo": 15500000,
+        "campoMotor": "parametros.mision.valorFactura"
+      },
+      "BS_Meta": {
+        "ref": "Modelo!$B$73",
+        "hoja": "Modelo",
+        "celda": "B73",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.baseSocial.BS_Meta"
+      },
+      "BTL_Calc": {
+        "ref": "Modelo!$B$121",
+        "hoja": "Modelo",
+        "celda": "B121",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Calc"
+      },
+      "BTL_Cump": {
+        "ref": "Modelo!$B$119",
+        "hoja": "Modelo",
+        "celda": "B119",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Cump"
+      },
+      "BTL_Cump_min": {
+        "ref": "Parámetros!$B$63",
+        "hoja": "Parámetros",
+        "celda": "B63",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "motor.btl.BTL_Cump_min"
+      },
+      "BTL_Estimado": {
+        "ref": "Modelo!$B$126",
+        "hoja": "Modelo",
+        "celda": "B126",
+        "valorEnArchivo": "",
+        "campoMotor": "resultado.btl.estimado"
+      },
+      "BTL_GMF": {
+        "ref": "Modelo!$B$116",
+        "hoja": "Modelo",
+        "celda": "B116",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_GMF"
+      },
+      "BTL_ICA": {
+        "ref": "Modelo!$B$115",
+        "hoja": "Modelo",
+        "celda": "B115",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_ICA"
+      },
+      "BTL_Margen": {
+        "ref": "Modelo!$B$118",
+        "hoja": "Modelo",
+        "celda": "B118",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Margen"
+      },
+      "BTL_Margen_alto": {
+        "ref": "Parámetros!$B$66",
+        "hoja": "Parámetros",
+        "celda": "B66",
+        "valorEnArchivo": 0.15,
+        "campoMotor": "motor.btl.BTL_Margen_alto"
+      },
+      "BTL_Margen_med": {
+        "ref": "Parámetros!$B$65",
+        "hoja": "Parámetros",
+        "celda": "B65",
+        "valorEnArchivo": 0.1,
+        "campoMotor": "motor.btl.BTL_Margen_med"
+      },
+      "BTL_Margen_min": {
+        "ref": "Parámetros!$B$64",
+        "hoja": "Parámetros",
+        "celda": "B64",
+        "valorEnArchivo": 0.05,
+        "campoMotor": "motor.btl.BTL_Margen_min"
+      },
+      "BTL_P100_M1": {
+        "ref": "Parámetros!$B$74",
+        "hoja": "Parámetros",
+        "celda": "B74",
+        "valorEnArchivo": 0.35,
+        "campoMotor": "motor.btl.BTL_P100_M1"
+      },
+      "BTL_P100_M2": {
+        "ref": "Parámetros!$B$75",
+        "hoja": "Parámetros",
+        "celda": "B75",
+        "valorEnArchivo": 0.6,
+        "campoMotor": "motor.btl.BTL_P100_M2"
+      },
+      "BTL_P100_M3": {
+        "ref": "Parámetros!$B$76",
+        "hoja": "Parámetros",
+        "celda": "B76",
+        "valorEnArchivo": 0.8,
+        "campoMotor": "motor.btl.BTL_P100_M3"
+      },
+      "BTL_P90_M1": {
+        "ref": "Parámetros!$B$71",
+        "hoja": "Parámetros",
+        "celda": "B71",
+        "valorEnArchivo": 0.2,
+        "campoMotor": "motor.btl.BTL_P90_M1"
+      },
+      "BTL_P90_M2": {
+        "ref": "Parámetros!$B$72",
+        "hoja": "Parámetros",
+        "celda": "B72",
+        "valorEnArchivo": 0.3,
+        "campoMotor": "motor.btl.BTL_P90_M2"
+      },
+      "BTL_P90_M3": {
+        "ref": "Parámetros!$B$73",
+        "hoja": "Parámetros",
+        "celda": "B73",
+        "valorEnArchivo": 0.4,
+        "campoMotor": "motor.btl.BTL_P90_M3"
+      },
+      "BTL_Pct": {
+        "ref": "Modelo!$B$120",
+        "hoja": "Modelo",
+        "celda": "B120",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Pct"
+      },
+      "BTL_Req": {
+        "ref": "Modelo!$B$125",
+        "hoja": "Modelo",
+        "celda": "B125",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Req"
+      },
+      "BTL_Salvaguarda": {
+        "ref": "Parámetros!$B$62",
+        "hoja": "Parámetros",
+        "celda": "B62",
+        "valorEnArchivo": 0.25,
+        "campoMotor": "motor.btl.BTL_Salvaguarda"
+      },
+      "BTL_Sat_min": {
+        "ref": "Parámetros!$B$67",
+        "hoja": "Parámetros",
+        "celda": "B67",
+        "valorEnArchivo": 0.85,
+        "campoMotor": "motor.btl.BTL_Sat_min"
+      },
+      "BTL_Score_min": {
+        "ref": "Parámetros!$B$68",
+        "hoja": "Parámetros",
+        "celda": "B68",
+        "valorEnArchivo": 80,
+        "campoMotor": "motor.btl.BTL_Score_min"
+      },
+      "BTL_Tope25": {
+        "ref": "Modelo!$B$124",
+        "hoja": "Modelo",
+        "celda": "B124",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Tope25"
+      },
+      "BTL_TopeAn": {
+        "ref": "Modelo!$B$123",
+        "hoja": "Modelo",
+        "celda": "B123",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_TopeAn"
+      },
+      "BTL_TopeEvt": {
+        "ref": "Modelo!$B$122",
+        "hoja": "Modelo",
+        "celda": "B122",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_TopeEvt"
+      },
+      "BTL_Tope_anual": {
+        "ref": "Parámetros!$B$61",
+        "hoja": "Parámetros",
+        "celda": "B61",
+        "valorEnArchivo": 2,
+        "campoMotor": "motor.btl.BTL_Tope_anual"
+      },
+      "BTL_Tope_evento": {
+        "ref": "Parámetros!$B$60",
+        "hoja": "Parámetros",
+        "celda": "B60",
+        "valorEnArchivo": 0.8,
+        "campoMotor": "motor.btl.BTL_Tope_evento"
+      },
+      "BTL_Utilidad": {
+        "ref": "Modelo!$B$117",
+        "hoja": "Modelo",
+        "celda": "B117",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.btl.BTL_Utilidad"
+      },
+      "Calc_Factor": {
+        "ref": "Modelo!$D$64",
+        "hoja": "Modelo",
+        "celda": "D64",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.calculadoraMargen.Calc_Factor"
+      },
+      "Calc_Margen": {
+        "ref": "Modelo!$B$64",
+        "hoja": "Modelo",
+        "celda": "B64",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.calculadoraMargen.Calc_Margen"
+      },
+      "Comision_vista": {
+        "ref": "Modelo!$AA$7",
+        "hoja": "Modelo",
+        "celda": "AA7",
+        "valorEnArchivo": 0,
+        "campoMotor": "resultado.comision"
+      },
+      "Cump_BS": {
+        "ref": "Modelo!$B$74",
+        "hoja": "Modelo",
+        "celda": "B74",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.cumplimiento.Cump_BS"
+      },
+      "Cump_Inn": {
+        "ref": "Modelo!$D$94",
+        "hoja": "Modelo",
+        "celda": "D94",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.cumplimiento.Cump_Inn"
+      },
+      "Cump_Sat": {
+        "ref": "Modelo!$B$100",
+        "hoja": "Modelo",
+        "celda": "B100",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.cumplimiento.Cump_Sat"
+      },
+      "Cump_SER": {
+        "ref": "Modelo!$B$82",
+        "hoja": "Modelo",
+        "celda": "B82",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.cumplimiento.Cump_SER"
+      },
+      "Cump_V_vista": {
+        "ref": "IF(OR(Pts_V_vista=\"\",Peso_Ventas=0),\"\",IF(Med_Ventas=\"NO\",1,IF(N(Modelo!$C$59)<=0,\"\",Modelo!$C$55)))",
+        "hoja": null,
+        "celda": null,
+        "valorEnArchivo": null,
+        "campoMotor": "motor.cumplimiento.Cump_V_vista"
+      },
+      "Pts_V_vista": {
+        "ref": "Modelo!$C$56",
+        "hoja": "Modelo",
+        "celda": "C56",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.puntos.Pts_V_vista"
+      },
+      "Peso_Ventas": {
+        "ref": "Parámetros!$B$7",
+        "hoja": "Parámetros",
+        "celda": "B7",
+        "valorEnArchivo": 45,
+        "campoMotor": "parametros.pesos.ventas"
+      },
+      "Med_Ventas": {
+        "ref": "Modelo!$B$18",
+        "hoja": "Modelo",
+        "celda": "B18",
+        "valorEnArchivo": "SÍ",
+        "campoMotor": "entradas.medicion.Med_Ventas"
+      },
+      "Curva_F1": {
+        "ref": "Parámetros!$B$19",
+        "hoja": "Parámetros",
+        "celda": "B19",
+        "valorEnArchivo": 0.7,
+        "campoMotor": "parametros.curva.anclas[0].factor"
+      },
+      "Curva_F2": {
+        "ref": "Parámetros!$B$21",
+        "hoja": "Parámetros",
+        "celda": "B21",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "parametros.curva.anclas[1].factor"
+      },
+      "Curva_F3": {
+        "ref": "Parámetros!$B$23",
+        "hoja": "Parámetros",
+        "celda": "B23",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.curva.anclas[2].factor"
+      },
+      "Curva_F4": {
+        "ref": "Parámetros!$B$25",
+        "hoja": "Parámetros",
+        "celda": "B25",
+        "valorEnArchivo": 1.1,
+        "campoMotor": "parametros.curva.anclas[3].factor"
+      },
+      "Curva_F5": {
+        "ref": "Parámetros!$B$27",
+        "hoja": "Parámetros",
+        "celda": "B27",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.curva.anclas[4].factor"
+      },
+      "Curva_P1": {
+        "ref": "Parámetros!$B$18",
+        "hoja": "Parámetros",
+        "celda": "B18",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.curva.anclas[0].puntaje"
+      },
+      "Curva_P2": {
+        "ref": "Parámetros!$B$20",
+        "hoja": "Parámetros",
+        "celda": "B20",
+        "valorEnArchivo": 90,
+        "campoMotor": "parametros.curva.anclas[1].puntaje"
+      },
+      "Curva_P3": {
+        "ref": "Parámetros!$B$22",
+        "hoja": "Parámetros",
+        "celda": "B22",
+        "valorEnArchivo": 100,
+        "campoMotor": "parametros.curva.anclas[2].puntaje"
+      },
+      "Curva_P4": {
+        "ref": "Parámetros!$B$24",
+        "hoja": "Parámetros",
+        "celda": "B24",
+        "valorEnArchivo": 110,
+        "campoMotor": "parametros.curva.anclas[3].puntaje"
+      },
+      "Curva_P5": {
+        "ref": "Parámetros!$B$26",
+        "hoja": "Parámetros",
+        "celda": "B26",
+        "valorEnArchivo": 120,
+        "campoMotor": "parametros.curva.anclas[4].puntaje"
+      },
+      "Dat_Cargo": {
+        "ref": "_Datos!$B$4",
+        "hoja": "_Datos",
+        "celda": "B4",
+        "valorEnArchivo": "Ejecutivo Comercial II – Regional Centro",
+        "campoMotor": null
+      },
+      "Dat_Documento": {
+        "ref": "_Datos!$B$5",
+        "hoja": "_Datos",
+        "celda": "B5",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Dat_FechaAplica": {
+        "ref": "_Datos!$B$7",
+        "hoja": "_Datos",
+        "celda": "B7",
+        "valorEnArchivo": "2026-12-01T00:00:00.000Z",
+        "campoMotor": null
+      },
+      "Dat_Nombre": {
+        "ref": "_Datos!$B$3",
+        "hoja": "_Datos",
+        "celda": "B3",
+        "valorEnArchivo": "Comercial Nuevo (nombre inventado)",
+        "campoMotor": null
+      },
+      "Dat_NombreCorto": {
+        "ref": "_Datos!$B$2",
+        "hoja": "_Datos",
+        "celda": "B2",
+        "valorEnArchivo": "Comercial Nuevo",
+        "campoMotor": null
+      },
+      "Dat_Politica": {
+        "ref": "_Datos!$B$6",
+        "hoja": "_Datos",
+        "celda": "B6",
+        "valorEnArchivo": "PCV-COM-001 versión 1.0 de 25 de septiembre de 2026",
+        "campoMotor": null
+      },
+      "Dias_lab": {
+        "ref": "Modelo!$D$3",
+        "hoja": "Modelo",
+        "celda": "D3",
+        "valorEnArchivo": 31,
+        "campoMotor": "entradas.prorrateo.Dias_lab"
+      },
+      "Dias_mes": {
+        "ref": "Modelo!$F$3",
+        "hoja": "Modelo",
+        "celda": "F3",
+        "valorEnArchivo": 31,
+        "campoMotor": "entradas.prorrateo.Dias_mes"
+      },
+      "Factor_alto": {
+        "ref": "Parámetros!$B$39",
+        "hoja": "Parámetros",
+        "celda": "B39",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.factor.Factor_alto"
+      },
+      "Factor_bajo": {
+        "ref": "Parámetros!$B$37",
+        "hoja": "Parámetros",
+        "celda": "B37",
+        "valorEnArchivo": 0,
+        "campoMotor": "motor.factor.Factor_bajo"
+      },
+      "Factor_medio": {
+        "ref": "Parámetros!$B$38",
+        "hoja": "Parámetros",
+        "celda": "B38",
+        "valorEnArchivo": 0.9,
+        "campoMotor": "motor.factor.Factor_medio"
+      },
+      "Factor_prorrateo": {
+        "ref": "Modelo!$B$17",
+        "hoja": "Modelo",
+        "celda": "B17",
+        "valorEnArchivo": 1,
+        "campoMotor": "motor.factor.Factor_prorrateo"
+      },
+      "Factor_vista": {
+        "ref": "Modelo!$AA$6",
+        "hoja": "Modelo",
+        "celda": "AA6",
+        "valorEnArchivo": 0,
+        "campoMotor": "resultado.factor"
+      },
+      "Fecha_fin": {
+        "ref": "IFERROR(INDEX(Lista_FinMes,MATCH(Mes_sel,Lista_Meses,0)),DATE(2027,1,1))",
+        "hoja": null,
+        "celda": null,
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_FinMes": {
+        "ref": "_Listas!$D$2:$D$8",
+        "hoja": "_Listas",
+        "celda": "D2:D8",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Mes_sel": {
+        "ref": "Modelo!$B$3",
+        "hoja": "Modelo",
+        "celda": "B3",
+        "valorEnArchivo": "Diciembre 2026",
+        "campoMotor": "entradas.mes"
+      },
+      "Lista_Meses": {
+        "ref": "_Listas!$A$2:$A$8",
+        "hoja": "_Listas",
+        "celda": "A2:A8",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Fecha_inicio": {
+        "ref": "IFERROR(INDEX(Lista_InicioMes,MATCH(Mes_sel,Lista_Meses,0)),DATE(2026,12,1))",
+        "hoja": null,
+        "celda": null,
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_InicioMes": {
+        "ref": "_Listas!$C$2:$C$8",
+        "hoja": "_Listas",
+        "celda": "C2:C8",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Incluir_anticipos": {
+        "ref": "Parámetros!$B$48",
+        "hoja": "Parámetros",
+        "celda": "B48",
+        "valorEnArchivo": "NO",
+        "campoMotor": null
+      },
+      "Incluir_no_canceladas": {
+        "ref": "Parámetros!$B$49",
+        "hoja": "Parámetros",
+        "celda": "B49",
+        "valorEnArchivo": "NO",
+        "campoMotor": null
+      },
+      "Incremento_BS": {
+        "ref": "Parámetros!$B$52",
+        "hoja": "Parámetros",
+        "celda": "B52",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.baseSocial.incremento"
+      },
+      "Inp_BS_Base": {
+        "ref": "Modelo!$B$68",
+        "hoja": "Modelo",
+        "celda": "B68",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BS_Base"
+      },
+      "Inp_BS_Cierre": {
+        "ref": "Modelo!$B$72",
+        "hoja": "Modelo",
+        "celda": "B72",
+        "valorEnArchivo": "",
+        "campoMotor": "entradas.Inp_BS_Cierre"
+      },
+      "Inp_BS_Ingresos": {
+        "ref": "Modelo!$B$69",
+        "hoja": "Modelo",
+        "celda": "B69",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BS_Ingresos"
+      },
+      "Inp_BS_Meses": {
+        "ref": "Modelo!$B$71",
+        "hoja": "Modelo",
+        "celda": "B71",
+        "valorEnArchivo": 1,
+        "campoMotor": "entradas.Inp_BS_Meses"
+      },
+      "Inp_BS_Retiros": {
+        "ref": "Modelo!$B$70",
+        "hoja": "Modelo",
+        "celda": "B70",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BS_Retiros"
+      },
+      "Inp_BTL_Cierre": {
+        "ref": "Modelo!$B$111",
+        "hoja": "Modelo",
+        "celda": "B111",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Cierre"
+      },
+      "Inp_BTL_Costo": {
+        "ref": "Modelo!$B$107",
+        "hoja": "Modelo",
+        "celda": "B107",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Costo"
+      },
+      "Inp_BTL_Ingreso": {
+        "ref": "Modelo!$B$106",
+        "hoja": "Modelo",
+        "celda": "B106",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Ingreso"
+      },
+      "Inp_BTL_Otros": {
+        "ref": "Modelo!$B$112",
+        "hoja": "Modelo",
+        "celda": "B112",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Otros"
+      },
+      "Inp_BTL_Pagado": {
+        "ref": "Modelo!$B$113",
+        "hoja": "Modelo",
+        "celda": "B113",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Pagado"
+      },
+      "Inp_BTL_Part": {
+        "ref": "Modelo!$B$110",
+        "hoja": "Modelo",
+        "celda": "B110",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Part"
+      },
+      "Inp_BTL_Presup": {
+        "ref": "Modelo!$B$108",
+        "hoja": "Modelo",
+        "celda": "B108",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Presup"
+      },
+      "Inp_BTL_Sat": {
+        "ref": "Modelo!$B$109",
+        "hoja": "Modelo",
+        "celda": "B109",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_BTL_Sat"
+      },
+      "Inp_Calc_Costo": {
+        "ref": "Modelo!$D$63",
+        "hoja": "Modelo",
+        "celda": "D63",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Calc_Costo"
+      },
+      "Inp_Calc_Ingreso": {
+        "ref": "Modelo!$B$63",
+        "hoja": "Modelo",
+        "celda": "B63",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Calc_Ingreso"
+      },
+      "Inp_Sat": {
+        "ref": "Modelo!$B$99",
+        "hoja": "Modelo",
+        "celda": "B99",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_Sat"
+      },
+      "Inp_SER_Meta": {
+        "ref": "Modelo!$B$81",
+        "hoja": "Modelo",
+        "celda": "B81",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_SER_Meta"
+      },
+      "Inp_SER_Ventas": {
+        "ref": "Modelo!$B$80",
+        "hoja": "Modelo",
+        "celda": "B80",
+        "valorEnArchivo": null,
+        "campoMotor": "entradas.Inp_SER_Ventas"
+      },
+      "Limitar_ventas": {
+        "ref": "Parámetros!$B$30",
+        "hoja": "Parámetros",
+        "celda": "B30",
+        "valorEnArchivo": "SÍ",
+        "campoMotor": null
+      },
+      "Lista_DiasMes": {
+        "ref": "_Listas!$B$2:$B$8",
+        "hoja": "_Listas",
+        "celda": "B2:B8",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_ReglaExacto": {
+        "ref": "_Listas!$H$2:$H$3",
+        "hoja": "_Listas",
+        "celda": "H2:H3",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_SiNo": {
+        "ref": "_Listas!$E$2:$E$3",
+        "hoja": "_Listas",
+        "celda": "E2:E3",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_TipoCurva": {
+        "ref": "_Listas!$G$2:$G$3",
+        "hoja": "_Listas",
+        "celda": "G2:G3",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Lista_Tipos": {
+        "ref": "_Listas!$F$2:$F$8",
+        "hoja": "_Listas",
+        "celda": "F2:F8",
+        "valorEnArchivo": null,
+        "campoMotor": null
+      },
+      "Med_BS": {
+        "ref": "Modelo!$B$67",
+        "hoja": "Modelo",
+        "celda": "B67",
+        "valorEnArchivo": "NO",
+        "campoMotor": "entradas.medicion.Med_BS"
+      },
+      "Med_Inn": {
+        "ref": "Modelo!$B$86",
+        "hoja": "Modelo",
+        "celda": "B86",
+        "valorEnArchivo": "NO",
+        "campoMotor": "entradas.medicion.Med_Inn"
+      },
+      "Med_Sat": {
+        "ref": "Modelo!$B$97",
+        "hoja": "Modelo",
+        "celda": "B97",
+        "valorEnArchivo": "NO",
+        "campoMotor": "entradas.medicion.Med_Sat"
+      },
+      "Med_SER": {
+        "ref": "Modelo!$B$79",
+        "hoja": "Modelo",
+        "celda": "B79",
+        "valorEnArchivo": "NO",
+        "campoMotor": "entradas.medicion.Med_SER"
+      },
+      "Peso_Base": {
+        "ref": "Parámetros!$B$8",
+        "hoja": "Parámetros",
+        "celda": "B8",
+        "valorEnArchivo": 20,
+        "campoMotor": "parametros.pesos.baseSocial"
+      },
+      "Peso_Innovacion": {
+        "ref": "Parámetros!$B$10",
+        "hoja": "Parámetros",
+        "celda": "B10",
+        "valorEnArchivo": 10,
+        "campoMotor": "parametros.pesos.innovacion"
+      },
+      "Peso_Satisfaccion": {
+        "ref": "Parámetros!$B$11",
+        "hoja": "Parámetros",
+        "celda": "B11",
+        "valorEnArchivo": 15,
+        "campoMotor": "parametros.pesos.satisfaccion"
+      },
+      "Peso_SER": {
+        "ref": "Parámetros!$B$9",
+        "hoja": "Parámetros",
+        "celda": "B9",
+        "valorEnArchivo": 10,
+        "campoMotor": "parametros.pesos.serfiscal"
+      },
+      "Prefijo_anticipo": {
+        "ref": "Parámetros!$B$47",
+        "hoja": "Parámetros",
+        "celda": "B47",
+        "valorEnArchivo": "27209",
+        "campoMotor": null
+      },
+      "Pts_BS": {
+        "ref": "Modelo!$B$75",
+        "hoja": "Modelo",
+        "celda": "B75",
+        "valorEnArchivo": 20,
+        "campoMotor": "motor.puntos.Pts_BS"
+      },
+      "Pts_Inn": {
+        "ref": "Modelo!$D$93",
+        "hoja": "Modelo",
+        "celda": "D93",
+        "valorEnArchivo": 10,
+        "campoMotor": "motor.puntos.Pts_Inn"
+      },
+      "Pts_Oferta": {
+        "ref": "Parámetros!$B$53",
+        "hoja": "Parámetros",
+        "celda": "B53",
+        "valorEnArchivo": 2,
+        "campoMotor": "motor.puntos.Pts_Oferta"
+      },
+      "Pts_PrimeraVenta": {
+        "ref": "Parámetros!$B$54",
+        "hoja": "Parámetros",
+        "celda": "B54",
+        "valorEnArchivo": 3,
+        "campoMotor": "motor.puntos.Pts_PrimeraVenta"
+      },
+      "Pts_Sat": {
+        "ref": "Modelo!$B$101",
+        "hoja": "Modelo",
+        "celda": "B101",
+        "valorEnArchivo": 15,
+        "campoMotor": "motor.puntos.Pts_Sat"
+      },
+      "Pts_SER": {
+        "ref": "Modelo!$B$83",
+        "hoja": "Modelo",
+        "celda": "B83",
+        "valorEnArchivo": 10,
+        "campoMotor": "motor.puntos.Pts_SER"
+      },
+      "Regla_exacto": {
+        "ref": "Parámetros!$B$42",
+        "hoja": "Parámetros",
+        "celda": "B42",
+        "valorEnArchivo": "90 % (política)",
+        "campoMotor": null
+      },
+      "Sat_Esperada": {
+        "ref": "Parámetros!$B$57",
+        "hoja": "Parámetros",
+        "celda": "B57",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.satisfaccion.esperada"
+      },
+      "Score_minimo": {
+        "ref": "Parámetros!$B$15",
+        "hoja": "Parámetros",
+        "celda": "B15",
+        "valorEnArchivo": 80,
+        "campoMotor": "parametros.curva.minimo"
+      },
+      "Score_vista": {
+        "ref": "Modelo!$AA$5",
+        "hoja": "Modelo",
+        "celda": "AA5",
+        "valorEnArchivo": 55,
+        "campoMotor": "resultado.puntaje"
+      },
+      "Sens_Otros": {
+        "ref": "Sensibilidad!$B$4",
+        "hoja": "Sensibilidad",
+        "celda": "B4",
+        "valorEnArchivo": 55,
+        "campoMotor": "motor.sensibilidad.Sens_Otros"
+      },
+      "Sens_Prueba": {
+        "ref": "Sensibilidad!$B$7",
+        "hoja": "Sensibilidad",
+        "celda": "B7",
+        "valorEnArchivo": null,
+        "campoMotor": "motor.sensibilidad.Sens_Prueba"
+      },
+      "Sens_Prueba_Score": {
+        "ref": "Sensibilidad!$D$7",
+        "hoja": "Sensibilidad",
+        "celda": "D7",
+        "valorEnArchivo": "",
+        "campoMotor": "motor.sensibilidad.Sens_Prueba_Score"
+      },
+      "Sim_Basico": {
+        "ref": "_Datos!$B$8",
+        "hoja": "_Datos",
+        "celda": "B8",
+        "valorEnArchivo": 3000000,
+        "campoMotor": "perfil.compensacion.basico"
+      },
+      "Sim_IMR": {
+        "ref": "_Datos!$B$11",
+        "hoja": "_Datos",
+        "celda": "B11",
+        "valorEnArchivo": 5000000,
+        "campoMotor": "perfil.compensacion.imr"
+      },
+      "Sim_IngMax": {
+        "ref": "_Datos!$B$12",
+        "hoja": "_Datos",
+        "celda": "B12",
+        "valorEnArchivo": 5400000,
+        "campoMotor": "perfil.compensacion.ingresoMaximo"
+      },
+      "Sim_Opp": {
+        "ref": "_Datos!$B$9",
+        "hoja": "_Datos",
+        "celda": "B9",
+        "valorEnArchivo": 2000000,
+        "campoMotor": "perfil.compensacion.oportunidad"
+      },
+      "Sim_TopeInd": {
+        "ref": "_Datos!$B$10",
+        "hoja": "_Datos",
+        "celda": "B10",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "perfil.compensacion.topeIndividual"
+      },
+      "Sim_VarMax": {
+        "ref": "_Datos!$B$13",
+        "hoja": "_Datos",
+        "celda": "B13",
+        "valorEnArchivo": 2400000,
+        "campoMotor": null
+      },
+      "Suma_pesos": {
+        "ref": "Parámetros!$B$12",
+        "hoja": "Parámetros",
+        "celda": "B12",
+        "valorEnArchivo": 100,
+        "campoMotor": null
+      },
+      "Tasa_GMF": {
+        "ref": "Parámetros!$B$41",
+        "hoja": "Parámetros",
+        "celda": "B41",
+        "valorEnArchivo": 0.004,
+        "campoMotor": "parametros.Tasa_GMF"
+      },
+      "Tasa_ICA": {
+        "ref": "Parámetros!$B$40",
+        "hoja": "Parámetros",
+        "celda": "B40",
+        "valorEnArchivo": 0.009660442,
+        "campoMotor": "parametros.Tasa_ICA"
+      },
+      "Tipo_curva": {
+        "ref": "Parámetros!$B$17",
+        "hoja": "Parámetros",
+        "celda": "B17",
+        "valorEnArchivo": "LINEAL",
+        "campoMotor": "parametros.curva.tipo"
+      },
+      "Tope_Congreso": {
+        "ref": "Parámetros!$B$32",
+        "hoja": "Parámetros",
+        "celda": "B32",
+        "valorEnArchivo": 1,
+        "campoMotor": "parametros.Tope_Congreso"
+      },
+      "Tope_Inn_oferta": {
+        "ref": "Parámetros!$B$55",
+        "hoja": "Parámetros",
+        "celda": "B55",
+        "valorEnArchivo": 5,
+        "campoMotor": "parametros.Tope_Inn_oferta"
+      },
+      "Tope_Inn_trim": {
+        "ref": "Parámetros!$B$56",
+        "hoja": "Parámetros",
+        "celda": "B56",
+        "valorEnArchivo": 10,
+        "campoMotor": "parametros.Tope_Inn_trim"
+      },
+      "Tope_pago": {
+        "ref": "Parámetros!$B$16",
+        "hoja": "Parámetros",
+        "celda": "B16",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.curva.tope"
+      },
+      "Tope_ventas": {
+        "ref": "Parámetros!$B$31",
+        "hoja": "Parámetros",
+        "celda": "B31",
+        "valorEnArchivo": 1.2,
+        "campoMotor": "parametros.Tope_ventas"
+      },
+      "Umbral_alto": {
+        "ref": "Parámetros!$B$36",
+        "hoja": "Parámetros",
+        "celda": "B36",
+        "valorEnArchivo": 0.2,
+        "campoMotor": "parametros.margen.Umbral_alto"
+      },
+      "Umbral_bajo": {
+        "ref": "Parámetros!$B$35",
+        "hoja": "Parámetros",
+        "celda": "B35",
+        "valorEnArchivo": 0.1,
+        "campoMotor": "parametros.margen.Umbral_bajo"
+      },
+      "Valor_Carton": {
+        "ref": "Parámetros!$B$46",
+        "hoja": "Parámetros",
+        "celda": "B46",
+        "valorEnArchivo": 40000,
+        "campoMotor": "parametros.cultural.valorCarton"
+      }
+    }
+  },
+  "casoSemilla": {
+    "descripcion": "Comercial A · Octubre · ver prompt §7.1",
+    "entradas": {
+      "comercial": "Comercial A",
+      "mes": "Octubre",
+      "Inp_EAT_Oct": 41250000,
+      "Inp_Mis_Oct": 3,
+      "BS_base": 90,
+      "Inp_SER": 12,
+      "Meta_SER": 10,
+      "Inp_Inn1": "SÍ",
+      "Inp_Inn1_Venta": 5000000,
+      "Inp_Sat": 85,
+      "Comision_anterior": 1500000,
+      "Inp_BTL_Ingreso": 100000000,
+      "Inp_BTL_Costo": 80000000,
+      "Inp_BTL_Presup": 15000000
+    },
+    "esperado": {
+      "Score_vista": 76.402,
+      "Factor_vista": 0,
+      "Comision_vista": 0,
+      "transicion": 1500000,
+      "BTL_Estimado": 4678488.95,
+      "Pts_Ventas": 43.4645,
+      "Pts_Base": 0,
+      "Pts_Diversificacion": 17,
+      "Pts_Satisfaccion": 15.9375
+    }
+  }
+}

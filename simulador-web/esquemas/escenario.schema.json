@@ -1,0 +1,6 @@
+{
+  "$comment": "Escenario v1: entradas sin salario ni oportunidad",
+  "formato": "analfe-simulador-escenario",
+  "version": 1,
+  "campos": ["perfilId", "mes", "entradas", "parametrosCambiados", "aviso"]
+}

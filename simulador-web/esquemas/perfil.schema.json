@@ -1,0 +1,15 @@
+{
+  "$comment": "Documentación del perfil v1. La validación real está en js/perfil.js",
+  "formato": "analfe-simulador-perfil",
+  "version": 1,
+  "tipo": ["comercial", "nuevo-ingreso", "director"],
+  "requeridos": ["formato", "version", "tipo", "persona", "compensacion"],
+  "persona": ["id", "nombreVisible"],
+  "compensacion": {
+    "basico": "number >= 0",
+    "oportunidad": "number >= 0",
+    "topeIndividual": "1 .. 1.5"
+  },
+  "periodos": "array de { mes: AAAA-MM, metas }",
+  "control.sha256": "huella canónica; aviso si no coincide"
+}

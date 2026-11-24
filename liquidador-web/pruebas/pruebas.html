@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pruebas · Liquidador ANALFE</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/estilos.css">
+  <script src="../lib/jszip.min.js"></script>
+</head>
+<body>
+  <header class="encabezado">
+    <p class="aviso">Simulación. No es un pago oficial.</p>
+    <h1>Pruebas de cálculo</h1>
+    <p class="subtitulo">Curva 5.8, margen, puntos, score y pago</p>
+  </header>
+  <main>
+    <article class="tarjeta">
+      <p id="resumen">Corriendo pruebas…</p>
+      <ul id="lista"></ul>
+    </article>
+  </main>
+  <script type="module">
+    import { PARAMETROS_INICIALES } from "../js/parametros.js";
+    import { numeroPesos, porcentaje } from "../js/utilidades.js";
+    import {
+      factorCurva,
+      factorMargen,
+      calcularMargen,
+      puntosIndicador,
+      score,
+      pagoVariable,
+      comisionAnteriorDirector,
+      comisionBtlAnterior,
+      comisionAnteriorTramos,
+      leerTasa,
+      liquidarComercial,
+      produccionAnterior,
+      produccionTotalMes,
+      tasaPorTramo,
+    } from "../js/calculos.js";
+    import { abrirPlantilla, ajustarFormula, copiarFormula, escribirCelda, fechaASerie, guardar, leerCelda } from "../js/excel/motor_excel_individual.js";
+
+    const curva = PARAMETROS_INICIALES.curva;
+    const margen = PARAMETROS_INICIALES.margen;
+    const costos = PARAMETROS_INICIALES.costos;
+    const tope = PARAMETROS_INICIALES.topeIndicador;
+    const casos = [];
+
+    function cerca(obtenido, esperado) {
+      return Math.abs(obtenido - esperado) < 0.000001;
+    }
+
+    function probar(nombre, obtenido, esperado) {
+      const bien = typeof obtenido === "string" || typeof esperado === "string"
+        ? obtenido === esperado
+        : cerca(obtenido, esperado);
+      casos.push({ nombre, bien, obtenido, esperado });
+    }
+
+    probar("40.000 pesos", numeroPesos("40.000"), 40000);
+    probar("500.000 pesos", numeroPesos("500.000"), 500000);
+    probar("15.500.000 pesos", numeroPesos("15.500.000"), 15500000);
+    probar("92.699.873 pesos", numeroPesos("92.699.873"), 92699873);
+
+    probar("79,99 → 0", factorCurva(79.99, curva), 0);
+    probar("80 → 0,70", factorCurva(80, curva), 0.7);
+    probar("85 → 0,80", factorCurva(85, curva), 0.8);
+    probar("90 → 0,90", factorCurva(90, curva), 0.9);
+    probar("91,83 → 0,9183", factorCurva(91.83, curva), 0.9183);
+    probar("100 → 1", factorCurva(100, curva), 1);
+    probar("130 → 1,20", factorCurva(130, curva), 1.2);
+
+    probar("margen 9 % → 0", factorMargen(0.09, margen), margen.factorBajo);
+    probar("margen 10 % → 90 %", factorMargen(0.1, margen), margen.factorMedio);
+    probar("margen 20 % exacto → 90 %", factorMargen(0.2, margen), margen.factorMedio);
+    probar("margen 21 % → 100 %", factorMargen(0.21, margen), margen.factorAlto);
+
+    const margenCalculado = calcularMargen(1000000, 700000, costos);
+    probar("margen usa ICA y GMF de parámetros", factorMargen(margenCalculado, margen), margen.factorAlto);
+
+    const pesoBase = PARAMETROS_INICIALES.pesos.baseSocial;
+    probar("base social 99 % con regla 100 → 0", puntosIndicador(pesoBase, 0.99, tope, true), 0);
+    probar("base social 100 % con regla 100 → peso", puntosIndicador(pesoBase, 1, tope, true), pesoBase);
+    probar("base social 110 % con regla 100 → peso × 1,1", puntosIndicador(pesoBase, 1.1, tope, true), pesoBase * 1.1);
+    probar("base social 150 % se detiene en el tope", puntosIndicador(pesoBase, 1.5, tope, true), pesoBase * tope);
+    probar("director 50 % sin regla 100 → la mitad", puntosIndicador(pesoBase, 0.5, tope, false), pesoBase * 0.5);
+
+    const puntos = [
+      puntosIndicador(PARAMETROS_INICIALES.pesos.ventas, 0.8, tope, false),
+      puntosIndicador(pesoBase, 0.5, tope, true),
+      puntosIndicador(PARAMETROS_INICIALES.pesos.satisfaccion, 1, tope, true),
+    ];
+    probar("score suma los puntos", score(puntos), 36 + 0 + 15);
+
+    const oportunidad = PARAMETROS_INICIALES.director.oportunidad;
+    const factor80 = factorCurva(80, curva);
+    probar("pago = oportunidad × factor", pagoVariable(oportunidad, factor80), oportunidad * 0.7);
+
+    const comercialPrueba = {
+      nombre: "Prueba",
+      nombreFacturacion: "Prueba",
+      basico: 1000,
+      oportunidad: 1000,
+      baseSocialInicial: 10,
+      cartones: 0,
+      activoDesde: "2026-10",
+      metas: { "2026-10": { eduAt: 100, mision: 0, congreso: 0 } },
+      ingresos: 0,
+      retiros: 0,
+      tieneEsquemaAnterior: true,
+      documento: "",
+      cargo: "",
+      diasTrabajados: null,
+      diasMes: null,
+      satisfaccion: null,
+      serfiscal: null,
+      ofertasAprobadas: null,
+      primerasVentas: null,
+      innovacionAcumuladaTrimestre: 0,
+      btlPagadoAnio: 0,
+      anteriorMes: { "2026-10": { meta: 200, produccionManual: null } },
+    };
+    const fechaPrueba = new Date(Date.UTC(2026, 9, 15));
+    const filaPrueba = (factura, base, comision, grupo, evento) => ({
+      elegida: true,
+      asesor: "Prueba",
+      grupo,
+      cuenta: grupo === "BTL" ? "1" : "41600511",
+      base,
+      comision,
+      factura,
+      fecha: fechaPrueba,
+      fechaPago: fechaPrueba,
+      estado: "CANCELADA",
+      evento,
+    });
+    const fichaPrueba = liquidarComercial(
+      comercialPrueba,
+      [
+        filaPrueba("F1", 100, 0.1, "EduAT", "1"),
+        filaPrueba("F2", 50, 0.2, "EduAT", "2"),
+        filaPrueba("B1", 80, 0.05, "BTL", "9"),
+        { elegida: false, hoja: "BTL", asesor: "Prueba", grupo: "BTL", cuenta: "9", base: 80, comision: 0.05, factura: "BX", fecha: fechaPrueba, fechaPago: fechaPrueba, estado: "CANCELADA" },
+      ],
+      "2026-10",
+      {
+        ...PARAMETROS_INICIALES,
+        anterior: { ...PARAMETROS_INICIALES.anterior, tasaBtl: 0.05 },
+        btl: { eventos: [{ evento: "9", comercial: "Prueba", ingresoEjecucion: 80 }] },
+      },
+      new Map([["1", 0.25], ["2", 0.25]]),
+      new Map(),
+      [
+        { evento: "1", ingreso: 1000, costo: 400, producto: "Curso", detalle: "PROGRAMA IA HUMAN AL-FIRST", delMes: true },
+        { evento: "2", ingreso: 500, costo: 100, producto: "Taller", delMes: true },
+      ]
+    );
+    const sumaReconocida = fichaPrueba.detalleFacturas.reduce((suma, fila) => suma + fila.ventaReconocida, 0);
+    probar("margen comprobado", fichaPrueba.eduAt.margenComprobado, 0.25);
+    probar("factor de reconocimiento", fichaPrueba.eduAt.factorReconocimiento, 1);
+    probar("venta reconocida suma Edu/AT", sumaReconocida, fichaPrueba.ventas.eduAt);
+    probar("comisión anterior sale de los tramos", fichaPrueba.pagoAnterior, fichaPrueba.anteriorTramos.comision);
+    probar("la hoja elegida entra completa en la producción", fichaPrueba.anteriorTramos.produccion, 230);
+    probar("BTL anterior queda aparte", fichaPrueba.btlAnterior, 4);
+    probar("el margen usa el detalle del evento", fichaPrueba.margenesEventos.find((item) => item.numero === "1").evento, "PROGRAMA IA HUMAN AL-FIRST");
+
+    const separadas = liquidarComercial(comercialPrueba, [
+      { elegida: true, hoja: "Facturacion", asesor: "Prueba", grupo: "Mision", cuenta: "41703001", base: 1000000, comision: 0.02, factura: "M1", fecha: fechaPrueba, fechaPago: fechaPrueba, estado: "CANCELADA" },
+      { elegida: false, hoja: "Mision", asesor: "Prueba", grupo: "Mision", cuenta: "41703001", base: 15500000, comision: 0, factura: "M1", fecha: fechaPrueba, fechaPago: fechaPrueba, estado: "CANCELADA" },
+      { elegida: true, hoja: "Facturacion", asesor: "Prueba", grupo: "BTL", cuenta: "27209001", base: 1000000, comision: 0.0063, factura: "B9", fecha: fechaPrueba, fechaPago: fechaPrueba, estado: "CANCELADA" },
+      { elegida: false, hoja: "BTL", asesor: "Prueba", grupo: "BTL", cuenta: "41600999", base: 50000000, comision: 0, factura: "B9", fecha: fechaPrueba, fechaPago: fechaPrueba, estado: "CANCELADA" },
+    ], "2026-10", PARAMETROS_INICIALES, new Map(), new Map(), []);
+    const delUso = (uso, factura) => separadas.detalleFacturas.filter((fila) => fila.uso === uso && fila.factura === factura);
+    probar("misión una vez en su grupo", delUso("Misión · valor fijo por factura", "M1").length, 1);
+    probar("misión reconocida por factura", delUso("Misión · valor fijo por factura", "M1")[0].ventaReconocida, 15500000);
+    probar("btl una vez en su grupo", delUso("BTL · se liquida en 5.11.5", "B9").length, 1);
+    probar("btl recaudado aparte", delUso("BTL · se liquida en 5.11.5", "B9")[0].recaudo, 50000000);
+    probar("el total no suma el btl", separadas.totalesFacturas.recaudo, 15500000);
+    probar("la hoja queda en la fila", delUso("Misión · valor fijo por factura", "M1")[0].origen, "Mision");
+    probar("misión de facturación va aparte", delUso("Misión · esquema anterior", "M1").length, 1);
+    probar("btl de facturación es referencia", delUso("BTL · referencia (hoja Facturación)", "B9").length, 1);
+    probar("la base sin btl deja fuera la referencia", separadas.totalesFacturas.base, 16500000);
+
+    const reglasAnterior = PARAMETROS_INICIALES.anterior;
+    const tasasEsperadas = [
+      [0.6999, 0],
+      [0.70, 0.05],
+      [0.80, 0.05],
+      [0.805, 0.07],
+      [0.90, 0.07],
+      [1, 0.09],
+      [1.0013, 0.10],
+      [1.10, 0.10],
+      [1.11, 0.11],
+    ];
+    tasasEsperadas.forEach(([cumplimiento, tasa]) => {
+      probar(`tramo ${cumplimiento} → ${tasa}`, tasaPorTramo(cumplimiento, reglasAnterior), tasa);
+    });
+    probar("leerTasa null", leerTasa(null), null);
+    probar("leerTasa vacío", leerTasa(""), null);
+    probar("leerTasa 10", leerTasa(10), 0.10);
+    probar("leerTasa 0,1", leerTasa("0,1"), 0.1);
+
+    const fechaOctubre = new Date(Date.UTC(2026, 9, 15));
+    const fechaOtroMes = new Date(Date.UTC(2026, 8, 15));
+    const filaMes = (factura, base, extra) => ({
+      elegida: true,
+      hoja: "Facturacion",
+      asesor: "Hernando Rozo",
+      grupo: "Educación",
+      cuenta: "41600511",
+      base,
+      factura,
+      fecha: fechaOctubre,
+      ...extra,
+    });
+    const muestraProduccion = [
+      filaMes("A", 100, { cuenta: "27209001" }),
+      filaMes("B", 40, {}),
+      filaMes("C", 10, { elegida: false, hoja: "Misión Int." }),
+      filaMes("D", 10, { asesor: "" }),
+      filaMes("E", 10, { fecha: null }),
+      filaMes("F", 10, { fecha: fechaOtroMes }),
+      filaMes("G", 5, { asesor: "Otra Persona" }),
+    ];
+    const comercialHernando = {
+      ...comercialPrueba,
+      nombre: "Hernando Rozo",
+      nombreFacturacion: "Hernando Rozo",
+      anteriorMes: { "2026-10": { meta: 100, produccionManual: null } },
+    };
+    const produccionHernando = produccionAnterior(muestraProduccion, comercialHernando, "2026-10");
+    probar("producción anterior incluye el anticipo 27209", produccionHernando.produccion, 140);
+    probar("producción anterior deja fuera la hoja complementaria", produccionHernando.lineas.some((fila) => fila.factura === "C"), false);
+    probar("producción anterior deja fuera la fila sin fecha", produccionHernando.lineas.some((fila) => fila.factura === "E"), false);
+    probar("producción anterior deja fuera otro mes", produccionHernando.lineas.some((fila) => fila.factura === "F"), false);
+
+    const totalMes = produccionTotalMes([
+      filaMes("H", 252848440 - 3910000 - 1000, {}),
+      filaMes("I", 3910000, { asesor: "Dirección Comercial" }),
+      filaMes("J", 1000, { cuenta: "27209001" }),
+      filaMes("K", 500000, { elegida: false, hoja: "BTL" }),
+      filaMes("L", 800, { asesor: "" }),
+      filaMes("M", 800, { fecha: null }),
+    ], "2026-10");
+    probar("total del mes incluye dirección y anticipo", totalMes.base, 252848440);
+    probar("total del mes deja fuera la hoja BTL", totalMes.lineas.some((fila) => fila.factura === "K"), false);
+    probar("total del mes deja fuera el total sin asesor", totalMes.lineas.some((fila) => fila.factura === "L"), false);
+
+    const comisionDirector = comisionAnteriorDirector(252848440, 0.015);
+    probar("comisión director exacta", comisionDirector, 3792726.6);
+    probar("comisión director al peso", Math.round(comisionDirector), 3792727);
+    probar("comisión director sin base", comisionAnteriorDirector(null, 0.015), null);
+    probar("la nueva del director sigue siendo mayor", 7208412 > comisionDirector, true);
+
+    const octubre = [
+      ["Carolina Gómez", 42000000, 37713000, 2639910],
+      ["Consuelo Castro", 25000000, 17510000, 875500],
+      ["Hernando Rozo", 49000000, 49062240, 4906224],
+      ["Leidy Lizcano", 23000000, 23841000, 2384100],
+      ["Lynette Arango", 41000000, 38465300, 3461877],
+      ["Oriette Henríquez", 30000000, 33897810, 3728759.1],
+      ["Tatiana Acuña", 39000000, 48449090, 5329399.9],
+    ];
+    let sumaComisiones = 0;
+    octubre.forEach(([nombre, meta, produccion, comision]) => {
+      const calculo = comisionAnteriorTramos(meta, produccion, reglasAnterior);
+      sumaComisiones += calculo.comision;
+      probar(`comisión octubre ${nombre}`, calculo.comision, comision);
+    });
+    probar("total de comisiones de octubre", sumaComisiones, 23325770);
+
+    const sinMeta = liquidarComercial(
+      { ...comercialHernando, anteriorMes: { "2026-10": { meta: null, produccionManual: null } } },
+      [filaMes("A", 100, {})],
+      "2026-10",
+      PARAMETROS_INICIALES,
+      new Map(),
+      new Map(),
+      []
+    );
+    probar("sin meta la comisión queda pendiente", sinMeta.pagoAnterior, null);
+    probar("sin meta avisa", sinMeta.avisos.includes("Falta la meta mensual de la política anterior"), true);
+
+    const manual = liquidarComercial(
+      { ...comercialHernando, anteriorMes: { "2026-10": { meta: 100, produccionManual: 50 } } },
+      [filaMes("A", 100, { comision: null })],
+      "2026-10",
+      PARAMETROS_INICIALES,
+      new Map(),
+      new Map(),
+      []
+    );
+    probar("producción manual reemplaza el archivo", manual.anteriorTramos.produccion, 50);
+    probar("producción manual queda marcada", manual.anteriorTramos.manual, true);
+    probar("producción manual guarda la diferencia", manual.anteriorTramos.produccion - manual.anteriorTramos.produccionArchivo, -50);
+    probar("sin columna de comisión avisa", manual.avisos.includes("El archivo no trae % de comisión"), true);
+    probar("BTL anterior comercial 410.580.000 × 3,8 %", comisionBtlAnterior(410580000, 0.038), 15602040);
+    probar("BTL anterior director 410.580.000 × 0,63 %", comisionBtlAnterior(410580000, 0.0063), 2586654);
+    probar("BTL anterior sin ingreso queda pendiente", comisionBtlAnterior(null, 0.038), null);
+    probar("100,13 % con dos decimales", porcentaje(1.0013, 2), "100,13 %");
+    probar("10,00 % con dos decimales", porcentaje(0.1, 2), "10,00 %");
+    probar("1,50 % con dos decimales", porcentaje(0.015, 2), "1,50 %");
+    probar("0,63 % con dos decimales", porcentaje(0.0063, 2), "0,63 %");
+    probar("copiar fórmula baja tres filas", copiarFormula("E2*I2+$B$3", 3), "E5*I5+$B$3");
+    probar("borrar una fila achica el rango y marca #REF!", ajustarFormula("A11+B12", "Escenarios", { tipo: "eliminar", hoja: "Escenarios", desde: 11, k: 1 }), "#REF!+B11");
+    probar("fecha de serie 16 oct 2026", fechaASerie("2026-10-16"), 46311);
+    const plantilla = await fetch("../plantillas/plantilla_liquidacion_individual.xlsx").then((respuesta) => respuesta.arrayBuffer());
+    const libro = await abrirPlantilla(plantilla, window.JSZip);
+    escribirCelda(libro, "Liquidación", "C3", "Persona de prueba");
+    probar("el libro generado se relee", leerCelda(libro, "Liquidación", "C3"), "Persona de prueba");
+    const bytes = await guardar(libro);
+    probar("el libro generado pesa", bytes.length > 1000, true);
+
+    const lista = document.querySelector("#lista");
+    casos.forEach((caso) => {
+      const item = document.createElement("li");
+      item.textContent = `${caso.bien ? "Bien" : "Mal"} · ${caso.nombre} · obtuvo ${caso.obtenido}`;
+      item.style.color = caso.bien ? "#0b6b2d" : "#9b1c1c";
+      lista.appendChild(item);
+    });
+
+    const fallas = casos.filter((caso) => !caso.bien).length;
+    const resumen = document.querySelector("#resumen");
+    resumen.textContent = fallas === 0
+      ? `${casos.length} pruebas pasaron.`
+      : `${fallas} pruebas fallaron de ${casos.length}.`;
+  </script>
+</body>
+</html>

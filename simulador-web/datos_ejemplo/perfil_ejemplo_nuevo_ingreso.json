@@ -1,0 +1,48 @@
+{
+  "formato": "analfe-simulador-perfil",
+  "version": 1,
+  "tipo": "nuevo-ingreso",
+  "variante": "dic2026-jun2027",
+  "generado": "2026-11-24",
+  "politica": "PCV-COM-001",
+  "persona": {
+    "id": "ni-ejemplo",
+    "nombreVisible": "Comercial Nuevo Ejemplo",
+    "cargo": "Ejecutivo Comercial Junior",
+    "regional": "Regional Centro"
+  },
+  "compensacion": {
+    "basico": 3000000,
+    "oportunidad": 2000000,
+    "topeIndividual": 1.2,
+    "imr": 5000000
+  },
+  "periodos": [
+    {
+      "mes": "2026-12",
+      "diasMes": 31,
+      "diasLaborados": 15,
+      "metas": {
+        "educacion": 20000000,
+        "mision": 0,
+        "congreso": 0,
+        "pasantia": 5000000,
+        "cultural": 8000000,
+        "patrocinios": 3000000
+      }
+    }
+  ],
+  "baseSocial": {
+    "fechaCorte": "2026-09-30",
+    "inicial": 10,
+    "ingresos": 0,
+    "retiros": 0,
+    "tieneBase": true,
+    "certificada": false
+  },
+  "cartones": 100,
+  "btl": { "pagadoEnAnio": 0 },
+  "anterior": {},
+  "parametrosPropios": {},
+  "control": { "sha256": "ejemplo-sin-huella" }
+}

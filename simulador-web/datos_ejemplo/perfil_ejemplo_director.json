@@ -1,0 +1,30 @@
+{
+  "formato": "analfe-simulador-perfil",
+  "version": 1,
+  "tipo": "director",
+  "variante": "trimestre-oct-dic-2026",
+  "generado": "2026-11-24",
+  "politica": "PCV-COM-001",
+  "persona": {
+    "id": "dir-ejemplo",
+    "nombreVisible": "Director Ejemplo",
+    "cargo": "Director Comercial",
+    "regional": "Nacional"
+  },
+  "compensacion": {
+    "basico": 8000000,
+    "oportunidad": 4000000,
+    "topeIndividual": 1.2
+  },
+  "equipo": {
+    "puntosIndividuales": [
+      { "alias": "Comercial 1", "puntaje": 95, "metaVentas": 40000000 },
+      { "alias": "Comercial 2", "puntaje": 88, "metaVentas": 35000000 },
+      { "alias": "Comercial 3", "puntaje": 102, "metaVentas": 50000000 }
+    ]
+  },
+  "btl": { "pagadoEnAnio": 0 },
+  "anterior": {},
+  "parametrosPropios": {},
+  "control": { "sha256": "ejemplo-sin-huella" }
+}

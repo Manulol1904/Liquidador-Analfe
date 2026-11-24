@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liquidador de compensación variable · ANALFE</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/estilos.css?v=20261123h">
+  <script>
+    (function () {
+      var densidad = localStorage.getItem("analfe-densidad");
+      if (densidad !== "comodo" && densidad !== "compacto") {
+        densidad = window.innerHeight <= 900 ? "compacto" : "comodo";
+      }
+      document.documentElement.dataset.densidad = densidad;
+      var riel = localStorage.getItem("analfe-riel");
+      if (riel !== "colapsado" && riel !== "expandido") {
+        riel = window.innerWidth >= 1440 ? "expandido" : "colapsado";
+      }
+      document.documentElement.dataset.riel = riel;
+    })();
+  </script>
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <div class="app">
+    <header class="barra-app">
+      <span class="barra-app__logo" aria-hidden="true">A</span>
+      <div class="barra-app__titulos">
+        <h1>Liquidador de compensación variable</h1>
+        <p>PCV-COM-001</p>
+      </div>
+      <div class="barra-app__espacio"></div>
+      <label class="selector-mes">Mes
+        <select class="campo-editable" id="mes-carga" aria-label="Mes de liquidación">
+          <option value="2026-10" selected>Octubre 2026</option>
+          <option value="2026-11">Noviembre 2026</option>
+          <option value="2026-12">Diciembre 2026</option>
+        </select>
+      </label>
+      <p class="chip-simulacion">⚠ Simulación. No es un pago oficial</p>
+      <p id="aviso-cambios" class="badge badge--aviso" hidden>Cambios sin guardar</p>
+      <button type="button" class="boton boton-densidad" id="btn-densidad">Compacto</button>
+    </header>
+
+    <nav class="riel" aria-label="Pasos">
+      <a class="riel__paso" id="paso-cargar" href="#cargar" data-panel="cargar"><span class="riel__circulo">1</span><span class="riel__corto">Cargar</span><span class="riel__largo">Cargar datos</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-parametros" href="#parametros" data-panel="parametros"><span class="riel__circulo">2</span><span class="riel__corto">Parám.</span><span class="riel__largo">Parámetros</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-equipo" href="#equipo" data-panel="equipo"><span class="riel__circulo">3</span><span class="riel__corto">Equipo</span><span class="riel__largo">Equipo</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-detalle" href="#ficha" data-panel="detalle"><span class="riel__circulo">4</span><span class="riel__corto">Ficha</span><span class="riel__largo">Ficha por comercial</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-btl" href="#btl" data-panel="btl"><span class="riel__circulo">5</span><span class="riel__corto">BTL</span><span class="riel__largo">BTL</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-director" href="#director" data-panel="director"><span class="riel__circulo">6</span><span class="riel__corto">Director</span><span class="riel__largo">Director</span><span class="riel__punto" hidden></span></a>
+      <a class="riel__paso" id="paso-exportar" href="#exportar" data-panel="exportar"><span class="riel__circulo">7</span><span class="riel__corto">Exportar</span><span class="riel__largo">Exportar</span><span class="riel__punto" hidden></span></a>
+      <button type="button" class="riel__plegar" id="plegar-riel" aria-label="Contraer el menú">«</button>
+    </nav>
+
+    <main id="contenido" tabindex="-1">
+      <section id="panel-cargar" class="panel activo"></section>
+      <section id="panel-parametros" class="panel" hidden></section>
+      <section id="panel-equipo" class="panel" hidden></section>
+      <section id="panel-detalle" class="panel" hidden></section>
+      <section id="panel-btl" class="panel" hidden></section>
+      <section id="panel-director" class="panel" hidden></section>
+      <section id="panel-exportar" class="panel" hidden></section>
+    </main>
+  </div>
+  <div class="avisos-breves" role="status" aria-live="polite"></div>
+  <p class="marca-cada-pagina">Simulación. No es un pago oficial</p>
+
+  <script src="lib/xlsx.full.min.js"></script>
+  <script src="lib/jszip.min.js"></script>
+  <script type="module" src="js/main.js?v=20261123h"></script>
+</body>
+</html>

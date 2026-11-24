@@ -1,0 +1,15 @@
+{
+  "name": "simulador-web-analfe",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulador web de compensación variable ANALFE (PCV-COM-001). Simulación. No es un pago oficial.",
+  "scripts": {
+    "test": "node herramientas/verificar_todo.mjs",
+    "test:unit": "node --test pruebas/*.test.mjs",
+    "empaquetar": "node herramientas/empaquetar.mjs",
+    "revision": "node herramientas/empaquetar.mjs --revision",
+    "mapeo": "node herramientas/_extraer_mapeo.mjs",
+    "perfiles": "node herramientas/generar_perfiles.mjs --entrada datos_ejemplo/encabezados_ejemplo.json"
+  }
+}

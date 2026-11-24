@@ -1,0 +1,560 @@
+{
+ "nota": "Textos de la plantilla que llevan cifras, fechas o nombres. La app los arma con los parámetros del mes. Marcadores genéricos: {persona} {cliente} {valor_pesos} {porcentaje} {numero}. Sin datos reales.",
+ "textos": [
+  {
+   "hoja": "Liquidación",
+   "ref": "A1",
+   "texto_con_marcadores": "ANALFE  –  Liquidación de Compensación Variable  –  Octubre {numero}"
+  },
+  {
+   "hoja": "Liquidación",
+   "ref": "C3",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Liquidación",
+   "ref": "C4",
+   "texto_con_marcadores": "{numero}"
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A1",
+   "texto_con_marcadores": "ANALFE  –  Explicación de la liquidación  –  Octubre {numero}  ·  v6.7"
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A2",
+   "texto_con_marcadores": "Política PCV-COM-001 (25 de septiembre de {numero})  ·  Circular al equipo comercial (19 de octubre de {numero})"
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A5",
+   "texto_con_marcadores": "Este archivo es una simulación de la liquidación de compensación variable de octubre de {numero}, bajo la política nueva PCV-COM-001, comparada con el esquema anterior. Lo elabora el área como un MVP para revisar cifras, supuestos y reglas con la Dirección. No constituye una liquidación oficial de pago: ninguna cifra de este archivo autoriza, por sí sola, un desembolso. Los parámetros son editables en la hoja Escenarios."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A6",
+   "texto_con_marcadores": "El ejercicio cubre a los siete comerciales activos ({persona}, {persona}, {persona}, {persona}, {persona}, {persona} Henríquez y {persona}). {persona} Pérez aparece como retirado y no liquida. Del Director Comercial y de Marketing se espera su básico y su oportunidad para completar el BTL de su línea."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A23",
+   "texto_con_marcadores": "Congreso Nacional y Actividad cultural no tienen meta en octubre (el Congreso se fasea en mayo–julio, núm. 5.11.2; la actividad cultural está asignada a diciembre, núm. 5.11.4). Por eso en octubre aparecen en cero: meta, venta, peso y cumplimiento, y no mueven el puntaje de este mes. Para diciembre ya quedó cargada la meta individual de la actividad cultural: la cuota de cartones de cada comercial multiplicada por {valor_pesos} (valor por cartón editable en Escenarios). {persona}, {persona}, {persona} y {persona} tienen 860 cartones ({valor_pesos}); {persona}, {persona} y {persona}, 425 cartones ({valor_pesos}). {persona} (860) y Dirección Comercial (425) aparecen en esa tabla solo como referencia; no liquidan en este archivo de octubre. También quedaron cargadas las metas oficiales de educación y asistencia técnica de noviembre y diciembre; tampoco entran al cálculo de octubre."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A26",
+   "texto_con_marcadores": "La política (numeral 5.11.3) reparte la meta anual {porcentaje} en agosto, {porcentaje} en septiembre y {porcentaje} en octubre. La meta anual del equipo es {valor_pesos} Por instrucción de jefatura, la meta de cada comercial en octubre es {valor_pesos} y cada factura elegible se toma por su valor completo de {valor_pesos} (no por el {valor_pesos} del esquema anterior). Ambos parámetros se pueden ajustar en Escenarios."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A27",
+   "texto_con_marcadores": "La venta reconocida de Misión es el número de facturas elegibles (canceladas, con fecha de pago en octubre) multiplicado por {valor_pesos} En octubre, las facturas elegibles son: {persona} 3, {persona} 1, {persona} 1, {persona} 1 y {persona} 1; {persona} y {persona} no tienen facturas elegibles. Las facturas no canceladas o pagadas fuera de octubre no entran a la venta reconocida. El cumplimiento es la venta reconocida dividida por {valor_pesos}"
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A31",
+   "texto_con_marcadores": "En el esquema anterior, cada factura de Misión se reconocía a {valor_pesos} con independencia de su valor real. En la columna de política anterior hay un bloque propio, análogo al de BTL, con tres datos: Valor {valor_pesos} Facturas (el mismo número de facturas elegibles) y Valor total = Valor × Facturas. Ese valor total no alimenta los 45 puntos de la política nueva."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A57",
+   "texto_con_marcadores": "El ingreso del evento que se muestra es la ejecución completa, {valor_pesos} y no el recaudo parcial de octubre ({valor_pesos}). Esa es la cifra que pidió usar la jefatura, tomada del informe de ejecución del evento {cliente}, y es también la base de la comisión del esquema anterior."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A58",
+   "texto_con_marcadores": "La comisión del esquema anterior es {valor_pesos} equivalente al {porcentaje} de {valor_pesos} Se muestra en el bloque de política anterior y en el comparativo. No se suma automáticamente a la comisión ordinaria de ventas del esquema anterior (en el caso de {persona}, {valor_pesos}) que alimenta la transición «más favorable»: esa transición sigue comparando solo la comisión ordinaria. Si se quiere incluir el BTL anterior en esa comparación, hay un control en Escenarios para hacerlo."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A59",
+   "texto_con_marcadores": "La comisión de la política nueva, calculada con la metodología de ANALFE (ingreso menos costo, menos ICA y GMF, sin comisiones), queda en {valor_pesos} que es el tope de 0,8 veces el ingreso mensual de referencia de {persona}. La utilidad real es {valor_pesos} y la presupuestada {valor_pesos} (cumplimiento {porcentaje}, margen {porcentaje}, liquidador {porcentaje}). Del tope anual se descuenta lo ya pagado por la Fiesta FEBOR ({valor_pesos}). Siguen pendientes la constancia formal de participación material, el cierre financiero certificado y la satisfacción del cliente. El supuesto de esta simulación es que {persona} participó, porque es el comercial asignado al evento."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A67",
+   "texto_con_marcadores": "Siguen abiertos, y están marcados como tales: las rúbricas y evidencias de SERFISCAL, innovación y satisfacción; la constancia formal de participación material en el BTL, el cierre financiero certificado y la satisfacción del cliente del evento; el básico y la oportunidad del Director Comercial, para completar su línea de BTL; y la confirmación, si la jefatura la quiere revisar, de la meta individual de Misión ({valor_pesos} para cada comercial) frente a la meta de equipo. También queda por confirmar si la meta cultural de equipo de {valor_pesos} debe igualarse a la suma de las cuotas individuales (cartones × {valor_pesos} = {valor_pesos} con {numero} cartones)."
+  },
+  {
+   "hoja": "Explicación",
+   "ref": "A69",
+   "texto_con_marcadores": "Simulación. No es un pago oficial.  ·  12 de noviembre de {numero}."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A1",
+   "texto_con_marcadores": "ANALFE  –  Parámetros de liquidación  –  Octubre {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "B51",
+   "texto_con_marcadores": "{numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C57",
+   "texto_con_marcadores": "Meta anual de Misión internacional según el Anexo 2 ({valor_pesos}). La meta individual de cada comercial en octubre es el parámetro Meta_Mision_individual ({valor_pesos}), por instrucción de jefatura; no es el {porcentaje} anual prorrateado entre el equipo."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D57",
+   "texto_con_marcadores": "Anexo 2; instrucción de jefatura, octubre {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C58",
+   "texto_con_marcadores": "{porcentaje} de la meta anual (núm. 5.11.3: {porcentaje} agosto, {porcentaje} septiembre, {porcentaje} octubre). Es la cifra de referencia del equipo. La meta que entra al cumplimiento de cada comercial es Meta_Mision_individual ({valor_pesos})."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C62",
+   "texto_con_marcadores": "Valor reconocido por cada factura de Misión internacional elegible (cancelada con pago en el mes). Instrucción de jefatura para la política nueva: {valor_pesos} (el valor real de las facturas elegibles de octubre coincide con esta cifra). Editable."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D62",
+   "texto_con_marcadores": "Instrucción de jefatura, octubre {numero}; núm. 5.11.3"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C83",
+   "texto_con_marcadores": "Utilidad base esperada del presupuesto aprobado, metodología ANALFE (ingreso − costo − ICA {porcentaje} − GMF 4/{numero} del costo, sin comisiones)."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C86",
+   "texto_con_marcadores": "Supuesto de simulación: SI, porque {persona} es el comercial asignado al evento 575. Falta la constancia formal de participación material (núm. 5.11.5). Editable."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D97",
+   "texto_con_marcadores": "Facturación {porcentaje} · FEC {numero}, {numero}, {numero} y {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D99",
+   "texto_con_marcadores": "Fiesta {cliente} / {cliente}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A111",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C115",
+   "texto_con_marcadores": "La meta individual de octubre es {valor_pesos} para cada comercial (instrucción de jefatura). Está cargada en el override de cuota, que tiene prioridad sobre el criterio proporcional a META 5. Si se borra el override, vuelve el criterio de esta fila."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D115",
+   "texto_con_marcadores": "Instrucción de jefatura, octubre {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C116",
+   "texto_con_marcadores": "Número de comerciales activos que liquidan en octubre (excluye a {persona}, retirado, y a Dirección)."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A122",
+   "texto_con_marcadores": "{persona} Gomez"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A123",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A124",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A125",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A126",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A127",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A128",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A130",
+   "texto_con_marcadores": "v6.3: la venta de Misión de la política nueva se reconoce a {valor_pesos} por factura elegible (Base_Mision_factura) y la meta de cada comercial en octubre es {valor_pesos} (Meta_Mision_individual). Las facturas elegibles de octubre tienen exactamente ese valor de {valor_pesos}; las no canceladas o pagadas fuera de octubre no entran. Los pesos del núm. 5.4 son meta del producto ÷ suma de metas del mes con meta mayor que cero (Congreso y Cultural quedan en cero en octubre). En la política anterior, Misión se cuenta a {valor_pesos} por factura."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A132",
+   "texto_con_marcadores": "Parámetros de liquidación BTL {cliente} (núm. 5.11.5)"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C133",
+   "texto_con_marcadores": "Presupuesto {numero} del archivo {cliente} (F10), 900 asistentes. Editable."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D133",
+   "texto_con_marcadores": "Archivo {cliente} {numero}, F10"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C134",
+   "texto_con_marcadores": "Total costos presupuestados del archivo {cliente} (F41 = costos fijos + variables), sin comisiones."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D134",
+   "texto_con_marcadores": "Archivo {cliente} {numero}, F41"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C135",
+   "texto_con_marcadores": "Comisión directa de la Fiesta FEBOR, nómina del 15 de octubre de {numero}. Se descuenta del tope anual 2 × IMR del comercial que liquida el evento. Editable si el acumulado es otro."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D135",
+   "texto_con_marcadores": "Nómina 15-oct-{numero}, Fiesta FEBOR"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A136",
+   "texto_con_marcadores": "La utilidad presupuestada (B83) se calcula con la metodología ANALFE: ingreso presupuestado − costo presupuestado − ICA (ingreso × Tasa_ICA) − GMF (costo × Tasa_GMF), sin restar comisiones. La utilidad real (B84) y el margen (B85) salen del evento 575 en _Margenes_especiales (costo del informe de eventos, {valor_pesos}). Los excedentes F54 ({valor_pesos}) y H54 ({valor_pesos}) del archivo {cliente} no se usan para liquidar: aplican GMF sobre el ingreso, ICA a 9,66/{numero} y un costo de ejecución {valor_pesos} mayor (la producción de H15 parece sumar dos veces FE51 de Pika)."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D139",
+   "texto_con_marcadores": "Instrucción de jefatura, octubre {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A142",
+   "texto_con_marcadores": "Ingreso de ejecución del evento BTL ({cliente})"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C142",
+   "texto_con_marcadores": "Ejecución de ingresos del archivo {cliente} {numero}, celda H10 ({valor_pesos}). Es el valor del evento que se muestra en 5.11.5 y en la política anterior, no el recaudo parcial de octubre ({valor_pesos} de FEC {numero} y FEC {numero}). Editable."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D142",
+   "texto_con_marcadores": "Archivo {cliente} {numero}, H10; Resumen Asesores, base BTL"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C143",
+   "texto_con_marcadores": "Tasa del esquema anterior sobre el ingreso de ejecución del evento. Fuente: hoja Resumen Asesores ({porcentaje} sobre {valor_pesos}). Editable."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C144",
+   "texto_con_marcadores": "Comisión BTL del esquema anterior: {porcentaje} sobre el ingreso de ejecución {valor_pesos} = {valor_pesos} Fuente: hoja Resumen Asesores del archivo de facturación ({persona}, BTL, Organización de evento). No se suma automáticamente a la comisión anterior de la Hoja 1 usada en la transición (esa sigue siendo la producción × tasa, sin BTL)."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A148",
+   "texto_con_marcadores": "{persona} Gomez"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A149",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A150",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A151",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A152",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A153",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A154",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D159",
+   "texto_con_marcadores": "Instrucción de jefatura, octubre {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C161",
+   "texto_con_marcadores": "Cuota total del equipo, incluidos {persona} y Dirección Comercial, que no liquidan en octubre. La meta del equipo en pesos es cartones × valor por cartón."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "D161",
+   "texto_con_marcadores": "Instrucción de jefatura, actividad cultural {numero}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "C162",
+   "texto_con_marcadores": "Resultado de la cuota de cartones del equipo por el valor por cartón. Se aplica en diciembre (cierre el 4 de diciembre). No entra al cálculo de octubre. El parámetro «Meta actividad cultural (diciembre)» de más arriba ({valor_pesos}) se conserva como referencia."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A166",
+   "texto_con_marcadores": "{persona} Gomez"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A167",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A168",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A169",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A170",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A171",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A172",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A177",
+   "texto_con_marcadores": "{persona} Gomez"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A178",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A179",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A180",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A181",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A182",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A183",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A184",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A186",
+   "texto_con_marcadores": "Las metas de educación y asistencia técnica de octubre coinciden con las que ya usa la liquidación de este mes. Noviembre y diciembre quedan cargadas para el futuro; no entran al cálculo de octubre. La meta cultural de cada comercial es su cuota de cartones por el valor por cartón y se aplica en diciembre (cierre el 4 de diciembre). {persona} y Dirección Comercial aparecen solo como referencia de esa campaña; no liquidan en este archivo de octubre. En octubre, Congreso y actividad cultural siguen en cero y no participan del promedio de ventas."
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A192",
+   "texto_con_marcadores": "{persona} Gomez"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A193",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A194",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A195",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A196",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A197",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Escenarios",
+   "ref": "A198",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Parámetros",
+   "ref": "B6",
+   "texto_con_marcadores": "RESUELTO: margen exactamente {porcentaje} = {porcentaje} (selector por defecto {porcentaje} (política)). PCV-COM-001 §5.4: \"Desde {porcentaje} a {porcentaje} = {porcentaje}\", \">{porcentaje} = {porcentaje}\" y \"reconocimiento pleno cuando su margen sea superior al {porcentaje}\". Circular 19-oct-{numero} punto 11: las matrices se armonizan con la política."
+  },
+  {
+   "hoja": "Parámetros",
+   "ref": "B7",
+   "texto_con_marcadores": "Bonificación BTL (núm. 5.11.5), evento 575 {cliente}: el ingreso del evento es la ejecución {valor_pesos} (H10 del archivo {cliente}), no el recaudo parcial de octubre ({valor_pesos}). Utilidad real {valor_pesos} y presupuestada {valor_pesos} con metodología ANALFE; cumplimiento {porcentaje}; margen {porcentaje}; liquidador {porcentaje}; comisión {valor_pesos} (tope 0,8 × IMR). Comisión del esquema anterior: {valor_pesos} ({porcentaje} × {valor_pesos} Resumen Asesores). Pendientes la certificación formal de participación, el cierre financiero y la satisfacción del cliente."
+  },
+  {
+   "hoja": "Parámetros",
+   "ref": "A9",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Parámetros",
+   "ref": "B9",
+   "texto_con_marcadores": "2da8b61f2e5b5e9638c1616d367f3066f52e6b8c4d70b499c3829003f3ba8924.docx — tablas1/4/5/6"
+  },
+  {
+   "hoja": "Parámetros",
+   "ref": "B11",
+   "texto_con_marcadores": "v6.7  ·  12 de noviembre de {numero}. Alineada con PCV-COM-001 (núm. 5.4 a 5.11) y con las instrucciones de jefatura de octubre: meta individual de Misión {valor_pesos} factura de Misión a {valor_pesos} base social con el corte al 30 de septiembre, tope del {porcentaje} por ítem, e ingreso BTL del archivo {cliente} ({valor_pesos}). Documento de simulación, no es liquidación oficial de pago."
+  },
+  {
+   "hoja": "Base social",
+   "ref": "B2",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Base social",
+   "ref": "A12",
+   "texto_con_marcadores": "Referencia histórica (corte al 31 de julio de {numero})"
+  },
+  {
+   "hoja": "Anterior detalle",
+   "ref": "B2",
+   "texto_con_marcadores": "{persona}"
+  },
+  {
+   "hoja": "Márgenes eventos",
+   "ref": "A1",
+   "texto_con_marcadores": "Márgenes de eventos  –  Octubre {numero}  ·  Eventos del comercial"
+  },
+  {
+   "hoja": "Márgenes eventos",
+   "ref": "A2",
+   "texto_con_marcadores": "Costo = COSTO del informe, sin prorrateo. ICA = ingreso × {porcentaje}. GMF = costo × 4/{numero}. Costo total = Costo + ICA + GMF. Margen bruto = (Ingreso − Costo total) / Ingreso. Bandas: menos de {porcentaje} = 0; de {porcentaje} a {porcentaje} = {porcentaje}; más de {porcentaje} = {porcentaje} (núm. 5.4)."
+  },
+  {
+   "hoja": "Facturas",
+   "ref": "A1",
+   "texto_con_marcadores": "Facturas  –  Octubre {numero}  ·  {persona}"
+  },
+  {
+   "hoja": "Facturas",
+   "ref": "A2",
+   "texto_con_marcadores": "Detalle de facturas del mes. Toda fila incluye cuenta y evento. Los anticipos (cuentas {numero}) no cruzan con un evento de octubre: se identifica la cuenta y el tipo de evento futuro. El recaudo de ventas es la suma de Recaudo × Factor aplicado de las filas elegibles. El BTL no suma a ventas."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "A2",
+   "texto_con_marcadores": "Octubre {numero}  ·  v6.7"
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B9",
+   "texto_con_marcadores": "El margen de educación y asistencia técnica sigue las bandas del núm. 5.4: menos de {porcentaje} = 0; de {porcentaje} a {porcentaje} = {porcentaje}; más de {porcentaje} = {porcentaje}. El costo directo es el COSTO del informe de eventos, sin prorrateo de asesorías, asambleas ni comisiones. El ICA es el ingreso × {porcentaje} y el GMF es el costo × 4/{numero}. El costo total es Costo + ICA + GMF. El margen bruto es (Ingreso − Costo total) / Ingreso. El factor aplicado a las facturas sale de ese margen bruto."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B10",
+   "texto_con_marcadores": "FEOC {numero} de {persona} se trata como seminario de educación (evento 574), no como Misión, según el informe de eventos y la confirmación de jefatura."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B11",
+   "texto_con_marcadores": "La bonificación BTL (núm. 5.11.5) del evento 575 ({cliente}) se liquida con la metodología ANALFE: utilidad = ingreso − costo del informe − ICA {porcentaje} − GMF 4/{numero} del costo, sin restar comisiones. Utilidad real {valor_pesos} y utilidad presupuestada {valor_pesos} (mismo método sobre F10 y F41). Cumplimiento {porcentaje}, margen {porcentaje}, porcentaje liquidador {porcentaje}, comisión {valor_pesos} (tope 0,8 × IMR; el tope anual disponible es {valor_pesos} tras descontar {valor_pesos} de la Fiesta FEBOR). La participación material del comercial se asumió en SI (es el asignado al evento); falta la constancia formal, el cierre financiero firmado y la satisfacción del cliente. La bonificación no entra a ventas ni al score, y no se suma a la comisión ordinaria."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B12",
+   "texto_con_marcadores": "El evento 567 (Misión internacional) queda fuera del detalle: ingreso {valor_pesos} y costo {valor_pesos} (margen negativo). El factor de margen no aplica (circular, punto 6). La sección 2.2 se mantiene."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B16",
+   "texto_con_marcadores": "Facturas no cruzadas con el informe de eventos de octubre: 8 documentos (en su mayoría anticipos de la cuenta {numero} o facturas no canceladas del cierre). No se les asignó costo de evento. No entran al recaudo cuando son anticipo o no están canceladas."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B17",
+   "texto_con_marcadores": "Los anticipos BTL de bolos de {persona} (cuenta {numero} «Ant. Eventos deportivos bolos»: FEC {numero} {valor_pesos} cancelada el 30 de octubre, FEC {numero} {valor_pesos} no cancelada y FEC {numero} {valor_pesos} no cancelada) no corresponden a un evento cerrado. No se liquidan en el núm. 5.11.5 de octubre; quedan pendientes hasta el cierre del evento."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B18",
+   "texto_con_marcadores": "v6.4 — Misión internacional, política nueva: la meta de cada comercial en octubre es {valor_pesos} (instrucción de jefatura, no el reparto de {valor_pesos} por META 5) y cada factura elegible se toma por {valor_pesos} (parámetro Base_Mision_factura). Las facturas elegibles de octubre tienen exactamente ese valor. Este cambio reasigna los pesos de 5.4 (la meta de Misión pasa a pesar cerca de la mitad del indicador) y modifica score y comisión de todo el equipo. Quien no tenga facturas de Misión en el mes queda con cumplimiento {porcentaje} en ese producto, lo que arrastra el puntaje de Ventas."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B19",
+   "texto_con_marcadores": "v6.4 — Misión internacional, política anterior: se muestra un bloque propio con Valor {valor_pesos} el número de facturas elegibles y el Valor total = Valor × Facturas, igual que se hizo con el BTL. Es la práctica del esquema anterior y no alimenta los 45 puntos de la política nueva."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B20",
+   "texto_con_marcadores": "v6.4 — BTL: el ingreso del evento es la ejecución {valor_pesos} del archivo {cliente} (H10), no los {valor_pesos} recaudados en octubre. La comisión del esquema anterior es {valor_pesos} ({porcentaje} × {valor_pesos}), tomada de la hoja Resumen Asesores del archivo de facturación. Esa comisión se muestra en el bloque de política anterior y no se suma sola a la comisión de la Hoja 1 usada en la transición (más favorable)."
+  },
+  {
+   "hoja": "Supuestos y pendientes",
+   "ref": "B22",
+   "texto_con_marcadores": "v6.5 — Metas de los próximos meses: quedaron cargadas las metas oficiales de educación y asistencia técnica de noviembre y diciembre, y la meta de actividad cultural de diciembre (cuota de cartones × {valor_pesos} por cartón, valor editable). Esas cifras no entran al cálculo de octubre. Congreso y actividad cultural siguen en cero en este mes."
+  },
+  {
+   "hoja": "Especiales auxiliar",
+   "ref": "A1",
+   "texto_con_marcadores": "Movimientos adicionales del auxiliar  –  Octubre {numero}"
+  }
+ ]
+}

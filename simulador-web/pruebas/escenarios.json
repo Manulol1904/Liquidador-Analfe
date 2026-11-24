@@ -1,0 +1,38 @@
+{
+  "nota": "Entradas por nombre definido para regenerar casos_excel.json con Excel/LibreOffice",
+  "escenarios": [
+    {
+      "id": "c00-semilla-octubre",
+      "variante": "comercial",
+      "comercial": "Comercial A",
+      "mes": "Octubre",
+      "entradas": {
+        "Inp_EAT_Oct": 41250000,
+        "Inp_Mis_Oct": 3,
+        "Inp_BS_Base": 90,
+        "Inp_BS_Ingresos": 0,
+        "Inp_BS_Retiros": 0,
+        "Inp_SER_Ventas": 12,
+        "Inp_SER_Meta": 10,
+        "Inp_Inn_Oferta1": "SÍ",
+        "Inp_Inn_Venta1": 5000000,
+        "Inp_Sat": 85,
+        "Inp_Anterior": 1500000,
+        "Inp_BTL_Ingreso": 100000000,
+        "Inp_BTL_Costo": 80000000,
+        "Inp_BTL_Presup": 15000000
+      },
+      "leer": [
+        "Score_vista",
+        "Factor_vista",
+        "Comision_vista",
+        "BTL_Estimado",
+        "Pts_V_vista",
+        "Pts_BS",
+        "Pts_SER",
+        "Pts_Inn",
+        "Pts_Sat"
+      ]
+    }
+  ]
+}
