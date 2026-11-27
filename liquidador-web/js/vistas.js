@@ -1114,9 +1114,9 @@ function seccionesDirector(liquidacion) {
   const s55 = `
     ${seccionDirector("5.5 Base social del equipo", `${pts(director.puntos.baseSocial)} de ${decimal(pesos.baseSocial, 0)} pts`, `
       ${tablaHtml(["Concepto", "Valor", "Cumplimiento", "Peso", "Puntos"], `
-        <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, regla ? "regla100" : "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
+        <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
         <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
-      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje(tope)}), ${notaRegla}.`)}
+      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje(tope)}) (sin regla del 100 %).`)}
       <p class="aviso">Pendiente con la jefa: la meta de base social del equipo queda en 622 o en 524. Hoy Parámetros dice ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
 
@@ -1186,7 +1186,7 @@ function pintarDirector(liquidacion) {
   const notaRegla = parametros.director.regla100 ? "con regla del 100 %" : "sin regla del 100 %";
   const formulaBase = director.puntos.baseCierre == null
     ? "Base social pendiente."
-    : `Cierre ${entero(director.puntos.baseCierre)} de ${entero(director.puntos.baseMeta)} = ${porcentaje(director.puntos.baseCumplimiento)} → ${decimal(director.puntos.baseSocial, 2)} puntos (${notaRegla})`;
+    : `Cierre ${entero(director.puntos.baseCierre)} de ${entero(director.puntos.baseMeta)} = ${porcentaje(director.puntos.baseCumplimiento)} → ${decimal(director.puntos.baseSocial, 2)} puntos (sin regla del 100 %)`;
   const tipoBase = parametros.director.regla100 ? "regla100" : "ventas";
   const pagoNuevo = director.elegido?.pago ?? director.transicion.pagada;
   const diferencia = pagoNuevo === null || director.pagoAnterior === null ? null : pagoNuevo - director.pagoAnterior;
@@ -1210,7 +1210,7 @@ function pintarDirector(liquidacion) {
   const tarjetaScoreDirector = bloqueScoreCurva({ etiqueta: "Score del equipo", score, factor });
   const indicadoresDirector = [
     { nombre: "Ventas", peso: pesos.ventas, puntos: director.puntos.ventas, cumplimiento: conTope, tipo: "ventas", neutral: false },
-    { nombre: "Base social", peso: pesos.baseSocial, puntos: director.puntos.baseSocial, cumplimiento: director.puntos.baseCumplimiento, tipo: tipoBase, neutral: false },
+    { nombre: "Base social", peso: pesos.baseSocial, puntos: director.puntos.baseSocial, cumplimiento: director.puntos.baseCumplimiento, tipo: "ventas", neutral: false },
     { nombre: "Diversificación e innovación", peso: pesoDiversificacion, puntos: diversificacion, cumplimiento: diversificacionNeutral ? null : diversificacion / pesoDiversificacion, tipo: tipoBase, neutral: diversificacionNeutral },
     { nombre: "Satisfacción", peso: pesos.satisfaccion, puntos: director.puntos.satisfaccion, cumplimiento: satisfaccionNeutral ? null : director.puntos.satisfaccion / pesos.satisfaccion, tipo: tipoBase, neutral: satisfaccionNeutral },
   ];
@@ -1273,7 +1273,7 @@ function pintarDirector(liquidacion) {
           <summary>Fórmulas y 5.8</summary>
           ${tablaHtml(["Indicador", "Peso", `Máx. ${porcentaje(tope)}`, "Puntos", "Cumplimiento"], `
             ${fila58("Ventas rentables y recaudadas", pesos.ventas, director.puntos.ventas, conTope, false, "ventas")}
-            ${fila58("Base social", pesos.baseSocial, director.puntos.baseSocial, director.puntos.baseCumplimiento, false, tipoBase)}
+            ${fila58("Base social", pesos.baseSocial, director.puntos.baseSocial, director.puntos.baseCumplimiento, false, "ventas")}
             ${fila58("Diversificación e innovación (SERFISCAL + innovación)", pesoDiversificacion, diversificacion, diversificacionNeutral ? null : diversificacion / pesoDiversificacion, diversificacionNeutral, tipoBase)}
             ${fila58("Satisfacción", pesos.satisfaccion, director.puntos.satisfaccion, satisfaccionNeutral ? null : director.puntos.satisfaccion / pesos.satisfaccion, satisfaccionNeutral, tipoBase)}
             ${fila58("Total", pesoTotal, totalIndicadores(director.puntos), null, false, "ventas")}
@@ -1611,7 +1611,7 @@ function tabla58(resultado, imprimir = false) {
   return `
     ${tablaHtml(["Indicador", "Peso", `Máx. ${porcentaje(tope)}`, "Puntos", "Cumplimiento"], `
           ${fila("Ventas rentables y recaudadas", pesos.ventas, puntos.ventas, resultado.cumplimientoConTope, "ventas")}
-          ${fila("Base social", pesos.baseSocial, puntos.baseSocial, resultado.baseSocial?.neutral ? null : resultado.baseSocial?.cumplimiento, "regla100")}
+          ${fila("Base social", pesos.baseSocial, puntos.baseSocial, resultado.baseSocial?.neutral ? null : resultado.baseSocial?.cumplimiento, "ventas")}
           ${fila("Diversificación e innovación (SERFISCAL + innovación)", pesoDiversificacion, diversificacion, resultado.neutrales.serfiscal && resultado.neutrales.innovacion ? null : diversificacion / pesoDiversificacion, "regla100")}
           ${fila("Satisfacción", pesos.satisfaccion, puntos.satisfaccion, resultado.neutrales.satisfaccion ? null : resultado.satisfaccion?.cumplimiento, "regla100")}
           ${fila("Total", pesoTotal, resultado.score, null, "ventas")}
@@ -1696,7 +1696,7 @@ function miniIndicadores(resultado) {
   const neutroDiversificacion = resultado.neutrales.serfiscal && resultado.neutrales.innovacion;
   const indicadores = [
     { clave: "54", nombre: "Ventas", peso: pesos.ventas, puntos: puntos.ventas, cumplimiento: resultado.cumplimientoConTope, tipo: "ventas", neutral: false },
-    { clave: "55", nombre: "Base social", peso: pesos.baseSocial, puntos: puntos.baseSocial, cumplimiento: resultado.baseSocial?.neutral ? null : resultado.baseSocial?.cumplimiento, tipo: "regla100", neutral: Boolean(resultado.baseSocial?.neutral) },
+    { clave: "55", nombre: "Base social", peso: pesos.baseSocial, puntos: puntos.baseSocial, cumplimiento: resultado.baseSocial?.neutral ? null : resultado.baseSocial?.cumplimiento, tipo: "ventas", neutral: Boolean(resultado.baseSocial?.neutral) },
     { clave: "56", nombre: "Diversificación", peso: pesoDiversificacion, puntos: diversificacion, cumplimiento: neutroDiversificacion ? null : diversificacion / pesoDiversificacion, tipo: "regla100", neutral: Boolean(neutroDiversificacion) },
     { clave: "57", nombre: "Satisfacción", peso: pesos.satisfaccion, puntos: puntos.satisfaccion, cumplimiento: resultado.neutrales.satisfaccion ? null : resultado.satisfaccion?.cumplimiento, tipo: "regla100", neutral: Boolean(resultado.neutrales.satisfaccion) },
   ];
@@ -2150,13 +2150,12 @@ function seccionBase(resultado) {
   const parametros = obtenerParametros();
   const base = resultado.baseSocial;
   const comercial = resultado.comercial;
-  const regla = base.cumplimiento !== null && base.cumplimiento < 1 ? " &lt; 100 % → 0 puntos (regla del 100 %)" : "";
   const formula = base.neutral
     ? "Neutral: primer mes"
     : base.cierre === null
       ? "Pendiente"
-      : `Cierre = base + ingresos − retiros = ${entero(base.cierre)}. Meta = ${entero(base.meta)}. Resultado ${porcentaje(base.cumplimiento)}${regla}. Puntos ${decimal(resultado.puntos.baseSocial, 2)}.`;
-  const resultadoBase = base.neutral ? "Neutral: primer mes" : `${distintivo(base.cumplimiento, "regla100")} ${barraCumplimiento(base.cumplimiento)}`;
+      : `Cierre = base + ingresos − retiros = ${entero(base.cierre)}. Meta = ${entero(base.meta)}. Cumplimiento ${porcentaje(base.cumplimiento)}. Puntos = peso × mín(cumplimiento; tope) = ${decimal(resultado.puntos.baseSocial, 2)} (sin regla del 100 %).`;
+  const resultadoBase = base.neutral ? "Neutral: primer mes" : `${distintivo(base.cumplimiento, "ventas")} ${barraCumplimiento(base.cumplimiento)}`;
   const cumplimientoTexto = base.cumplimiento === null || base.cumplimiento === undefined ? "Pendiente" : porcentaje(base.cumplimiento);
   const puntosTexto = resultado.puntos.baseSocial === null ? "Pendiente" : `${decimal(resultado.puntos.baseSocial, 2)} de ${parametros.pesos.baseSocial} pts`;
   const resumen = base.neutral
@@ -2174,7 +2173,7 @@ function seccionBase(resultado) {
     </ul>
     ${verFormula(formula)}`;
   return seccion(resultado, "55", "5.5 Base social", {
-    badge: base.neutral ? `<span class="badge badge--neutro">Neutral</span>` : distintivo(base.cumplimiento, "regla100"),
+    badge: base.neutral ? `<span class="badge badge--neutro">Neutral</span>` : distintivo(base.cumplimiento, "ventas"),
     resumen,
     cuerpo,
     falta: faltaDato([comercial.retiros, comercial.ingresos]),

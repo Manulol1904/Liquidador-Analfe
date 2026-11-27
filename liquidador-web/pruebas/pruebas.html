@@ -81,10 +81,11 @@
     probar("margen usa ICA y GMF de parámetros", factorMargen(margenCalculado, margen), margen.factorAlto);
 
     const pesoBase = PARAMETROS_INICIALES.pesos.baseSocial;
-    probar("base social 99 % con regla 100 → 0", puntosIndicador(pesoBase, 0.99, tope, true), 0);
-    probar("base social 100 % con regla 100 → peso", puntosIndicador(pesoBase, 1, tope, true), pesoBase);
-    probar("base social 110 % con regla 100 → peso × 1,1", puntosIndicador(pesoBase, 1.1, tope, true), pesoBase * 1.1);
-    probar("base social 150 % se detiene en el tope", puntosIndicador(pesoBase, 1.5, tope, true), pesoBase * tope);
+    probar("base social 99 % sin regla 100 → proporcional", puntosIndicador(pesoBase, 0.99, tope, false), pesoBase * 0.99);
+    probar("base social 100 % sin regla 100 → peso", puntosIndicador(pesoBase, 1, tope, false), pesoBase);
+    probar("base social 110 % sin regla 100 → peso × 1,1", puntosIndicador(pesoBase, 1.1, tope, false), pesoBase * 1.1);
+    probar("base social 150 % se detiene en el tope", puntosIndicador(pesoBase, 1.5, tope, false), pesoBase * tope);
+    probar("regla 100 sigue disponible para otros indicadores", puntosIndicador(pesoBase, 0.99, tope, true), 0);
     probar("director 50 % sin regla 100 → la mitad", puntosIndicador(pesoBase, 0.5, tope, false), pesoBase * 0.5);
 
     const puntos = [

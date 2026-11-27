@@ -626,7 +626,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     baseSocial.metaOrigen = metaMes.origen;
     baseSocial.metaCalculada = metaBaseSocialCalculada(comercial, mes, parametros);
     baseSocial.cumplimiento = baseSocial.meta ? baseSocial.cierre / baseSocial.meta : null;
-    puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, baseSocial.cumplimiento, tope, true);
+    puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, baseSocial.cumplimiento, tope, false);
   }
 
   const serfiscal = puntosNeutroOMedido(parametros.pesos.serfiscal, comercial.serfiscal, tope);
@@ -1024,7 +1024,8 @@ export function metodosDirector(resultados, parametros, mes) {
     const cierre = medidos.reduce((s, item) => s + item.baseSocial.cierre, 0);
     const meta = parametros.director.metaBaseSocialEquipo;
     const cumplimiento = meta ? cierre / meta : 0;
-    puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, parametros.director.regla100);
+    // Base social del director: sin regla del 100 % (proporcional, como los comerciales).
+    puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, false);
     puntos.baseCierre = cierre;
     puntos.baseMeta = meta;
     puntos.baseCumplimiento = cumplimiento;
