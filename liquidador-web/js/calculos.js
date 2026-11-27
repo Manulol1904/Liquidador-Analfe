@@ -270,9 +270,8 @@ export function produccionAnterior(filas, comercial, mes, parametros) {
 }
 
 /**
- * Filas que suman a la base del director en esquema anterior.
- * Misma base que el Excel de producción del equipo: Edu/AT + Jornada (sin BTL/Misión).
- * La Misión × $1M sigue solo en la liquidación individual del comercial.
+ * Filas de Facturación en la base del director (esquema anterior).
+ * Edu/AT + Jornada (como el Excel $230.256.640); sin BTL ni BASE cruda de Misión.
  */
 export function cuentaEnProduccionAnteriorDirector(fila, parametros) {
   const producto = clasificarProducto(fila?.grupo, fila?.cuenta, parametros);
@@ -280,9 +279,38 @@ export function cuentaEnProduccionAnteriorDirector(fila, parametros) {
 }
 
 /**
- * Total de producción del mes para la comisión anterior del director (tasa × base total).
- * CANCELADA de Facturación: Edu/AT + Jornada Analfista + anticipos edu (cuadra con $230.256.640 del archivo).
- * Excluye BTL/cultural y Misión (esta última solo en comerciales, N × $1.000.000).
+ * Misión del equipo (director): CANCELADA completa × CANTIDAD × valorFacturaAnterior.
+ */
+export function misionEsquemaAnteriorEquipo(filas, mes, parametros) {
+  const vistas = new Set();
+  const lineas = [];
+  (filas || []).forEach((fila) => {
+    if (asesorVacio(fila)) return;
+    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
+    if (!estadoPermiteMisionAnterior(fila)) return;
+    if (!esMisionCompletaAnterior(fila, parametros)) return;
+    if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
+    const numero = String(fila.factura ?? "").trim();
+    const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
+    if (vistas.has(clave)) return;
+    vistas.add(clave);
+    lineas.push(fila);
+  });
+  const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+  const unidades = lineas.reduce((suma, fila) => suma + cantidadMision(fila), 0);
+  return {
+    facturas: unidades,
+    unidades,
+    lineas,
+    valorPorFactura: valorUnitario,
+    valor: unidades * valorUnitario,
+  };
+}
+
+/**
+ * Total de producción del mes para la comisión anterior del director.
+ * Base Facturación (Edu/AT + Jornada = $230.256.640) + Misión (N × $1.000.000, p. ej. 14 → $14M).
+ * Total ejemplo: $244.256.640. Sin BTL.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
@@ -290,6 +318,7 @@ export function produccionTotalMes(filas, mes, parametros) {
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
     && cuentaEnProduccionAnteriorDirector(fila, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
+  const mision = misionEsquemaAnteriorEquipo(filas, mes, parametros);
   const grupos = new Map();
   lineasTodas.forEach((fila) => {
     const asesor = String(fila.asesor).trim();
@@ -298,12 +327,13 @@ export function produccionTotalMes(filas, mes, parametros) {
     actual.facturas += 1;
     grupos.set(asesor, actual);
   });
-  const total = sumar(lineasTodas);
+  const baseFacturacion = sumar(lineasTodas);
+  const total = baseFacturacion + mision.valor;
   return {
     base: total,
-    baseFacturacion: total,
+    baseFacturacion,
     baseConAnticipos: total,
-    mision: { facturas: 0, unidades: 0, lineas: [], valorPorFactura: 0, valor: 0 },
+    mision,
     lineas: lineasTodas,
     lineasTodas,
     porAsesor: [...grupos.values()],
@@ -1463,6 +1493,7 @@ export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento, fil
   const anterior = {
     base: totalMes.base,
     baseFacturacion: totalMes.baseFacturacion,
+    mision: totalMes.mision,
     tasa: parametros.director.tasaAnterior,
     comision: pagoAnterior,
     facturas: totalMes.lineas.length,

@@ -977,8 +977,11 @@ function encabezadoPagosDirector(liquidacion) {
   const pagoBtl = sumaNumeros(eventos, (item) => item.pagoDirector);
   const motivos = [...new Set(eventos.map((item) => item.motivoDirector).filter(Boolean))];
   // v21: mismas reglas que la ficha: las líneas BTL aparecen solo si hay eventos BTL este mes.
+  const nMisionDir = Number(anterior.mision?.unidades ?? anterior.mision?.facturas) || 0;
   const lineasAnterior = [
-    ["Base (producción del equipo)", `<span class="dinero">${moneda(anterior.base)}</span>`],
+    ["Base Facturación (Edu/AT + Jornada)", `<span class="dinero">${moneda(anterior.baseFacturacion ?? anterior.base)}</span>`],
+    ...(nMisionDir ? [["Misión (N × $1.000.000)", `<span class="dinero">${nMisionDir} × ${moneda(anterior.mision?.valorPorFactura)} = ${moneda(anterior.mision?.valor)}</span>`]] : []),
+    ["Base comisión", `<span class="dinero">${moneda(anterior.base)}</span>`],
     ["Tasa", `<span class="dinero">${porcentaje(anterior.tasa)}</span>`],
   ];
   if (eventos.length) {
@@ -1347,11 +1350,18 @@ function bloqueAnteriorDirector(director) {
     : director.baseBtl
       ? `<p>BTL anterior, aparte: ${porcentaje(obtenerParametros().director.tasaBtlAnterior)} × ${moneda(director.baseBtl)} = ${moneda(director.btlAnterior)} (informativo, no entra a la transición)</p>`
       : "";
+  const nMision = Number(anterior.mision?.unidades ?? anterior.mision?.facturas) || 0;
+  const valorMision = Number(anterior.mision?.valor) || 0;
+  const notaMision = nMision
+    ? `<li><span>Misión (CANCELADA × $1.000.000)</span><span class="dinero">${nMision} × ${moneda(anterior.mision?.valorPorFactura)} = ${moneda(valorMision)}</span></li>`
+    : "";
   return `
-    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; Edu/AT + Jornada, sin BTL) ${marcaHoja4(anterior.base, control?.total)}</p>
+    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; Edu/AT + Jornada)${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(anterior.baseFacturacion ?? anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
-      <li><span>Base comisión (producción del equipo)</span><span class="dinero">${moneda(anterior.base)}</span></li>
+      <li><span>Base Facturación (Edu/AT + Jornada)</span><span class="dinero">${moneda(anterior.baseFacturacion ?? anterior.base)}</span></li>
+      ${notaMision}
+      <li><span>Base comisión</span><span class="dinero">${moneda(anterior.base)}</span></li>
       <li><span>Tasa</span><span class="dinero">${porcentaje(anterior.tasa)} <button type="button" class="boton boton--texto" data-ir="parametros">✎ Parámetros</button></span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(anterior.comision)}</span></li>
     </ul>
