@@ -6326,13 +6326,9 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     return { hoja: nombre, porAsesor, total };
   }
   function sumaProduccionMes(filas, mes) {
-    const parametros = obtenerParametros();
-    const prefijo = String(parametros.anticipos?.prefijoCuenta || (parametros.clasificacion || []).find((regla) => regla.producto === "btl")?.cuentasPrefijo?.[0] || "27209");
     return filas.reduce((suma, fila2) => {
       if (fila2.elegida !== true || vacio(fila2.asesor)) return suma;
       if (!(fila2.fecha instanceof Date) || !fechaEnMes(fila2.fecha, mes)) return suma;
-      const codigo = String(fila2.cuenta || "").trim().split(/\s/)[0];
-      if (prefijo && codigo.startsWith(prefijo)) return suma;
       return suma + (Number(fila2.base) || 0);
     }, 0);
   }
@@ -7402,11 +7398,20 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     return prefijo.length > 0 && codigo.startsWith(prefijo);
   }
   function produccionAnterior(filas, comercial, mes, parametros) {
-    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && !esCuentaAnticipo(fila2.cuenta, parametros));
-    return { produccion: lineas.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0), lineas };
+    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
+    const lineasSinAnticipos = lineas.filter((fila2) => !esCuentaAnticipo(fila2.cuenta, parametros));
+    const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
+    return {
+      produccion: sumar(lineas),
+      produccionSinAnticipos: sumar(lineasSinAnticipos),
+      lineas,
+      lineasSinAnticipos
+    };
   }
   function produccionTotalMes(filas, mes, parametros) {
-    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && !esCuentaAnticipo(fila2.cuenta, parametros));
+    const lineasTodas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
+    const lineas = lineasTodas.filter((fila2) => !esCuentaAnticipo(fila2.cuenta, parametros));
+    const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
     const grupos = /* @__PURE__ */ new Map();
     lineas.forEach((fila2) => {
       const asesor = String(fila2.asesor).trim();
@@ -7416,8 +7421,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       grupos.set(asesor, actual);
     });
     return {
-      base: lineas.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0),
+      base: sumar(lineas),
+      baseConAnticipos: sumar(lineasTodas),
       lineas,
+      lineasTodas,
       porAsesor: [...grupos.values()]
     };
   }
@@ -7428,13 +7435,24 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const tramo = (reglas.tramos || []).find((item) => item.hasta === null || ajustado <= item.hasta);
     return tramo ? tramo.tasa : null;
   }
-  function comisionAnteriorTramos(meta, produccion, reglas) {
+  function comisionAnteriorTramos(meta, produccion, reglas, produccionComision) {
+    const baseComision = produccionComision === void 0 || produccionComision === null ? produccion : produccionComision;
     if (meta === null || meta === void 0 || !(meta > 0) || produccion === null || produccion === void 0) {
-      return { meta, produccion, cumplimiento: null, tasa: null, comision: null };
+      return { meta, produccion, produccionComision: baseComision, cumplimiento: null, tasa: null, comision: null };
+    }
+    if (baseComision === null || baseComision === void 0) {
+      return { meta, produccion, produccionComision: baseComision, cumplimiento: null, tasa: null, comision: null };
     }
     const cumplimiento = produccion / meta;
     const tasa = tasaPorTramo(cumplimiento, reglas);
-    return { meta, produccion, cumplimiento, tasa, comision: tasa === null ? null : produccion * tasa };
+    return {
+      meta,
+      produccion,
+      produccionComision: baseComision,
+      cumplimiento,
+      tasa,
+      comision: tasa === null ? null : baseComision * tasa
+    };
   }
   function comisionAnteriorDirector(base, tasa) {
     if (base === null || base === void 0 || tasa === null || tasa === void 0) return null;
@@ -7778,18 +7796,22 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       const manualValor = delMes.produccionManual;
       const manual = manualValor !== null && manualValor !== void 0 && manualValor !== "" && Number.isFinite(Number(manualValor));
       const produccionUsada = manual ? Number(manualValor) : produccionMes.produccion;
+      const produccionComision = manual ? Number(manualValor) : produccionMes.produccionSinAnticipos;
       const meta = delMes.meta === void 0 ? null : delMes.meta;
-      const calculo = comisionAnteriorTramos(meta, produccionUsada, reglas);
+      const calculo = comisionAnteriorTramos(meta, produccionUsada, reglas, produccionComision);
       pagoAnterior = calculo.comision;
       anteriorTramos = {
         meta: calculo.meta,
         produccion: calculo.produccion,
+        produccionComision: calculo.produccionComision,
         produccionArchivo: produccionMes.produccion,
+        produccionSinAnticipos: produccionMes.produccionSinAnticipos,
         manual,
         cumplimiento: calculo.cumplimiento,
         tasa: calculo.tasa,
         comision: calculo.comision,
-        lineas: produccionMes.lineas
+        lineas: produccionMes.lineas,
+        lineasSinAnticipos: produccionMes.lineasSinAnticipos
       };
       if (!(meta > 0)) avisos.push("Falta la meta mensual de la política anterior");
       if (produccionMes.lineas.some((fila2) => leerTasa(fila2.comision) === null)) avisos.push("El archivo no trae % de comisión");
@@ -12593,23 +12615,26 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       </ul>
       <p>Falta la meta mensual de la política anterior.</p>`;
     }
+    const baseComision = tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion;
     return `
     <p>${escaparHtml(fuente)} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
     ${tablaAnteriorImpresion([
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
-      ["Producción", moneda(tramo.produccion)],
+      ["Producción (con anticipos 27209)", moneda(tramo.produccion)],
       ["Cumplimiento", porcentaje2(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje2(tramo.tasa)],
-      ["Producción × tasa", moneda(tramo.comision)]
+      ["Base comisión (sin anticipos)", moneda(baseComision)],
+      ["Base × tasa", moneda(tramo.comision)]
     ])}
     <ul class="lista-concepto anterior-pantalla">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(tramo.comision)}</span></li>
       <li><span>Meta mensual</span><span class="dinero">${moneda(tramo.meta)} <button type="button" class="boton boton--texto" data-ir="parametros">✎</button></span></li>
-      <li><span>Producción</span><span class="dinero">${moneda(tramo.produccion)} ${manual}</span></li>
+      <li><span>Producción (cumplimiento)</span><span class="dinero">${moneda(tramo.produccion)} ${manual}</span></li>
       <li><span>Cumplimiento</span><span class="dinero">${porcentaje2(tramo.cumplimiento)}</span></li>
       <li><span>Tasa aplicada</span><span class="dinero">${porcentaje2(tramo.tasa)} <span class="ayuda-campo">tramo «${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span></span></li>
-      <li><span>Producción × tasa</span><span class="dinero">${moneda(tramo.comision)}</span></li>
+      <li><span>Base comisión (sin anticipos)</span><span class="dinero">${moneda(baseComision)}</span></li>
+      <li><span>Base × tasa</span><span class="dinero">${moneda(tramo.comision)}</span></li>
     </ul>
     <details class="no-imprimir">
       <summary>Ver tramos</summary>
@@ -12732,7 +12757,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       ["Total del mes (básico + variable)", moneda(totalMesImp)]
     ], { paga: esquema === "nueva" });
     const anterior = sinAnterior ? tarjeta("Esquema anterior", "No aplica", [["Motivo", "No se compara"]]) : tarjeta("Esquema anterior", resultado.pagoAnterior === null ? "Pendiente" : moneda(resultado.pagoAnterior), [
-      ["Producción", moneda(tramo?.produccion)],
+      ["Producción (cumplimiento)", moneda(tramo?.produccion)],
+      ["Base comisión (sin anticipos)", moneda(tramo?.produccionComision ?? tramo?.produccionSinAnticipos ?? tramo?.produccion)],
       ["Tasa aplicada", tramo?.tasa === null || tramo?.tasa === void 0 ? "Pendiente" : porcentaje2(tramo.tasa)]
     ], { paga: esquema === "anterior" });
     const claseDif = resultado.diferencia === null ? "" : resultado.diferencia < 0 ? "diferencia--negativa" : "diferencia--positiva";
@@ -13244,7 +13270,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     <p>Fuente: Facturación (${anterior.facturas || 0} facturas) ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
-      <li><span>Base: producción del mes sin anticipos 27209</span><span class="dinero">${moneda(anterior.base)}</span></li>
+      <li><span>Base comisión (sin anticipos 27209)</span><span class="dinero">${moneda(anterior.base)}</span></li>
       <li><span>Tasa</span><span class="dinero">${porcentaje2(anterior.tasa)} <button type="button" class="boton boton--texto" data-ir="parametros">✎ Parámetros</button></span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(anterior.comision)}</span></li>
     </ul>
@@ -13634,9 +13660,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const reglas = obtenerParametros().anterior;
     const monto = resultado.pagoAnterior === null || resultado.pagoAnterior === void 0 ? "Pendiente" : moneda(resultado.pagoAnterior);
     const lineas = tramo && tramo.comision !== null ? [
-      ["Producción", `<span class="dinero">${moneda(tramo.produccion)}</span>`],
+      ["Producción (cumplimiento)", `<span class="dinero">${moneda(tramo.produccion)}</span>`],
       ["Cumplimiento", `<span class="dinero">${porcentaje2(tramo.cumplimiento)}</span>`],
-      ["Tasa del tramo", `<span class="dinero">${porcentaje2(tramo.tasa)}</span> <span class="ayuda-campo">«${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span>`]
+      ["Tasa del tramo", `<span class="dinero">${porcentaje2(tramo.tasa)}</span> <span class="ayuda-campo">«${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span>`],
+      ["Base comisión (sin anticipos)", `<span class="dinero">${moneda(tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion)}</span>`]
     ] : [["Meta mensual", tramo && tramo.meta > 0 ? moneda(tramo.meta) : "Pendiente"], ["Falta", "la meta de la política anterior"]];
     if ((resultado.btlMes || []).length) {
       const sub = resultado.btlAnterior === null || resultado.ingresoBtlAnterior === null ? `<br><small>Pendiente</small>` : `<br><small>(tasa ${porcentaje2(resultado.tasaBtlAnterior)} sobre ${moneda(resultado.ingresoBtlAnterior)})</small>`;

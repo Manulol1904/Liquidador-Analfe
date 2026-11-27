@@ -145,24 +145,33 @@ export function esCuentaAnticipo(cuenta, parametros) {
 /**
  * Producción del esquema anterior (comisión por tramos).
  * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes.
- * No entran anticipos / cuentas 27 (27209…), ni hojas complementarias, filas sin asesor,
- * sin fecha ni de otro mes. La política nueva no usa esta suma (usa recaudo).
+ * - produccion: total con anticipos 27209 (para % de cumplimiento / tramo).
+ * - produccionSinAnticipos: base de la comisión (sin cuentas 27).
+ * No entran hojas complementarias, filas sin asesor, sin fecha ni de otro mes.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
-    && !esCuentaAnticipo(fila.cuenta, parametros));
-  return { produccion: lineas.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0), lineas };
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+  const lineasSinAnticipos = lineas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
+  const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
+  return {
+    produccion: sumar(lineas),
+    produccionSinAnticipos: sumar(lineasSinAnticipos),
+    lineas,
+    lineasSinAnticipos,
+  };
 }
 
 /**
  * Total de producción del mes para la comisión anterior del director (1,5 % × base).
- * Misma regla que produccionAnterior: sin anticipos / cuentas 27 (27209…).
+ * La comisión del director se calcula sin anticipos / cuentas 27 (27209…).
+ * baseConAnticipos queda disponible por si se necesita el total producido.
  */
 export function produccionTotalMes(filas, mes, parametros) {
-  const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
-    && !esCuentaAnticipo(fila.cuenta, parametros));
+  const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+  const lineas = lineasTodas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
+  const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const grupos = new Map();
   lineas.forEach((fila) => {
     const asesor = String(fila.asesor).trim();
@@ -172,8 +181,10 @@ export function produccionTotalMes(filas, mes, parametros) {
     grupos.set(asesor, actual);
   });
   return {
-    base: lineas.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0),
+    base: sumar(lineas),
+    baseConAnticipos: sumar(lineasTodas),
     lineas,
+    lineasTodas,
     porAsesor: [...grupos.values()],
   };
 }
@@ -187,14 +198,29 @@ export function tasaPorTramo(cumplimiento, reglas) {
   return tramo ? tramo.tasa : null;
 }
 
-/** Comisión anterior = producción × tasa del tramo. Sin meta, no devuelve cero. */
-export function comisionAnteriorTramos(meta, produccion, reglas) {
+/**
+ * Comisión anterior por tramos.
+ * Cumplimiento = producciónConAnticipos / meta (define la tasa).
+ * Comisión = producciónSinAnticipos × tasa (si no se pasa, usa la misma producción).
+ */
+export function comisionAnteriorTramos(meta, produccion, reglas, produccionComision) {
+  const baseComision = produccionComision === undefined || produccionComision === null ? produccion : produccionComision;
   if (meta === null || meta === undefined || !(meta > 0) || produccion === null || produccion === undefined) {
-    return { meta, produccion, cumplimiento: null, tasa: null, comision: null };
+    return { meta, produccion, produccionComision: baseComision, cumplimiento: null, tasa: null, comision: null };
+  }
+  if (baseComision === null || baseComision === undefined) {
+    return { meta, produccion, produccionComision: baseComision, cumplimiento: null, tasa: null, comision: null };
   }
   const cumplimiento = produccion / meta;
   const tasa = tasaPorTramo(cumplimiento, reglas);
-  return { meta, produccion, cumplimiento, tasa, comision: tasa === null ? null : produccion * tasa };
+  return {
+    meta,
+    produccion,
+    produccionComision: baseComision,
+    cumplimiento,
+    tasa,
+    comision: tasa === null ? null : baseComision * tasa,
+  };
 }
 
 /** Comisión anterior del director: un porcentaje fijo sobre el total de producción del mes. */
@@ -609,19 +635,24 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     const delMes = comercial.anteriorMes?.[mes] || {};
     const manualValor = delMes.produccionManual;
     const manual = manualValor !== null && manualValor !== undefined && manualValor !== "" && Number.isFinite(Number(manualValor));
+    // Cumplimiento: total producido (con cuentas 27). Comisión: sin anticipos.
     const produccionUsada = manual ? Number(manualValor) : produccionMes.produccion;
+    const produccionComision = manual ? Number(manualValor) : produccionMes.produccionSinAnticipos;
     const meta = delMes.meta === undefined ? null : delMes.meta;
-    const calculo = comisionAnteriorTramos(meta, produccionUsada, reglas);
+    const calculo = comisionAnteriorTramos(meta, produccionUsada, reglas, produccionComision);
     pagoAnterior = calculo.comision;
     anteriorTramos = {
       meta: calculo.meta,
       produccion: calculo.produccion,
+      produccionComision: calculo.produccionComision,
       produccionArchivo: produccionMes.produccion,
+      produccionSinAnticipos: produccionMes.produccionSinAnticipos,
       manual,
       cumplimiento: calculo.cumplimiento,
       tasa: calculo.tasa,
       comision: calculo.comision,
       lineas: produccionMes.lineas,
+      lineasSinAnticipos: produccionMes.lineasSinAnticipos,
     };
     if (!(meta > 0)) avisos.push("Falta la meta mensual de la política anterior");
     if (produccionMes.lineas.some((fila) => leerTasa(fila.comision) === null)) avisos.push("El archivo no trae % de comisión");

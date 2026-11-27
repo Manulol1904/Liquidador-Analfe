@@ -282,17 +282,11 @@ export function leerControlHoja4(libro) {
   return { hoja: nombre, porAsesor, total };
 }
 
-/** Misma suma que produccionTotalMes: hoja elegida, con asesor y fecha en el mes; sin anticipos 27209. */
+/** Suma para cuadre con Hoja4: hoja elegida, con asesor y fecha en el mes (incluye anticipos 27209). */
 function sumaProduccionMes(filas, mes) {
-  const parametros = obtenerParametros();
-  const prefijo = String(parametros.anticipos?.prefijoCuenta
-    || (parametros.clasificacion || []).find((regla) => regla.producto === "btl")?.cuentasPrefijo?.[0]
-    || "27209");
   return filas.reduce((suma, fila) => {
     if (fila.elegida !== true || vacio(fila.asesor)) return suma;
     if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return suma;
-    const codigo = String(fila.cuenta || "").trim().split(/\s/)[0];
-    if (prefijo && codigo.startsWith(prefijo)) return suma;
     return suma + (Number(fila.base) || 0);
   }, 0);
 }
