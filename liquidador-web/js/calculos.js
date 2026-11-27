@@ -629,9 +629,10 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
       const factorDefecto = parametros.margen.factorPorDefecto;
       const hayMargenesCargados = margenes.size > 0;
       const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
-      // Sin informe de márgenes: la venta reconocida es la BASE del Excel (CANCELADA + pago en el mes).
-      // Con márgenes cargados, cada factura debe aparecer en el informe (o usar factor por defecto).
-      if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
+      const anticipo = esCuentaAnticipo(fila.cuenta, parametros);
+      // Anticipos 27209 no vienen en el informe PRODUCTOS: cuentan a la BASE (factor 1).
+      // Sin informe de márgenes: BASE del Excel. Con márgenes, el resto debe cruzar con el evento.
+      if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
         eduPendiente = true;
         avisos.push(clave
           ? `La factura ${fila.factura || "sin número"} no está en el informe de producción.`
@@ -846,8 +847,9 @@ function factorDeEdu(fila, margenes, facturaAEvento, parametros) {
   const factorDefecto = parametros.margen.factorPorDefecto;
   const hayMargenesCargados = margenes && margenes.size > 0;
   const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
-  // Alineado con liquidarComercial: sin márgenes cargados, factor 1 = BASE del Excel.
-  if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
+  const anticipo = esCuentaAnticipo(fila.cuenta, parametros);
+  // Alineado con liquidarComercial: anticipos o sin márgenes → factor 1 (BASE).
+  if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
     return { clave, margenEvento: null, factor: null };
   }
   const factor = margenEvento !== null

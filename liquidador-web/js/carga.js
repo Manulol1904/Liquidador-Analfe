@@ -227,11 +227,12 @@ function pareceProduccion(filas) {
   return conMes > 0 && conMes >= filas.length / 2;
 }
 
-/** Anticipo BTL: la cuenta empieza por el prefijo de la clasificación (27209). No se une con producción. */
+/** Anticipo 27209…: no cruza con el informe PRODUCTOS (no tiene # de evento). */
 function esAnticipo(fila) {
   const codigo = String(fila.cuenta || "").trim().split(/\s/)[0];
-  const regla = (obtenerParametros().clasificacion || []).find((item) => item.producto === "btl");
-  return (regla?.cuentasPrefijo || []).some((prefijo) => codigo.startsWith(String(prefijo)));
+  if (!codigo) return false;
+  const prefijo = String(obtenerParametros()?.anticipos?.prefijoCuenta || "27209");
+  return prefijo.length > 0 && codigo.startsWith(prefijo);
 }
 
 export function resumenUnion(filasFacturacion, facturaAEvento, mes) {

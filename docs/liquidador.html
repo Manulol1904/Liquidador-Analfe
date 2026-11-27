@@ -6317,8 +6317,9 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   }
   function esAnticipo(fila2) {
     const codigo = String(fila2.cuenta || "").trim().split(/\s/)[0];
-    const regla = (obtenerParametros().clasificacion || []).find((item) => item.producto === "btl");
-    return (regla?.cuentasPrefijo || []).some((prefijo) => codigo.startsWith(String(prefijo)));
+    if (!codigo) return false;
+    const prefijo = String(obtenerParametros()?.anticipos?.prefijoCuenta || "27209");
+    return prefijo.length > 0 && codigo.startsWith(prefijo);
   }
   function resumenUnion(filasFacturacion, facturaAEvento, mes) {
     const facturas = /* @__PURE__ */ new Set();
@@ -7963,7 +7964,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         const factorDefecto = parametros.margen.factorPorDefecto;
         const hayMargenesCargados = margenes.size > 0;
         const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
-        if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
+        const anticipo = esCuentaAnticipo(fila2.cuenta, parametros);
+        if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
           eduPendiente = true;
           avisos.push(clave5 ? `La factura ${fila2.factura || "sin número"} no está en el informe de producción.` : `La factura ${fila2.factura || "sin número"} no tiene evento.`);
           return;
@@ -8146,7 +8148,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const factorDefecto = parametros.margen.factorPorDefecto;
     const hayMargenesCargados = margenes && margenes.size > 0;
     const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
-    if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
+    const anticipo = esCuentaAnticipo(fila2.cuenta, parametros);
+    if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
       return { clave: clave5, margenEvento: null, factor: null };
     }
     const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
