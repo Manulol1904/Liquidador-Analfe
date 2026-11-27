@@ -4,7 +4,7 @@
  */
 
 import { encabezadoDe } from "./encabezados.js";
-import { normalizar, obtenerControlHoja4, obtenerEventos, obtenerEventosProduccion, obtenerFacturacion, obtenerFacturaAEvento, obtenerBtlEventos, textoClave } from "./carga.js";
+import { normalizar, obtenerControlHoja4, obtenerEventos, obtenerEventosProduccion, obtenerFacturacion, obtenerFacturaAEvento, obtenerProduccionDetalle, obtenerBtlEventos, textoClave } from "./carga.js";
 import { obtenerEventosBtlImportados } from "./btlArchivos.js";
 import { comisionBtlAnterior, describirTramo, detalleBtlAnteriorEvento, liquidarMes } from "./calculos.js";
 import { exportarJson, importarJson, obtenerParametros } from "./parametros.js";
@@ -243,7 +243,7 @@ function armar() {
       condiciones: guardadas || { ...condicionesVacias(), ...(deHoja?.condiciones || {}) },
     };
   });
-  return liquidarMes(obtenerFacturacion(), eventos, obtenerParametros(), mesActual(), obtenerFacturaAEvento());
+  return liquidarMes(obtenerFacturacion(), eventos, obtenerParametros(), mesActual(), obtenerFacturaAEvento(), obtenerProduccionDetalle());
 }
 
 function barraScore(score) {
@@ -589,6 +589,7 @@ function gruposFacturas(resultado) {
   const orden = [
     "Edu/AT · política nueva",
     "Edu/AT · no recaudada en el mes",
+    "Misión · producción (política nueva)",
     "Misión · valor fijo por factura",
     "Misión · esquema anterior",
     "BTL · se liquida en 5.11.5",
@@ -2069,7 +2070,7 @@ function cuerpoVentas(resultado, imprimir = false) {
       factor: edu.factorReconocimiento,
       ventaReconocida: edu.ventaReconocida,
     })}
-    <p class="nota-mision">Facturas de Misión del mes: ${mision.facturas ?? 0}.</p>`;
+    <p class="nota-mision">Misión Internacional (archivo de Producción): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
 }
 
 /** v23 · Bandas de margen de Parámetros (sin valores quemados): menor al umbral bajo, entre umbrales, mayor al alto. */

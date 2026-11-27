@@ -539,10 +539,30 @@ function puntosInnovacion(comercial, parametros) {
 }
 
 /**
+ * Producción de Misión Internacional para la política nueva: sale del archivo de Producción
+ * (filas con ASESOR/BASE/GRUPO·SERVICIO clasificadas como misión). Suma la BASE del comercial.
+ * Si la fila trae fecha, solo cuenta las del mes; si no trae fecha, cuenta todas.
+ */
+export function produccionMisionNueva(filasProduccion, comercial, mes, parametros) {
+  const lineas = (filasProduccion || []).filter((fila) => {
+    if (asesorVacio(fila) || !mismaPersona(fila.asesor, comercial)) return false;
+    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return false;
+    if (fila.fecha instanceof Date) return fechaEnMes(fila.fecha, mes);
+    return true;
+  });
+  return {
+    produccion: lineas.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0),
+    lineas,
+    facturas: new Set(lineas.map((fila) => String(fila.factura ?? "").trim()).filter(Boolean)).size,
+  };
+}
+
+/**
  * Liquidación de un comercial en un mes.
  * Devuelve score, pagos y la lista de datos que faltan. No inventa el margen.
+ * filasProduccionDetalle: líneas ASESOR/BASE del libro de Producción (Misión Internacional).
  */
-export function liquidarComercial(comercial, filas, mes, parametros, margenesEvento, facturaAEvento, eventos) {
+export function liquidarComercial(comercial, filas, mes, parametros, margenesEvento, facturaAEvento, eventos, filasProduccionDetalle = []) {
   const avisos = [];
   const margenes = margenesEvento || new Map();
   const anteriores = filas.filter((fila) => deHojaElegida(fila, parametros)
@@ -555,7 +575,9 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
 
   function sirveParaPoliticaNueva(fila) {
     const producto = clasificarProducto(fila.grupo, fila.cuenta, parametros);
-    if (deHojaElegida(fila, parametros)) return producto !== "mision" && producto !== "btl";
+    // La Misión de la política nueva sale del archivo de Producción, no del recaudo de Facturación.
+    if (producto === "mision" || producto === "btl") return false;
+    if (deHojaElegida(fila, parametros)) return true;
     return esHojaComplementaria(fila, parametros);
   }
 
@@ -567,15 +589,11 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
   const facturasMision = new Set();
   let eduPendiente = false;
   let eduReconocida = 0;
+  let misionDesdeProduccion = null;
 
-  elegibles.forEach((fila, indice) => {
+  elegibles.forEach((fila) => {
     const producto = clasificarProducto(fila.grupo, fila.cuenta, parametros);
-    if (producto === "btl") return;
-    if (producto === "mision") {
-      const numero = String(fila.factura ?? "").trim();
-      facturasMision.add(numero || `sin-numero-${fila.hoja || ""}-${indice}`);
-      return;
-    }
+    if (producto === "btl" || producto === "mision") return;
     if (producto === "eduAt") {
       const clave = eventoDeFila(fila, facturaAEvento);
       const margenEvento = clave && margenes.has(clave) ? margenes.get(clave) : null;
@@ -594,7 +612,17 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     if (producto === "otro") avisos.push(`Producto sin clasificar en ${fila.factura || "una factura"}.`);
     else ventas[producto] += Number(fila.base) || 0;
   });
-  ventas.mision = facturasMision.size * parametros.mision.valorFacturaNueva;
+
+  misionDesdeProduccion = produccionMisionNueva(filasProduccionDetalle, comercial, mes, parametros);
+  if (misionDesdeProduccion.lineas.length) {
+    ventas.mision = misionDesdeProduccion.produccion;
+    misionDesdeProduccion.lineas.forEach((fila, indice) => {
+      const numero = String(fila.factura ?? "").trim();
+      facturasMision.add(numero || `prod-${fila.hoja || ""}-${indice}`);
+    });
+  } else {
+    ventas.mision = 0;
+  }
   ventas.eduAt = eduPendiente ? null : eduReconocida;
 
   const metas = metasDelMes(comercial, mes, parametros);
@@ -707,6 +735,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     ponderado,
     tope,
     lineasProduccion: produccionMes.lineas,
+    misionDesdeProduccion,
   });
 
   const trabajados = Number(comercial.diasTrabajados);
@@ -846,14 +875,14 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
   const ordenUso = [
     "Edu/AT · política nueva",
     "Edu/AT · no recaudada en el mes",
+    "Misión · producción (política nueva)",
     "Misión · valor fijo por factura",
     "Misión · esquema anterior",
     "BTL · se liquida en 5.11.5",
     "BTL · referencia (hoja Facturación)",
     "Solo esquema anterior",
   ];
-  detalleFacturas.sort((a, b) => ordenUso.indexOf(a.uso) - ordenUso.indexOf(b.uso));
-
+  // El sort de detalleFacturas se hace después de agregar las líneas de Misión de Producción.
   const ventaRecaudada = baseEdu;
   const ventaReconocida = datos.eduPendiente ? null : datos.eduReconocida;
   const eduAt = {
@@ -863,16 +892,41 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
     factorReconocimiento: ventaReconocida === null || ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada,
   };
 
-  let valorRealMision = 0;
-  datos.elegibles.forEach((fila) => {
-    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) === "mision") valorRealMision += Number(fila.base) || 0;
-  });
+  const lineasMisionProd = datos.misionDesdeProduccion?.lineas || [];
+  const valorRealMision = lineasMisionProd.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const mision = {
     facturas: datos.facturasMision.size,
     valorPorFactura: parametros.mision.valorFacturaNueva,
     valorReal: valorRealMision,
-    ventaReconocida: datos.facturasMision.size * parametros.mision.valorFacturaNueva,
+    ventaReconocida: valorRealMision,
+    origen: "produccion",
+    lineas: lineasMisionProd,
   };
+
+  // Añade las líneas de Misión del archivo de Producción al detalle de la ficha.
+  lineasMisionProd.forEach((fila) => {
+    const id = `prod|${fila.hoja || ""}|${fila.numeroFila || ""}|${fila.factura || ""}|${fila.cuenta || ""}`;
+    if (vistos.has(id)) return;
+    vistos.add(id);
+    detalleFacturas.push({
+      factura: fila.factura || "",
+      origen: fila.hoja || "Producción",
+      uso: "Misión · producción (política nueva)",
+      producto: nombreVisible("mision"),
+      productoClave: "mision",
+      cuenta: fila.cuenta || "",
+      evento: eventoDeFila(fila, facturaAEvento),
+      base: Number(fila.base) || 0,
+      estado: fila.estado || "",
+      fechaPago: fila.fechaPago instanceof Date ? fila.fechaPago : null,
+      elegible: true,
+      recaudo: Number(fila.base) || 0,
+      margenEvento: null,
+      factorAplicado: null,
+      ventaReconocida: Number(fila.base) || 0,
+    });
+  });
+  detalleFacturas.sort((a, b) => ordenUso.indexOf(a.uso) - ordenUso.indexOf(b.uso));
 
   const detalleAnterior = (datos.lineasProduccion || []).map((fila) => ({
     factura: fila.factura || "",
@@ -1242,10 +1296,10 @@ function esEventoBtl(evento, parametros) {
   return textoEvento.includes(marca);
 }
 
-export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento) {
+export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento, filasProduccionDetalle = []) {
   const equipo = parametros.comerciales.filter((comercial) => (comercial.activoDesde || "0000-00") <= mes);
   const margenes = margenesPorEvento(eventos, parametros);
-  const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos));
+  const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos, filasProduccionDetalle));
   const director = metodosDirector(resultados, parametros, mes);
   const avisos = [];
   filas.forEach((fila) => {

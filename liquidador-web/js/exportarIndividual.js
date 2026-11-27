@@ -3,7 +3,7 @@
  * Este módulo solo pone datos. La estructura la escribe el motor, sin reescribirlo.
  */
 
-import { obtenerEventos, obtenerFacturaAEvento, obtenerFacturacion, textoClave } from "./carga.js";
+import { obtenerEventos, obtenerFacturaAEvento, obtenerFacturacion, obtenerProduccionDetalle, textoClave } from "./carga.js";
 import { liquidarMes } from "./calculos.js";
 import * as M from "./excel/motor_excel_individual.js";
 import { textoDe } from "./excel/textosExcel.js";
@@ -730,7 +730,7 @@ function mesVisible() {
 
 function liquidacionDe(liquidacion) {
   if (liquidacion) return liquidacion;
-  return liquidarMes(obtenerFacturacion(), obtenerEventos(), obtenerParametros(), mesVisible(), obtenerFacturaAEvento());
+  return liquidarMes(obtenerFacturacion(), obtenerEventos(), obtenerParametros(), mesVisible(), obtenerFacturaAEvento(), obtenerProduccionDetalle());
 }
 
 export async function generarExcelComercial(nombre, { clave, liquidacion } = {}) {

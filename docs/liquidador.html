@@ -6169,6 +6169,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   var facturacionCargada = [];
   var eventosCargados = [];
   var facturaAEventoCargada = /* @__PURE__ */ new Map();
+  var produccionDetalleCargada = [];
   var btlEventosCargados = /* @__PURE__ */ new Map();
   var btlEventosManual = false;
   var controlHoja4 = null;
@@ -6186,6 +6187,9 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   }
   function obtenerEventosProduccion() {
     return eventosCargados;
+  }
+  function obtenerProduccionDetalle() {
+    return produccionDetalleCargada;
   }
   function obtenerFacturaAEvento() {
     return facturaAEventoCargada;
@@ -6535,6 +6539,23 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const encabezados = (matriz[0] || []).map((celda) => celda ?? "");
     return sugerirColumnas(encabezados, campos).mapa;
   }
+  function hojaPareceDetalleFacturacion(matriz) {
+    if (!matriz || !matriz.length) return false;
+    const encabezados = (matriz[0] || []).map((celda) => normalizar(celda));
+    const tiene = (...aliases) => aliases.some((alias) => encabezados.some((h) => h === alias || h.includes(alias)));
+    return tiene("asesor") && tiene("base") && (tiene("grupo") || tiene("servicio") || tiene("cuenta"));
+  }
+  function leerDetalleProduccion(libro) {
+    const detalle = [];
+    Object.keys(libro || {}).forEach((nombre) => {
+      const matriz = libro[nombre] || [];
+      if (!hojaPareceDetalleFacturacion(matriz)) return;
+      const mapa = mapaAutomatico(matriz, CAMPOS_FACTURACION);
+      if (mapa.asesor === "" || mapa.asesor === void 0 || mapa.base === "" || mapa.base === void 0) return;
+      detalle.push(...filasDesdeHoja(matriz, CAMPOS_FACTURACION, mapa, nombre, false));
+    });
+    return detalle;
+  }
   function filasDesdeHoja(matriz, campos, mapa, hoja, elegida) {
     const cuerpo = matriz.slice(1);
     const filas = [];
@@ -6830,7 +6851,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         <p class="nota-union" id="nota-resumen" hidden></p>
       </article>
       <article class="tarjeta tarjeta-archivo">
-        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe de producción (hoja PRODUCTOS) con ingreso y costo por evento.")}
+        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe de producción: hoja PRODUCTOS (márgenes) y, si viene, el detalle de Misión Internacional (ASESOR/BASE) para la política nueva.")}
         <div class="zona-error" data-error="eventos"></div>
         <p class="nota-union" id="nota-union" hidden></p>
       </article>
@@ -6999,28 +7020,38 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         const armado = armarProduccion(filas, mes);
         eventosCargados = armado.eventos;
         facturaAEventoCargada = armado.facturaAEvento;
+        produccionDetalleCargada = leerDetalleProduccion(libro);
         const avisos = advertenciasEventos(filas, nombres, mes);
-        vistas.eventos = { filas, mes, hojas: [nombreHoja2] };
+        if (produccionDetalleCargada.length) {
+          avisos.push(`Producción: ${produccionDetalleCargada.length} líneas de detalle (Misión Internacional u otras) leídas del mismo libro.`);
+        }
+        vistas.eventos = { filas, mes, hojas: [nombreHoja2], detalle: produccionDetalleCargada };
         pintarVistaTipo("eventos");
         avisosPorTipo.eventos = avisos;
         resumenArchivos.eventos = {
           archivo: nombresArchivo.eventos,
           hoja: nombreHoja2,
           lineas: armado.eventos.length,
-          eventosMes: armado.eventos.filter((evento) => evento.delMes).length
+          eventosMes: armado.eventos.filter((evento) => evento.delMes).length,
+          detalle: produccionDetalleCargada.length
         };
       } else {
         eventosCargados = filas.map((fila2) => ({ ...fila2, delMes: true }));
         facturaAEventoCargada = mapaDesdeFacturas(filas);
+        produccionDetalleCargada = leerDetalleProduccion(libro);
         const avisos = advertenciasEventos(filas, nombres, mes);
-        vistas.eventos = { filas, mes, hojas: [nombreHoja2] };
+        if (produccionDetalleCargada.length) {
+          avisos.push(`Producción: ${produccionDetalleCargada.length} líneas de detalle (Misión Internacional u otras) leídas del mismo libro.`);
+        }
+        vistas.eventos = { filas, mes, hojas: [nombreHoja2], detalle: produccionDetalleCargada };
         pintarVistaTipo("eventos");
         avisosPorTipo.eventos = avisos;
         resumenArchivos.eventos = {
           archivo: nombresArchivo.eventos,
           hoja: nombreHoja2,
           lineas: filas.length,
-          eventosMes: eventosCargados.length
+          eventosMes: eventosCargados.length,
+          detalle: produccionDetalleCargada.length
         };
       }
       pintarEstadoArchivos();
@@ -7751,7 +7782,20 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const tope = Math.min(disponible, ofertas > 0 ? topeOfertas : disponible);
     return { puntos: Math.min(bruto, tope), neutral: false };
   }
-  function liquidarComercial(comercial, filas, mes, parametros, margenesEvento, facturaAEvento, eventos2) {
+  function produccionMisionNueva(filasProduccion, comercial, mes, parametros) {
+    const lineas = (filasProduccion || []).filter((fila2) => {
+      if (asesorVacio(fila2) || !mismaPersona(fila2.asesor, comercial)) return false;
+      if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision") return false;
+      if (fila2.fecha instanceof Date) return fechaEnMes(fila2.fecha, mes);
+      return true;
+    });
+    return {
+      produccion: lineas.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0),
+      lineas,
+      facturas: new Set(lineas.map((fila2) => String(fila2.factura ?? "").trim()).filter(Boolean)).size
+    };
+  }
+  function liquidarComercial(comercial, filas, mes, parametros, margenesEvento, facturaAEvento, eventos2, filasProduccionDetalle = []) {
     const avisos = [];
     const margenes = margenesEvento || /* @__PURE__ */ new Map();
     const anteriores = filas.filter((fila2) => deHojaElegida(fila2, parametros) && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && cuentaParaAnterior(fila2, mes));
@@ -7760,7 +7804,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     });
     function sirveParaPoliticaNueva(fila2) {
       const producto = clasificarProducto(fila2.grupo, fila2.cuenta, parametros);
-      if (deHojaElegida(fila2, parametros)) return producto !== "mision" && producto !== "btl";
+      if (producto === "mision" || producto === "btl") return false;
+      if (deHojaElegida(fila2, parametros)) return true;
       return esHojaComplementaria(fila2, parametros);
     }
     const elegibles = filas.filter((fila2) => !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esRecaudo(fila2, mes, parametros) && sirveParaPoliticaNueva(fila2));
@@ -7768,14 +7813,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const facturasMision = /* @__PURE__ */ new Set();
     let eduPendiente = false;
     let eduReconocida = 0;
-    elegibles.forEach((fila2, indice) => {
+    let misionDesdeProduccion = null;
+    elegibles.forEach((fila2) => {
       const producto = clasificarProducto(fila2.grupo, fila2.cuenta, parametros);
-      if (producto === "btl") return;
-      if (producto === "mision") {
-        const numero2 = String(fila2.factura ?? "").trim();
-        facturasMision.add(numero2 || `sin-numero-${fila2.hoja || ""}-${indice}`);
-        return;
-      }
+      if (producto === "btl" || producto === "mision") return;
       if (producto === "eduAt") {
         const clave5 = eventoDeFila(fila2, facturaAEvento);
         const margenEvento = clave5 && margenes.has(clave5) ? margenes.get(clave5) : null;
@@ -7792,7 +7833,16 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       if (producto === "otro") avisos.push(`Producto sin clasificar en ${fila2.factura || "una factura"}.`);
       else ventas[producto] += Number(fila2.base) || 0;
     });
-    ventas.mision = facturasMision.size * parametros.mision.valorFacturaNueva;
+    misionDesdeProduccion = produccionMisionNueva(filasProduccionDetalle, comercial, mes, parametros);
+    if (misionDesdeProduccion.lineas.length) {
+      ventas.mision = misionDesdeProduccion.produccion;
+      misionDesdeProduccion.lineas.forEach((fila2, indice) => {
+        const numero2 = String(fila2.factura ?? "").trim();
+        facturasMision.add(numero2 || `prod-${fila2.hoja || ""}-${indice}`);
+      });
+    } else {
+      ventas.mision = 0;
+    }
     ventas.eduAt = eduPendiente ? null : eduReconocida;
     const metas = metasDelMes(comercial, mes, parametros);
     const ponderado = cumplimientoVentas(ventas, metas, parametros.topeCongreso, parametros.topeProducto);
@@ -7886,7 +7936,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       facturasMision,
       ponderado,
       tope,
-      lineasProduccion: produccionMes.lineas
+      lineasProduccion: produccionMes.lineas,
+      misionDesdeProduccion
     });
     const trabajados = Number(comercial.diasTrabajados);
     const diasMes = Number(comercial.diasMes);
@@ -8016,13 +8067,13 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const ordenUso = [
       "Edu/AT · política nueva",
       "Edu/AT · no recaudada en el mes",
+      "Misión · producción (política nueva)",
       "Misión · valor fijo por factura",
       "Misión · esquema anterior",
       "BTL · se liquida en 5.11.5",
       "BTL · referencia (hoja Facturación)",
       "Solo esquema anterior"
     ];
-    detalleFacturas.sort((a, b) => ordenUso.indexOf(a.uso) - ordenUso.indexOf(b.uso));
     const ventaRecaudada = baseEdu;
     const ventaReconocida = datos.eduPendiente ? null : datos.eduReconocida;
     const eduAt = {
@@ -8031,16 +8082,39 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       margenComprobado: margenFaltante || ventaRecaudada === 0 ? null : basePorMargen / ventaRecaudada,
       factorReconocimiento: ventaReconocida === null || ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada
     };
-    let valorRealMision = 0;
-    datos.elegibles.forEach((fila2) => {
-      if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) === "mision") valorRealMision += Number(fila2.base) || 0;
-    });
+    const lineasMisionProd = datos.misionDesdeProduccion?.lineas || [];
+    const valorRealMision = lineasMisionProd.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
     const mision = {
       facturas: datos.facturasMision.size,
       valorPorFactura: parametros.mision.valorFacturaNueva,
       valorReal: valorRealMision,
-      ventaReconocida: datos.facturasMision.size * parametros.mision.valorFacturaNueva
+      ventaReconocida: valorRealMision,
+      origen: "produccion",
+      lineas: lineasMisionProd
     };
+    lineasMisionProd.forEach((fila2) => {
+      const id = `prod|${fila2.hoja || ""}|${fila2.numeroFila || ""}|${fila2.factura || ""}|${fila2.cuenta || ""}`;
+      if (vistos.has(id)) return;
+      vistos.add(id);
+      detalleFacturas.push({
+        factura: fila2.factura || "",
+        origen: fila2.hoja || "Producción",
+        uso: "Misión · producción (política nueva)",
+        producto: nombreVisible("mision"),
+        productoClave: "mision",
+        cuenta: fila2.cuenta || "",
+        evento: eventoDeFila(fila2, facturaAEvento),
+        base: Number(fila2.base) || 0,
+        estado: fila2.estado || "",
+        fechaPago: fila2.fechaPago instanceof Date ? fila2.fechaPago : null,
+        elegible: true,
+        recaudo: Number(fila2.base) || 0,
+        margenEvento: null,
+        factorAplicado: null,
+        ventaReconocida: Number(fila2.base) || 0
+      });
+    });
+    detalleFacturas.sort((a, b) => ordenUso.indexOf(a.uso) - ordenUso.indexOf(b.uso));
     const detalleAnterior = (datos.lineasProduccion || []).map((fila2) => ({
       factura: fila2.factura || "",
       cliente: fila2.cliente || "",
@@ -8364,10 +8438,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const textoEvento = texto(`${evento.grupo || ""} ${evento.producto || ""}`);
     return textoEvento.includes(marca);
   }
-  function liquidarMes(filas, eventos2, parametros, mes, facturaAEvento) {
+  function liquidarMes(filas, eventos2, parametros, mes, facturaAEvento, filasProduccionDetalle = []) {
     const equipo = parametros.comerciales.filter((comercial) => (comercial.activoDesde || "0000-00") <= mes);
     const margenes = margenesPorEvento(eventos2, parametros);
-    const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2));
+    const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2, filasProduccionDetalle));
     const director = metodosDirector(resultados, parametros, mes);
     const avisos = [];
     filas.forEach((fila2) => {
@@ -12247,7 +12321,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   }
   function liquidacionDe(liquidacion) {
     if (liquidacion) return liquidacion;
-    return liquidarMes(obtenerFacturacion(), obtenerEventos(), obtenerParametros(), mesVisible2(), obtenerFacturaAEvento());
+    return liquidarMes(obtenerFacturacion(), obtenerEventos(), obtenerParametros(), mesVisible2(), obtenerFacturaAEvento(), obtenerProduccionDetalle());
   }
   async function generarExcelComercial(nombre, { clave: clave5, liquidacion } = {}) {
     const actual = liquidacionDe(liquidacion);
@@ -12469,7 +12543,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         condiciones: guardadas || { ...condicionesVacias(), ...deHoja?.condiciones || {} }
       };
     });
-    return liquidarMes(obtenerFacturacion(), eventos2, obtenerParametros(), mesActual(), obtenerFacturaAEvento());
+    return liquidarMes(obtenerFacturacion(), eventos2, obtenerParametros(), mesActual(), obtenerFacturaAEvento(), obtenerProduccionDetalle());
   }
   function listaAvisos(avisos) {
     if (!avisos || !avisos.length) return "";
@@ -12719,6 +12793,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const orden = [
       "Edu/AT · política nueva",
       "Edu/AT · no recaudada en el mes",
+      "Misión · producción (política nueva)",
       "Misión · valor fijo por factura",
       "Misión · esquema anterior",
       "BTL · se liquida en 5.11.5",
@@ -13960,7 +14035,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       factor: edu.factorReconocimiento,
       ventaReconocida: edu.ventaReconocida
     })}
-    <p class="nota-mision">Facturas de Misión del mes: ${mision.facturas ?? 0}.</p>`;
+    <p class="nota-mision">Misión Internacional (archivo de Producción): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
   }
   function bandasMargen() {
     const reglas = obtenerParametros().margen || {};

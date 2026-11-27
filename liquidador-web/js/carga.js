@@ -57,6 +57,8 @@ const CAMPOS_BTL_EVENTOS = [
 let facturacionCargada = [];
 let eventosCargados = [];
 let facturaAEventoCargada = new Map();
+/** Filas tipo Facturación (ASESOR, BASE, GRUPO, SERVICIO…) leídas del libro de Producción (p. ej. Misión Internacional). */
+let produccionDetalleCargada = [];
 let btlEventosCargados = new Map();
 let btlEventosManual = false;
 let controlHoja4 = null;
@@ -85,6 +87,14 @@ export function obtenerEventos() {
 /** Solo los eventos del informe de Producción (sin los BTL importados). */
 export function obtenerEventosProduccion() {
   return eventosCargados;
+}
+
+/**
+ * Detalle de producción con columnas de facturación (asesor, base, grupo, cuenta…),
+ * p. ej. filas de Misión Internacional del archivo de producción.
+ */
+export function obtenerProduccionDetalle() {
+  return produccionDetalleCargada;
 }
 
 /** Mapa de factura normalizada a la clave del evento (el #). */
@@ -499,6 +509,27 @@ function mapaAutomatico(matriz, campos) {
   return sugerirColumnas(encabezados, campos).mapa;
 }
 
+/** Hoja del libro de Producción con detalle tipo Facturación (ASESOR + BASE + GRUPO/SERVICIO). */
+function hojaPareceDetalleFacturacion(matriz) {
+  if (!matriz || !matriz.length) return false;
+  const encabezados = (matriz[0] || []).map((celda) => normalizar(celda));
+  const tiene = (...aliases) => aliases.some((alias) => encabezados.some((h) => h === alias || h.includes(alias)));
+  return tiene("asesor") && tiene("base") && (tiene("grupo") || tiene("servicio") || tiene("cuenta"));
+}
+
+/** Lee del libro de Producción las hojas con filas ASESOR/BASE (Misión Internacional, etc.). */
+export function leerDetalleProduccion(libro) {
+  const detalle = [];
+  Object.keys(libro || {}).forEach((nombre) => {
+    const matriz = libro[nombre] || [];
+    if (!hojaPareceDetalleFacturacion(matriz)) return;
+    const mapa = mapaAutomatico(matriz, CAMPOS_FACTURACION);
+    if (mapa.asesor === "" || mapa.asesor === undefined || mapa.base === "" || mapa.base === undefined) return;
+    detalle.push(...filasDesdeHoja(matriz, CAMPOS_FACTURACION, mapa, nombre, false));
+  });
+  return detalle;
+}
+
 function filasDesdeHoja(matriz, campos, mapa, hoja, elegida) {
   const cuerpo = matriz.slice(1);
   const filas = [];
@@ -848,7 +879,7 @@ export function iniciarCarga(contenedor) {
         <p class="nota-union" id="nota-resumen" hidden></p>
       </article>
       <article class="tarjeta tarjeta-archivo">
-        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe de producción (hoja PRODUCTOS) con ingreso y costo por evento.")}
+        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe de producción: hoja PRODUCTOS (márgenes) y, si viene, el detalle de Misión Internacional (ASESOR/BASE) para la política nueva.")}
         <div class="zona-error" data-error="eventos"></div>
         <p class="nota-union" id="nota-union" hidden></p>
       </article>
@@ -1046,8 +1077,12 @@ export function iniciarCarga(contenedor) {
       const armado = armarProduccion(filas, mes);
       eventosCargados = armado.eventos;
       facturaAEventoCargada = armado.facturaAEvento;
+      produccionDetalleCargada = leerDetalleProduccion(libro);
       const avisos = advertenciasEventos(filas, nombres, mes);
-      vistas.eventos = { filas, mes, hojas: [nombreHoja] };
+      if (produccionDetalleCargada.length) {
+        avisos.push(`Producción: ${produccionDetalleCargada.length} líneas de detalle (Misión Internacional u otras) leídas del mismo libro.`);
+      }
+      vistas.eventos = { filas, mes, hojas: [nombreHoja], detalle: produccionDetalleCargada };
       pintarVistaTipo("eventos");
       avisosPorTipo.eventos = avisos;
       resumenArchivos.eventos = {
@@ -1055,12 +1090,17 @@ export function iniciarCarga(contenedor) {
         hoja: nombreHoja,
         lineas: armado.eventos.length,
         eventosMes: armado.eventos.filter((evento) => evento.delMes).length,
+        detalle: produccionDetalleCargada.length,
       };
     } else {
       eventosCargados = filas.map((fila) => ({ ...fila, delMes: true }));
       facturaAEventoCargada = mapaDesdeFacturas(filas);
+      produccionDetalleCargada = leerDetalleProduccion(libro);
       const avisos = advertenciasEventos(filas, nombres, mes);
-      vistas.eventos = { filas, mes, hojas: [nombreHoja] };
+      if (produccionDetalleCargada.length) {
+        avisos.push(`Producción: ${produccionDetalleCargada.length} líneas de detalle (Misión Internacional u otras) leídas del mismo libro.`);
+      }
+      vistas.eventos = { filas, mes, hojas: [nombreHoja], detalle: produccionDetalleCargada };
       pintarVistaTipo("eventos");
       avisosPorTipo.eventos = avisos;
       resumenArchivos.eventos = {
@@ -1068,6 +1108,7 @@ export function iniciarCarga(contenedor) {
         hoja: nombreHoja,
         lineas: filas.length,
         eventosMes: eventosCargados.length,
+        detalle: produccionDetalleCargada.length,
       };
     }
     pintarEstadoArchivos();
