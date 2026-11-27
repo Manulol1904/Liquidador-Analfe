@@ -51,12 +51,13 @@ describe("facturación nacional (Facturacion + Misión + BTL)", () => {
     assert.equal(armado.filas.filter((f) => !f.elegida).length, 3);
   });
 
-  it("mapea fecha, fechaPago y estado; fechas 05:00 UTC cuentan en el mes", () => {
+  it("mapea fecha, fechaPago, estado y cantidad; fechas 05:00 UTC cuentan en el mes", () => {
     const armado = armarFacturacionDesdeLibro(libroNacionalSintetico());
     const edu = armado.filas.find((f) => f.factura === "FV1");
     assert.ok(edu.fecha instanceof Date);
     assert.ok(edu.fechaPago instanceof Date);
     assert.equal(edu.estado, "CANCELADA");
+    assert.equal(edu.cantidad, 1);
     assert.equal(fechaEnMes(edu.fecha, "2026-10"), true);
     assert.equal(fechaEnMes(edu.fecha, "2026-11"), false);
   });

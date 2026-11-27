@@ -162,15 +162,25 @@ export function esCuentaAnticipo(cuenta, parametros) {
   return prefijo.length > 0 && codigo.startsWith(prefijo);
 }
 
-/**
- * Facturas de Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
- * En el esquema anterior cada factura aporta parametros.mision.valorFacturaAnterior (p. ej. $1.000.000).
- */
 /** Esquema anterior: solo ESTADO exactamente CANCELADA (NO CANCELADA no entra). */
 export function esCancelada(fila) {
   return texto(fila?.estado) === "cancelada";
 }
 
+/** Unidades de misión: columna CANTIDAD del Excel (p. ej. 2 → dos misiones). Sin dato = 1. */
+export function cantidadMision(fila) {
+  const crudo = fila?.cantidad;
+  if (typeof crudo === "number" && Number.isFinite(crudo) && crudo > 0) return crudo;
+  const textoNum = String(crudo ?? "").trim().replace(/\s/g, "").replace(",", ".");
+  const n = Number(textoNum);
+  if (Number.isFinite(n) && n > 0) return n;
+  return 1;
+}
+
+/**
+ * Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
+ * Esquema anterior: N = suma de CANTIDAD × valorFacturaAnterior (p. ej. 2 × $1.000.000).
+ */
 export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   const vistas = new Set();
   const lineas = [];
@@ -186,17 +196,19 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
     lineas.push(fila);
   });
   const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+  const unidades = lineas.reduce((suma, fila) => suma + cantidadMision(fila), 0);
   return {
-    facturas: lineas.length,
+    facturas: unidades,
+    unidades,
     lineas,
     valorPorFactura: valorUnitario,
-    valor: lineas.length * valorUnitario,
+    valor: unidades * valorUnitario,
   };
 }
 
 /**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE CANCELADA de la hoja elegida + Misión (N × valorFacturaAnterior).
+ * Suma BASE CANCELADA de la hoja elegida + Misión (suma CANTIDAD × valorFacturaAnterior).
  * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209).
  * NO CANCELADA no entra.
  */

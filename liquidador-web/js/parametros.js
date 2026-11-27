@@ -603,7 +603,7 @@ function htmlFormulario() {
     ), "ICA y GMF se restan al armar el costo total del evento.")
       + tarjetaParam("Misión", ["mision"], camposParam(
         campo("mision.valorFacturaNueva", p.mision.valorFacturaNueva, { titulo: "Factura nueva", unidad: "pesos", ayuda: "Valor reconocido por factura de Misión" }),
-        campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Factura anterior", unidad: "pesos", ayuda: "Base del esquema anterior por factura" })
+        campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Valor por misión (anterior)", unidad: "pesos", ayuda: "Esquema anterior: CANTIDAD del Excel × este valor (p. ej. 2 × $1.000.000)" })
       ), "La política nueva reconoce un valor fijo por factura.")
       + tarjetaParam("Actividad cultural", ["cultural"], camposParam(
         campo("cultural.valorCarton", p.cultural.valorCarton, { titulo: "Valor por cartón", unidad: "pesos", ayuda: "Pesos por cartón" }),

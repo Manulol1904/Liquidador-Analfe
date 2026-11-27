@@ -1,10 +1,10 @@
 /**
- * Esquema anterior: cada factura de Misión suma valorFacturaAnterior a la producción.
+ * Esquema anterior: Misión = suma de CANTIDAD × valorFacturaAnterior.
  * node --test pruebas/mision_anterior.test.mjs
  */
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { produccionAnterior, misionEsquemaAnterior, liquidarComercial } from "../js/calculos.js";
+import { produccionAnterior, misionEsquemaAnterior, liquidarComercial, cantidadMision } from "../js/calculos.js";
 import { PARAMETROS_INICIALES } from "../js/parametros.js";
 
 const p = structuredClone(PARAMETROS_INICIALES);
@@ -27,12 +27,41 @@ const comercial = {
 const fecha = new Date(Date.UTC(2026, 9, 15, 5, 0, 0));
 
 describe("misión en producción esquema anterior", () => {
-  it("cuenta facturas de la hoja Misión Int. a valorFacturaAnterior", () => {
+  it("cantidadMision usa CANTIDAD (por defecto 1)", () => {
+    assert.equal(cantidadMision({ cantidad: 2 }), 2);
+    assert.equal(cantidadMision({ cantidad: "2,00" }), 2);
+    assert.equal(cantidadMision({}), 1);
+    assert.equal(cantidadMision({ cantidad: 0 }), 1);
+  });
+
+  it("una fila con CANTIDAD 2 cuenta como 2 misiones, no como 1", () => {
+    const filas = [
+      {
+        elegida: false,
+        hoja: "Misión Int. ",
+        asesor: "Carolina Gomez",
+        grupo: "Misión Interna",
+        cuenta: "41703001 Ingreso Misión Internacional",
+        cantidad: 2,
+        base: 42_384_081,
+        fecha,
+        factura: "FV-C2",
+        estado: "CANCELADA",
+      },
+    ];
+    const carolina = { nombre: "Carolina Gómez", nombreFacturacion: "Carolina Gomez" };
+    const m = misionEsquemaAnterior(filas, carolina, "2026-10", p);
+    assert.equal(m.facturas, 2);
+    assert.equal(m.unidades, 2);
+    assert.equal(m.valor, 2_000_000);
+  });
+
+  it("suma CANTIDAD de varias facturas a valorFacturaAnterior", () => {
     const filas = [
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 2_000_000, fecha, factura: "E1", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M2", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Otro", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M3", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M2", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Otro", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 2, base: 15_500_000, fecha, factura: "M3", estado: "CANCELADA" },
     ];
     const m = misionEsquemaAnterior(filas, comercial, "2026-10", p);
     assert.equal(m.facturas, 2);
@@ -48,9 +77,9 @@ describe("misión en producción esquema anterior", () => {
   it("liquidarComercial refleja Misión en Producción (cumplimiento)", () => {
     const filas = [
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 21_892_200, fecha, factura: "E1", estado: "CANCELADA", fechaPago: fecha },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M2", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M3", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M2", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M3", estado: "CANCELADA" },
     ];
     const r = liquidarComercial(comercial, filas, "2026-10", p, new Map(), new Map(), [], []);
     assert.equal(r.anteriorTramos.mision.facturas, 3);
@@ -62,8 +91,8 @@ describe("misión en producción esquema anterior", () => {
     const filas = [
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 2_000_000, fecha, factura: "E1", estado: "CANCELADA" },
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 900_000, fecha, factura: "E2", estado: "NO CANCELADA " },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M2", estado: "NO CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 2, base: 15_500_000, fecha, factura: "M2", estado: "NO CANCELADA" },
     ];
     const ant = produccionAnterior(filas, comercial, "2026-10", p);
     assert.equal(ant.produccionBase, 2_000_000);

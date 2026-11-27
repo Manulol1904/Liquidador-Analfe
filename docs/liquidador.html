@@ -5097,7 +5097,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si la factura no tiene margen en PRODUCTOS, Edu/AT reconoce el 100 % de la BASE" })
       ), "ICA y GMF se restan al armar el costo total del evento.") + tarjetaParam("Misión", ["mision"], camposParam(
         campo("mision.valorFacturaNueva", p.mision.valorFacturaNueva, { titulo: "Factura nueva", unidad: "pesos", ayuda: "Valor reconocido por factura de Misión" }),
-        campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Factura anterior", unidad: "pesos", ayuda: "Base del esquema anterior por factura" })
+        campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Valor por misión (anterior)", unidad: "pesos", ayuda: "Esquema anterior: CANTIDAD del Excel × este valor (p. ej. 2 × $1.000.000)" })
       ), "La política nueva reconoce un valor fijo por factura.") + tarjetaParam("Actividad cultural", ["cultural"], camposParam(
         campo("cultural.valorCarton", p.cultural.valorCarton, { titulo: "Valor por cartón", unidad: "pesos", ayuda: "Pesos por cartón" }),
         campo("cultural.mes", p.cultural.mes, { titulo: "Mes cultural", ayuda: "Número de mes, 12 es diciembre" })
@@ -6142,6 +6142,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     { clave: "subgrupo", titulo: "Subgrupo", aliases: ["subgrupo"] },
     { clave: "cuenta", titulo: "Cuenta", aliases: ["cuenta", "servicio"] },
     { clave: "evento", titulo: "Evento", aliases: ["evento", "evento_id", "nro evento", "no. evento"] },
+    { clave: "cantidad", titulo: "Cantidad", aliases: ["cantidad"] },
     { clave: "base", titulo: "Base", aliases: ["base"] },
     { clave: "comision", titulo: "% comisión", aliases: ["% com", "% comision", "% comisión"] },
     { clave: "direccion", titulo: "% dirección", aliases: ["% direccion", "% dirección"] },
@@ -7596,6 +7597,14 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   function esCancelada(fila2) {
     return texto(fila2?.estado) === "cancelada";
   }
+  function cantidadMision(fila2) {
+    const crudo = fila2?.cantidad;
+    if (typeof crudo === "number" && Number.isFinite(crudo) && crudo > 0) return crudo;
+    const textoNum = String(crudo ?? "").trim().replace(/\s/g, "").replace(",", ".");
+    const n = Number(textoNum);
+    if (Number.isFinite(n) && n > 0) return n;
+    return 1;
+  }
   function misionEsquemaAnterior(filas, comercial, mes, parametros) {
     const vistas = /* @__PURE__ */ new Set();
     const lineas = [];
@@ -7611,11 +7620,13 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       lineas.push(fila2);
     });
     const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+    const unidades = lineas.reduce((suma, fila2) => suma + cantidadMision(fila2), 0);
     return {
-      facturas: lineas.length,
+      facturas: unidades,
+      unidades,
       lineas,
       valorPorFactura: valorUnitario,
-      valor: lineas.length * valorUnitario
+      valor: unidades * valorUnitario
     };
   }
   function produccionAnterior(filas, comercial, mes, parametros) {
@@ -12901,14 +12912,14 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const misionAnt = tramo.mision || resultado.misionAnterior || {};
     const nMision = Number(misionAnt.facturas) || 0;
     const valorMision = Number(misionAnt.valor ?? misionAnt.valorTotal) || 0;
-    const notaMision = nMision ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>` : "";
+    const notaMision = nMision ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} unidades × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>` : "";
     return `
     <p>${escaparHtml(fuente)}${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
     ${tablaAnteriorImpresion([
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
       ["Producción (total CANCELADA)", moneda(tramo.produccion)],
-      ...nMision ? [["Misión (N × valor factura anterior)", moneda(valorMision)]] : [],
+      ...nMision ? [["Misión (unidades × valor)", moneda(valorMision)]] : [],
       ["Cumplimiento", porcentaje2(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje2(tramo.tasa)],
       ["Base comisión", moneda(baseComision)],

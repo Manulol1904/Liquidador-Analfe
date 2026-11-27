@@ -508,7 +508,7 @@ function bloquePoliticaAnterior(resultado) {
   const nMision = Number(misionAnt.facturas) || 0;
   const valorMision = Number(misionAnt.valor ?? misionAnt.valorTotal) || 0;
   const notaMision = nMision
-    ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>`
+    ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} unidades × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>`
     : "";
   return `
     <p>${escaparHtml(fuente)}${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
@@ -516,7 +516,7 @@ function bloquePoliticaAnterior(resultado) {
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
       ["Producción (total CANCELADA)", moneda(tramo.produccion)],
-      ...(nMision ? [["Misión (N × valor factura anterior)", moneda(valorMision)]] : []),
+      ...(nMision ? [["Misión (unidades × valor)", moneda(valorMision)]] : []),
       ["Cumplimiento", porcentaje(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje(tramo.tasa)],
       ["Base comisión", moneda(baseComision)],

@@ -19,6 +19,7 @@ const CAMPOS_FACTURACION = [
   { clave: "subgrupo", titulo: "Subgrupo", aliases: ["subgrupo"] },
   { clave: "cuenta", titulo: "Cuenta", aliases: ["cuenta", "servicio"] },
   { clave: "evento", titulo: "Evento", aliases: ["evento", "evento_id", "nro evento", "no. evento"] },
+  { clave: "cantidad", titulo: "Cantidad", aliases: ["cantidad"] },
   { clave: "base", titulo: "Base", aliases: ["base"] },
   { clave: "comision", titulo: "% comisión", aliases: ["% com", "% comision", "% comisión"] },
   { clave: "direccion", titulo: "% dirección", aliases: ["% direccion", "% dirección"] },
