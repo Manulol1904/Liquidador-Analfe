@@ -111,4 +111,16 @@ describe("misión en producción esquema anterior", () => {
     assert.equal(ant.mision.facturas, 1);
     assert.equal(ant.produccion, 3_000_000);
   });
+
+  it("cargo parcial de Misión (BASE < valorFacturaNueva) no cuenta unidad", () => {
+    const filas = [
+      { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 37_510_000, fecha, factura: "E1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 1_421_600, fecha, factura: "M2", estado: "CANCELADA" },
+    ];
+    const ant = produccionAnterior(filas, comercial, "2026-10", p);
+    assert.equal(ant.mision.unidades, 1);
+    assert.equal(ant.mision.valor, 1_000_000);
+    assert.equal(ant.produccion, 38_510_000);
+  });
 });

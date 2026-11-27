@@ -7610,6 +7610,11 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     if (!e) return true;
     return e === "cancelada";
   }
+  function esMisionCompletaAnterior(fila2, parametros) {
+    const minimo = Number(parametros?.mision?.valorFacturaNueva) || 0;
+    const base = Number(fila2?.base) || 0;
+    return minimo <= 0 || base >= minimo;
+  }
   function misionEsquemaAnterior(filas, comercial, mes, parametros) {
     const vistas = /* @__PURE__ */ new Set();
     const lineas = [];
@@ -7617,6 +7622,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       if (asesorVacio(fila2) || !mismaPersona(fila2.asesor, comercial)) return;
       if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision") return;
       if (!estadoPermiteMisionAnterior(fila2)) return;
+      if (!esMisionCompletaAnterior(fila2, parametros)) return;
       if (!(fila2.fecha instanceof Date) || !fechaEnMes(fila2.fecha, mes)) return;
       const numero2 = String(fila2.factura ?? "").trim();
       const clave5 = numero2 || `misi-${fila2.hoja || ""}-${fila2.numeroFila || lineas.length}`;

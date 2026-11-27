@@ -187,9 +187,19 @@ export function estadoPermiteMisionAnterior(fila) {
 }
 
 /**
+ * Misión “completa” para esquema anterior: BASE >= valorFacturaNueva (p. ej. $15.500.000).
+ * Cargos menores (p. ej. $1.421.600) no cuentan como unidad.
+ */
+export function esMisionCompletaAnterior(fila, parametros) {
+  const minimo = Number(parametros?.mision?.valorFacturaNueva) || 0;
+  const base = Number(fila?.base) || 0;
+  return minimo <= 0 || base >= minimo;
+}
+
+/**
  * Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
  * Esquema anterior: N = suma de CANTIDAD × valorFacturaAnterior (p. ej. 2 × $1.000.000).
- * NO CANCELADA no entra.
+ * Solo CANCELADA (o sin ESTADO) y BASE de misión completa. NO CANCELADA / cargos parciales no entran.
  */
 export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   const vistas = new Set();
@@ -198,6 +208,7 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
     if (asesorVacio(fila) || !mismaPersona(fila.asesor, comercial)) return;
     if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
     if (!estadoPermiteMisionAnterior(fila)) return;
+    if (!esMisionCompletaAnterior(fila, parametros)) return;
     if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
     const numero = String(fila.factura ?? "").trim();
     const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
