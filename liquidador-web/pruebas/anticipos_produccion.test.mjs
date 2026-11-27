@@ -1,6 +1,6 @@
 /**
- * Cuentas 27 / anticipos 27209: entran en esquema anterior (produccionAnterior),
- * no en el total de producción del mes (produccionTotalMes).
+ * Cuentas 27 / anticipos 27209: se excluyen del esquema anterior
+ * (produccionAnterior y produccionTotalMes). La política nueva no usa esa suma.
  */
 import { produccionAnterior, produccionTotalMes, esCuentaAnticipo } from "../js/calculos.js";
 
@@ -35,12 +35,12 @@ const assert = (nombre, ok) => {
 assert("esCuentaAnticipo 27209", esCuentaAnticipo("27209001 Ant. bolos", parametros) === true);
 assert("esCuentaAnticipo edu", esCuentaAnticipo("41600511", parametros) === false);
 
-const anterior = produccionAnterior(filas, comercial, mes);
-assert("esquema anterior incluye anticipo", anterior.produccion === 140);
-assert("esquema anterior lista anticipo", anterior.lineas.some((f) => f.factura === "B"));
+const anterior = produccionAnterior(filas, comercial, mes, parametros);
+assert("esquema anterior excluye anticipo", anterior.produccion === 100);
+assert("esquema anterior no lista anticipo", !anterior.lineas.some((f) => f.factura === "B"));
 
 const total = produccionTotalMes(filas, mes, parametros);
-assert("producción del mes excluye anticipo", total.base === 100);
-assert("producción del mes no lista anticipo", !total.lineas.some((f) => f.factura === "B"));
+assert("total mes (comisión anterior director) excluye anticipo", total.base === 100);
+assert("total mes no lista anticipo", !total.lineas.some((f) => f.factura === "B"));
 
 console.log("anticipos_produccion.test.mjs: listo");

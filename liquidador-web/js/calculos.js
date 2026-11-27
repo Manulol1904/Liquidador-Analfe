@@ -143,20 +143,21 @@ export function esCuentaAnticipo(cuenta, parametros) {
 }
 
 /**
- * Producción de la política anterior, como la tabla dinámica Hoja4.
+ * Producción del esquema anterior (comisión por tramos).
  * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes.
- * Entran todas las cuentas de esa hoja, incluidos los anticipos 27209 (solo esquema anterior).
- * No entran las hojas complementarias, las filas sin asesor, las sin fecha ni las de otro mes.
+ * No entran anticipos / cuentas 27 (27209…), ni hojas complementarias, filas sin asesor,
+ * sin fecha ni de otro mes. La política nueva no usa esta suma (usa recaudo).
  */
-export function produccionAnterior(filas, comercial, mes) {
+export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
+    && !esCuentaAnticipo(fila.cuenta, parametros));
   return { produccion: lineas.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0), lineas };
 }
 
 /**
- * Total de producción del mes (hoja elegida, con asesor y fecha en el mes).
- * No cuenta anticipos / cuentas 27 (27209…): esos solo entran en la liquidación del esquema anterior.
+ * Total de producción del mes para la comisión anterior del director (1,5 % × base).
+ * Misma regla que produccionAnterior: sin anticipos / cuentas 27 (27209…).
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
@@ -600,7 +601,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
   const factorPago = total === null ? null : factorCurva(total, parametros.curva);
   const pagoNuevo = factorPago === null || comercial.oportunidad === null ? null : pagoVariable(comercial.oportunidad, factorPago);
 
-  const produccionMes = produccionAnterior(filas, comercial, mes);
+  const produccionMes = produccionAnterior(filas, comercial, mes, parametros);
   let pagoAnterior = null;
   let anteriorTramos = null;
   if (comercial.tieneEsquemaAnterior) {

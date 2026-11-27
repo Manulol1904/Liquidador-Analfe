@@ -7401,8 +7401,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const prefijo = String(prefijoParam || prefijoClasif || "27209");
     return prefijo.length > 0 && codigo.startsWith(prefijo);
   }
-  function produccionAnterior(filas, comercial, mes) {
-    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
+  function produccionAnterior(filas, comercial, mes, parametros) {
+    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && !esCuentaAnticipo(fila2.cuenta, parametros));
     return { produccion: lineas.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0), lineas };
   }
   function produccionTotalMes(filas, mes, parametros) {
@@ -7769,7 +7769,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const total = hayHueco ? null : score([puntos.ventas, puntos.baseSocial, puntos.serfiscal, puntos.innovacion, puntos.satisfaccion]);
     const factorPago = total === null ? null : factorCurva(total, parametros.curva);
     const pagoNuevo = factorPago === null || comercial.oportunidad === null ? null : pagoVariable(comercial.oportunidad, factorPago);
-    const produccionMes = produccionAnterior(filas, comercial, mes);
+    const produccionMes = produccionAnterior(filas, comercial, mes, parametros);
     let pagoAnterior = null;
     let anteriorTramos = null;
     if (comercial.tieneEsquemaAnterior) {
@@ -13244,7 +13244,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     <p>Fuente: Facturación (${anterior.facturas || 0} facturas) ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
-      <li><span>Base: total de producción del mes (sin anticipos 27209)</span><span class="dinero">${moneda(anterior.base)}</span></li>
+      <li><span>Base: producción del mes sin anticipos 27209</span><span class="dinero">${moneda(anterior.base)}</span></li>
       <li><span>Tasa</span><span class="dinero">${porcentaje2(anterior.tasa)} <button type="button" class="boton boton--texto" data-ir="parametros">✎ Parámetros</button></span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(anterior.comision)}</span></li>
     </ul>
