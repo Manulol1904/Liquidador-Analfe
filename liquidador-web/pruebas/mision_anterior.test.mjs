@@ -57,4 +57,17 @@ describe("misión en producción esquema anterior", () => {
     assert.equal(r.anteriorTramos.produccion, 21_892_200 + 3_000_000);
     assert.equal(r.misionAnterior.valorTotal, 3_000_000);
   });
+
+  it("NO CANCELADA no entra a la producción del esquema anterior", () => {
+    const filas = [
+      { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 2_000_000, fecha, factura: "E1", estado: "CANCELADA" },
+      { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 900_000, fecha, factura: "E2", estado: "NO CANCELADA " },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", base: 15_500_000, fecha, factura: "M2", estado: "NO CANCELADA" },
+    ];
+    const ant = produccionAnterior(filas, comercial, "2026-10", p);
+    assert.equal(ant.produccionBase, 2_000_000);
+    assert.equal(ant.mision.facturas, 1);
+    assert.equal(ant.produccion, 3_000_000);
+  });
 });

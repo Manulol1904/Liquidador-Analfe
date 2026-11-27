@@ -26,6 +26,7 @@ function fila(extra = {}) {
     fecha,
     base: 1000,
     cuenta: "41600511",
+    estado: "CANCELADA",
     ...extra,
   };
 }

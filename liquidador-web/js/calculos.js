@@ -166,12 +166,18 @@ export function esCuentaAnticipo(cuenta, parametros) {
  * Facturas de Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
  * En el esquema anterior cada factura aporta parametros.mision.valorFacturaAnterior (p. ej. $1.000.000).
  */
+/** Esquema anterior: solo ESTADO exactamente CANCELADA (NO CANCELADA no entra). */
+export function esCancelada(fila) {
+  return texto(fila?.estado) === "cancelada";
+}
+
 export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   const vistas = new Set();
   const lineas = [];
   (filas || []).forEach((fila) => {
     if (asesorVacio(fila) || !mismaPersona(fila.asesor, comercial)) return;
     if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
+    if (!esCancelada(fila)) return;
     if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
     const numero = String(fila.factura ?? "").trim();
     const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
@@ -190,14 +196,15 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
 
 /**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes,
- * más Misión: N facturas × valorFacturaAnterior (hoja Misión Int.).
+ * Suma BASE de la hoja elegida, del comercial, CANCELADA con fecha de facturación en el mes,
+ * más Misión CANCELADA: N facturas × valorFacturaAnterior (hoja Misión Int.).
  * - produccion: total con anticipos 27209 + Misión (para % de cumplimiento / tramo).
  * - produccionSinAnticipos: base de la comisión (sin cuentas 27) + Misión.
- * No entran BTL ni filas sin asesor / sin fecha / de otro mes en la BASE elegida.
+ * NO CANCELADA no entra. Tampoco BTL ni filas sin asesor / sin fecha / de otro mes.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
+    && esCancelada(fila)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
   const lineasSinAnticipos = lineas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
@@ -216,10 +223,11 @@ export function produccionAnterior(filas, comercial, mes, parametros) {
 /**
  * Total de producción del mes para la comisión anterior del director (1,5 % × base).
  * La comisión del director se calcula sin anticipos / cuentas 27 (27209…).
- * baseConAnticipos queda disponible por si se necesita el total producido.
+ * Solo CANCELADA. baseConAnticipos queda disponible por si se necesita el total producido.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
+    && esCancelada(fila)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
   const lineas = lineasTodas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
@@ -453,8 +461,9 @@ function deHojaElegida(fila, parametros) {
   return !esHojaComplementaria(fila, parametros);
 }
 
-/** En el esquema anterior entra la fila del mes y la que no tiene fecha. La de otro mes no entra. */
+/** En el esquema anterior: CANCELADA, del mes (o sin fecha). NO CANCELADA y otro mes no entran. */
 function cuentaParaAnterior(fila, mes) {
+  if (!esCancelada(fila)) return false;
   if (!(fila.fecha instanceof Date)) return true;
   return fechaEnMes(fila.fecha, mes);
 }
