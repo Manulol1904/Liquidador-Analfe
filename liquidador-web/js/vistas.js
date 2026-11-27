@@ -2168,7 +2168,7 @@ function seccionBase(resultado) {
       <li><span>Retiros</span>${entradaFicha(resultado, "retiros", "Retiros", false, true)}</li>
       <li><span>Ingresos</span>${entradaFicha(resultado, "ingresos", "Ingresos", false, true)}</li>
       <li><span>Base social cierre</span><span>${base.cierre === null ? "Pendiente" : entero(base.cierre)}</span></li>
-      <li><span>Meta</span><span>${base.meta === null ? "Pendiente" : entero(base.meta)}</span></li>
+      <li><span>Meta</span><span>${base.meta === null ? "Pendiente" : `${entero(base.meta)}${base.metaOrigen === "manual" ? ' <span class="badge badge--aviso">editada</span>' : base.metaOrigen === "formula" ? ' <span class="badge badge--neutro">fórmula</span>' : ""}`}</span></li>
       <li><span>Resultado</span><span>${resultadoBase}</span></li>
       <li class="fila-puntos"><span>Puntos</span><span>${resultado.puntos.baseSocial === null ? "Pendiente" : decimal(resultado.puntos.baseSocial, 2)}</span></li>
     </ul>

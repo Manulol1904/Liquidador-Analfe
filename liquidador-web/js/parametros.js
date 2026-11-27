@@ -486,6 +486,30 @@ function filaMetas(personaActual, indice) {
   return `<tr><th>${escaparHtml(personaActual.nombre)}</th>${celda("eduAt")}${celda("mision")}${celda("congreso")}<td data-cultural="${indice}">${escaparHtml(cultural)}</td></tr>`;
 }
 
+/** Fórmula de referencia para el placeholder de meta de base social. */
+function metaBaseSocialPlaceholder(personaActual, mes) {
+  const origen = parametrosActuales.baseSocial?.mesOrigen || "2026-10";
+  const incremento = Number(parametrosActuales.baseSocial?.incrementoPorMes);
+  if (personaActual.baseSocialInicial === null || personaActual.baseSocialInicial === undefined || !Number.isFinite(incremento)) return "";
+  const [anioOrigen, mesOrigen] = origen.split("-").map(Number);
+  const [anio, numeroMes] = String(mes).split("-").map(Number);
+  const diferencia = (anio - anioOrigen) * 12 + (numeroMes - mesOrigen);
+  if (diferencia < 0) return "";
+  return String(personaActual.baseSocialInicial + (diferencia + 1) * incremento);
+}
+
+function filaBaseSocialMes(personaActual, indice) {
+  const base = personaActual.baseSocialInicial;
+  const baseTxt = base === null || base === undefined || base === "" ? "—" : String(base);
+  const celdas = ["2026-10", "2026-11", "2026-12"].map((mes) => {
+    const valor = personaActual.baseSocialMes?.[mes]?.meta;
+    const titulo = `Meta base social ${mes} de ${personaActual.nombre}`;
+    const placeholder = metaBaseSocialPlaceholder(personaActual, mes);
+    return `<td><input class="entrada campo-editable" type="number" step="any" data-ruta="comerciales.${indice}.baseSocialMes.${mes}.meta" value="${valorInput(valor)}" placeholder="${escaparHtml(placeholder)}" aria-label="${escaparHtml(titulo)}" title="${placeholder ? `Fórmula si vacío: ${placeholder}` : ""}"></td>`;
+  }).join("");
+  return `<tr><th>${escaparHtml(personaActual.nombre)}</th><td class="num">${escaparHtml(baseTxt)}</td>${celdas}</tr>`;
+}
+
 /** Grupos de la pestaña Parámetros. Se muestra uno a la vez. */
 const GRUPOS_PARAMETROS = [
   { id: "reglas", titulo: "Reglas", ayuda: "Cada peso es el máximo de puntos de ese indicador. La suma de pesos debe dar 100." },
@@ -495,7 +519,7 @@ const GRUPOS_PARAMETROS = [
   { id: "btl", titulo: "BTL", ayuda: "Umbrales de la tabla de porcentaje liquidador (5.11.5)." },
   { id: "director", titulo: "Director", ayuda: "Datos del director y método para armar el score del equipo." },
   { id: "comerciales", titulo: "Comerciales", ayuda: "Datos por comercial. El documento y el cargo van en la segunda línea de cada nombre." },
-  { id: "metas", titulo: "Metas por mes", ayuda: "Congreso de noviembre y diciembre vacío = pendiente. La actividad cultural sale de cartones × valor del cartón." },
+  { id: "metas", titulo: "Metas por mes", ayuda: "Congreso de noviembre y diciembre vacío = pendiente. La actividad cultural sale de cartones × valor del cartón. La meta de base social se edita mes a mes; vacío = fórmula Base 30 sep + pasos × incremento." },
 ];
 
 let grupoParametros = "reglas";
@@ -661,7 +685,7 @@ function htmlFormulario() {
             <tbody>${p.comerciales.map(filaComercial).join("")}</tbody>
           </table>
         </div>`),
-    metas: tarjetaParam("Metas por mes", null, `
+    metas: tarjetaParam("Metas por mes", ["baseSocial.incrementoPorMes", "baseSocial.mesOrigen"], `
         <p>La actividad cultural del mes ${escaparHtml(p.cultural.mes)} es cartones × valor del cartón. Congreso de noviembre y diciembre vacío = pendiente.</p>
         <div class="segmentos" role="tablist" aria-label="Mes de las metas">
           ${["2026-10", "2026-11", "2026-12"].map((mes) => `<button type="button" data-mes-vista="${mes}" class="${mes === mesMetas ? "activa" : ""}">${mesLegible(mes)}</button>`).join("")}
@@ -671,7 +695,19 @@ function htmlFormulario() {
             <thead><tr><th>Comercial</th><th>Edu/AT</th><th>Misión</th><th>Congreso</th><th>Cultural</th></tr></thead>
             <tbody>${p.comerciales.map(filaMetas).join("")}</tbody>
           </table>
-        </div>`),
+        </div>`)
+      + tarjetaParam("Meta de base social por mes", ["baseSocial.incrementoPorMes", "baseSocial.mesOrigen", "comerciales"], `
+        ${camposParam(
+          campo("baseSocial.incrementoPorMes", p.baseSocial.incrementoPorMes, { titulo: "Incremento por mes", ayuda: "Personas que suma la fórmula cada mes (si la celda del mes está vacía)" }),
+          `<label class="campo-param"><span class="campo-param__etiqueta">Mes origen</span><span class="caja-campo"><input class="entrada campo-editable" type="text" data-ruta="baseSocial.mesOrigen" data-tipo="texto" value="${escaparHtml(p.baseSocial.mesOrigen || "")}" aria-label="Mes origen" placeholder="2026-10"></span><small class="ayuda-campo">Primer mes de la fórmula (ej. 2026-10). Paso 1 = ese mes</small></label>`
+        )}
+        <p>Vacío en un mes = se usa la fórmula: Base 30 sep + pasos × incremento. Si escribes un número, reemplaza la fórmula en ese mes.</p>
+        <div class="tabla-scroll">
+          <table class="tabla tabla-metas">
+            <thead><tr><th>Comercial</th><th>Base 30 sep</th><th>Meta octubre</th><th>Meta noviembre</th><th>Meta diciembre</th></tr></thead>
+            <tbody>${p.comerciales.map(filaBaseSocialMes).join("")}</tbody>
+          </table>
+        </div>`, "Edición mes a mes de la meta de base social de cada comercial."),
   };
   return `
     <div class="barra-param">
@@ -699,12 +735,16 @@ function htmlFormulario() {
     ${GRUPOS_PARAMETROS.map((grupo) => seccionGrupo(grupos[grupo.id], principales[grupo.id])).join("")}`;
 }
 
-/** Escribe un número en el objeto siguiendo una ruta como "pesos.ventas". */
+/** Escribe un valor en el objeto siguiendo una ruta como "pesos.ventas". Crea objetos intermedios si faltan. */
 function asignarRuta(ruta, valor) {
   const partes = ruta.split(".");
   let actual = parametrosActuales;
   for (let i = 0; i < partes.length - 1; i += 1) {
-    actual = actual[partes[i]];
+    const clave = partes[i];
+    if (actual[clave] === null || actual[clave] === undefined) {
+      actual[clave] = /^\d+$/.test(partes[i + 1]) ? [] : {};
+    }
+    actual = actual[clave];
   }
   actual[partes[partes.length - 1]] = valor;
 }

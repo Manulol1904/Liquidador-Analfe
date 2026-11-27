@@ -101,6 +101,28 @@ export function pasosDeBaseSocial(mes, origen) {
   return diferencia + 1;
 }
 
+/** Meta de base social por fórmula: Base 30 sep + pasos × incremento. */
+export function metaBaseSocialCalculada(comercial, mes, parametros) {
+  const pasos = pasosDeBaseSocial(mes, parametros?.baseSocial?.mesOrigen || "2026-10");
+  if (comercial?.baseSocialInicial === null || comercial?.baseSocialInicial === undefined || pasos === null) return null;
+  const incremento = Number(parametros?.baseSocial?.incrementoPorMes);
+  if (!Number.isFinite(incremento)) return null;
+  return comercial.baseSocialInicial + pasos * incremento;
+}
+
+/**
+ * Meta de base social del mes: si en Parámetros hay valor en baseSocialMes[mes].meta, se usa;
+ * si está vacío, aplica la fórmula (Base 30 sep + pasos × incremento).
+ */
+export function metaBaseSocialDelMes(comercial, mes, parametros) {
+  const crudo = comercial?.baseSocialMes?.[mes]?.meta;
+  if (crudo !== null && crudo !== undefined && crudo !== "" && Number.isFinite(Number(crudo))) {
+    return { meta: Number(crudo), origen: "manual" };
+  }
+  const calculada = metaBaseSocialCalculada(comercial, mes, parametros);
+  return { meta: calculada, origen: calculada === null ? null : "formula" };
+}
+
 /**
  * Educación, misión, congreso, cultural, BTL o "otro". Núm. 5.4 y 5.11.
  * El mapa de grupos y cuentas llega en parametros.clasificacion, en orden.
@@ -599,7 +621,10 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     faltantes.push("base social");
   } else {
     baseSocial.cierre = Math.round(comercial.baseSocialInicial + ingresos - retiros);
-    baseSocial.meta = comercial.baseSocialInicial + pasos * parametros.baseSocial.incrementoPorMes;
+    const metaMes = metaBaseSocialDelMes(comercial, mes, parametros);
+    baseSocial.meta = metaMes.meta;
+    baseSocial.metaOrigen = metaMes.origen;
+    baseSocial.metaCalculada = metaBaseSocialCalculada(comercial, mes, parametros);
     baseSocial.cumplimiento = baseSocial.meta ? baseSocial.cierre / baseSocial.meta : null;
     puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, baseSocial.cumplimiento, tope, true);
   }
