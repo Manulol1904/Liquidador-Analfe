@@ -228,16 +228,25 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
 }
 
 /**
+ * Filas de Facturación que suman a la producción del esquema anterior.
+ * Fuera: Misión (va por CANTIDAD × valor fijo), BTL y actividad cultural (bolos, etc.).
+ */
+export function cuentaEnProduccionAnterior(fila, parametros) {
+  const producto = clasificarProducto(fila?.grupo, fila?.cuenta, parametros);
+  return producto !== "mision" && producto !== "btl" && producto !== "cultural";
+}
+
+/**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE CANCELADA de la hoja elegida (sin Misión) + Misión (CANTIDAD × valorFacturaAnterior).
- * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209).
- * NO CANCELADA no entra (ni en Facturación ni en Misión).
+ * Suma BASE CANCELADA de la hoja elegida (sin Misión/BTL/cultural) + Misión (CANTIDAD × valorFacturaAnterior).
+ * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209 de Educación/AT).
+ * NO CANCELADA no entra. BTL/bolos y cultural no entran a esta producción.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
     && esCancelada(fila)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
-    && clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision");
+    && cuentaEnProduccionAnterior(fila, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
   const base = sumar(lineas);
@@ -254,12 +263,13 @@ export function produccionAnterior(filas, comercial, mes, parametros) {
 
 /**
  * Total de producción del mes para la comisión anterior del director (tasa × base total).
- * Solo CANCELADA; incluye anticipos 27209.
+ * Solo CANCELADA; incluye anticipos 27209 de Educación/AT; excluye BTL/cultural/Misión.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
     && esCancelada(fila)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
+    && cuentaEnProduccionAnterior(fila, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const grupos = new Map();
   lineasTodas.forEach((fila) => {

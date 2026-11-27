@@ -7640,8 +7640,12 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       valor: unidades * valorUnitario
     };
   }
+  function cuentaEnProduccionAnterior(fila2, parametros) {
+    const producto = clasificarProducto(fila2?.grupo, fila2?.cuenta, parametros);
+    return producto !== "mision" && producto !== "btl" && producto !== "cultural";
+  }
   function produccionAnterior(filas, comercial, mes, parametros) {
-    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision");
+    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && cuentaEnProduccionAnterior(fila2, parametros));
     const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
     const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
     const base = sumar(lineas);
@@ -7656,7 +7660,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     };
   }
   function produccionTotalMes(filas, mes, parametros) {
-    const lineasTodas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
+    const lineasTodas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && cuentaEnProduccionAnterior(fila2, parametros));
     const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
     const grupos = /* @__PURE__ */ new Map();
     lineasTodas.forEach((fila2) => {
