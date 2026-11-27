@@ -8203,6 +8203,19 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
     return { clave: clave5, margenEvento, factor };
   }
+  function ventaEduAtReconocida(filas, mes, parametros, margenes, facturaAEvento, predicadoAsesor = null) {
+    let suma = 0;
+    const mapaMargenes = margenes || /* @__PURE__ */ new Map();
+    const mapaFacturas = facturaAEvento || /* @__PURE__ */ new Map();
+    for (const fila2 of filas || []) {
+      if (asesorVacio(fila2) || !esRecaudo(fila2, mes, parametros)) continue;
+      if (predicadoAsesor && !predicadoAsesor(fila2.asesor)) continue;
+      if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "eduAt") continue;
+      const { factor } = factorDeEdu(fila2, mapaMargenes, mapaFacturas, parametros);
+      suma += (Number(fila2.base) || 0) * (Number.isFinite(factor) ? factor : 1);
+    }
+    return suma;
+  }
   function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2, datos) {
     const vistos = /* @__PURE__ */ new Set();
     const filasFicha = [];
@@ -8406,7 +8419,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       innovacion: innovaciones.length ? innovaciones.reduce((suma, item) => suma + item.puntos.innovacion, 0) / innovaciones.length : parametros.pesos.innovacion
     };
   }
-  function metodosDirector(resultados, parametros, mes) {
+  function metodosDirector(resultados, parametros, mes, extras = {}) {
     const faltantes2 = [];
     const ventas = { eduAt: 0, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 };
     resultados.forEach((resultado) => {
@@ -8416,6 +8429,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         else ventas[producto] += valor;
       });
     });
+    const eduAtExtra = Number(extras.eduAtExtra);
+    if (Number.isFinite(eduAtExtra) && eduAtExtra !== 0) ventas.eduAt += eduAtExtra;
     const metaEduAtCrudo = parametros.director.metaEduAtEquipo;
     const metaEduAt = metaEduAtCrudo === null || metaEduAtCrudo === void 0 || metaEduAtCrudo === "" ? null : Number(metaEduAtCrudo);
     const metas = {
@@ -8658,7 +8673,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const equipo = parametros.comerciales.filter((comercial) => (comercial.activoDesde || "0000-00") <= mes);
     const margenes = margenesPorEvento(eventos2, parametros);
     const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2, filasProduccionDetalle));
-    const director = metodosDirector(resultados, parametros, mes);
+    const delEquipo = new Set(equipo.flatMap((c) => [texto(c.nombre), texto(c.nombreFacturacion)]).filter(Boolean));
+    const eduAtExtra = ventaEduAtReconocida(filas, mes, parametros, margenes, facturaAEvento, (asesor) => !delEquipo.has(texto(asesor)));
+    const director = metodosDirector(resultados, parametros, mes, { eduAtExtra });
+    director.eduAtCanal = eduAtExtra;
     const avisos = [];
     filas.forEach((fila2) => {
       if (!deHojaElegida(fila2, parametros) || asesorVacio(fila2)) return;

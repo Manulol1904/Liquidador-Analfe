@@ -935,6 +935,24 @@ function factorDeEdu(fila, margenes, facturaAEvento, parametros) {
   return { clave, margenEvento, factor };
 }
 
+/**
+ * Venta Edu/AT reconocida (política nueva): CANCELADA del mes, incluye Jornada Analfista.
+ * predicadoAsesor opcional para filtrar (p. ej. solo Dirección Comercial / fuera del equipo).
+ */
+export function ventaEduAtReconocida(filas, mes, parametros, margenes, facturaAEvento, predicadoAsesor = null) {
+  let suma = 0;
+  const mapaMargenes = margenes || new Map();
+  const mapaFacturas = facturaAEvento || new Map();
+  for (const fila of filas || []) {
+    if (asesorVacio(fila) || !esRecaudo(fila, mes, parametros)) continue;
+    if (predicadoAsesor && !predicadoAsesor(fila.asesor)) continue;
+    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "eduAt") continue;
+    const { factor } = factorDeEdu(fila, mapaMargenes, mapaFacturas, parametros);
+    suma += (Number(fila.base) || 0) * (Number.isFinite(factor) ? factor : 1);
+  }
+  return suma;
+}
+
 /** Detalle de la ficha. No cambia el pago: relee las mismas filas que ya liquidó. */
 function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos, datos) {
   const vistos = new Set();
@@ -1163,7 +1181,7 @@ function indicadoresEquipo(resultados, parametros, tope) {
  * Tres formas de leer el score del director. Núm. 5.9.
  * Devuelve totales, promedio simple y promedio ponderado por meta.
  */
-export function metodosDirector(resultados, parametros, mes) {
+export function metodosDirector(resultados, parametros, mes, extras = {}) {
   const faltantes = [];
   const ventas = { eduAt: 0, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 };
   resultados.forEach((resultado) => {
@@ -1173,6 +1191,9 @@ export function metodosDirector(resultados, parametros, mes) {
       else ventas[producto] += valor;
     });
   });
+  // Canal nacional / Dirección Comercial (y otros asesores fuera del equipo) en Edu/AT.
+  const eduAtExtra = Number(extras.eduAtExtra);
+  if (Number.isFinite(eduAtExtra) && eduAtExtra !== 0) ventas.eduAt += eduAtExtra;
   // Meta Edu/AT del director: parámetro fijo (metaEduAtEquipo). Meta misión = suma de comerciales.
   const metaEduAtCrudo = parametros.director.metaEduAtEquipo;
   const metaEduAt = metaEduAtCrudo === null || metaEduAtCrudo === undefined || metaEduAtCrudo === ""
@@ -1448,7 +1469,11 @@ export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento, fil
   const equipo = parametros.comerciales.filter((comercial) => (comercial.activoDesde || "0000-00") <= mes);
   const margenes = margenesPorEvento(eventos, parametros);
   const resultados = equipo.map((comercial) => liquidarComercial(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos, filasProduccionDetalle));
-  const director = metodosDirector(resultados, parametros, mes);
+  // Edu/AT del archivo que no está en el equipo (Dirección Comercial / canal nacional), incl. Jornada.
+  const delEquipo = new Set(equipo.flatMap((c) => [texto(c.nombre), texto(c.nombreFacturacion)]).filter(Boolean));
+  const eduAtExtra = ventaEduAtReconocida(filas, mes, parametros, margenes, facturaAEvento, (asesor) => !delEquipo.has(texto(asesor)));
+  const director = metodosDirector(resultados, parametros, mes, { eduAtExtra });
+  director.eduAtCanal = eduAtExtra;
   const avisos = [];
   filas.forEach((fila) => {
     if (!deHojaElegida(fila, parametros) || asesorVacio(fila)) return;
