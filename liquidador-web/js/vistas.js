@@ -504,12 +504,19 @@ function bloquePoliticaAnterior(resultado) {
       <p>Falta la meta mensual de la política anterior.</p>`;
   }
   const baseComision = tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion;
+  const misionAnt = tramo.mision || resultado.misionAnterior || {};
+  const nMision = Number(misionAnt.facturas) || 0;
+  const valorMision = Number(misionAnt.valor ?? misionAnt.valorTotal) || 0;
+  const notaMision = nMision
+    ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>`
+    : "";
   return `
-    <p>${escaparHtml(fuente)} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
+    <p>${escaparHtml(fuente)}${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
     ${tablaAnteriorImpresion([
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
       ["Producción (con anticipos 27209)", moneda(tramo.produccion)],
+      ...(nMision ? [["Misión (N × valor factura anterior)", moneda(valorMision)]] : []),
       ["Cumplimiento", porcentaje(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje(tramo.tasa)],
       ["Base comisión (sin anticipos)", moneda(baseComision)],
@@ -519,6 +526,7 @@ function bloquePoliticaAnterior(resultado) {
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(tramo.comision)}</span></li>
       <li><span>Meta mensual</span><span class="dinero">${moneda(tramo.meta)} <button type="button" class="boton boton--texto" data-ir="parametros">✎</button></span></li>
       <li><span>Producción (cumplimiento)</span><span class="dinero">${moneda(tramo.produccion)} ${manual}</span></li>
+      ${notaMision}
       <li><span>Cumplimiento</span><span class="dinero">${porcentaje(tramo.cumplimiento)}</span></li>
       <li><span>Tasa aplicada</span><span class="dinero">${porcentaje(tramo.tasa)} <span class="ayuda-campo">tramo «${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span></span></li>
       <li><span>Base comisión (sin anticipos)</span><span class="dinero">${moneda(baseComision)}</span></li>

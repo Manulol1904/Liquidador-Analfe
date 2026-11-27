@@ -163,20 +163,51 @@ export function esCuentaAnticipo(cuenta, parametros) {
 }
 
 /**
+ * Facturas de Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
+ * En el esquema anterior cada factura aporta parametros.mision.valorFacturaAnterior (p. ej. $1.000.000).
+ */
+export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
+  const vistas = new Set();
+  const lineas = [];
+  (filas || []).forEach((fila) => {
+    if (asesorVacio(fila) || !mismaPersona(fila.asesor, comercial)) return;
+    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
+    if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
+    const numero = String(fila.factura ?? "").trim();
+    const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
+    if (vistas.has(clave)) return;
+    vistas.add(clave);
+    lineas.push(fila);
+  });
+  const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+  return {
+    facturas: lineas.length,
+    lineas,
+    valorPorFactura: valorUnitario,
+    valor: lineas.length * valorUnitario,
+  };
+}
+
+/**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes.
- * - produccion: total con anticipos 27209 (para % de cumplimiento / tramo).
- * - produccionSinAnticipos: base de la comisión (sin cuentas 27).
- * No entran hojas complementarias, filas sin asesor, sin fecha ni de otro mes.
+ * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes,
+ * más Misión: N facturas × valorFacturaAnterior (hoja Misión Int.).
+ * - produccion: total con anticipos 27209 + Misión (para % de cumplimiento / tramo).
+ * - produccionSinAnticipos: base de la comisión (sin cuentas 27) + Misión.
+ * No entran BTL ni filas sin asesor / sin fecha / de otro mes en la BASE elegida.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
   const lineasSinAnticipos = lineas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
+  const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
   return {
-    produccion: sumar(lineas),
-    produccionSinAnticipos: sumar(lineasSinAnticipos),
+    produccion: sumar(lineas) + mision.valor,
+    produccionSinAnticipos: sumar(lineasSinAnticipos) + mision.valor,
+    produccionBase: sumar(lineas),
+    produccionBaseSinAnticipos: sumar(lineasSinAnticipos),
+    mision,
     lineas,
     lineasSinAnticipos,
   };
@@ -696,7 +727,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     const delMes = comercial.anteriorMes?.[mes] || {};
     const manualValor = delMes.produccionManual;
     const manual = manualValor !== null && manualValor !== undefined && manualValor !== "" && Number.isFinite(Number(manualValor));
-    // Cumplimiento: total producido (con cuentas 27). Comisión: sin anticipos.
+    // Cumplimiento: BASE elegida (con 27) + Misión (N × valorFacturaAnterior). Comisión: sin anticipos + Misión.
     const produccionUsada = manual ? Number(manualValor) : produccionMes.produccion;
     const produccionComision = manual ? Number(manualValor) : produccionMes.produccionSinAnticipos;
     const meta = delMes.meta === undefined ? null : delMes.meta;
@@ -707,7 +738,9 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
       produccion: calculo.produccion,
       produccionComision: calculo.produccionComision,
       produccionArchivo: produccionMes.produccion,
+      produccionBase: produccionMes.produccionBase,
       produccionSinAnticipos: produccionMes.produccionSinAnticipos,
+      mision: produccionMes.mision,
       manual,
       cumplimiento: calculo.cumplimiento,
       tasa: calculo.tasa,
@@ -744,6 +777,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     tope,
     lineasProduccion: produccionMes.lineas,
     misionDesdeProduccion,
+    misionAnteriorCalc: produccionMes.mision,
   });
 
   const trabajados = Number(comercial.diasTrabajados);
@@ -959,11 +993,7 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
   const ingresoBtlAnterior = null;
   const tasaBtlAnterior = parametros.anterior?.tasaBtl ?? null;
   const btlAnterior = null;
-  const facturasMisionAnterior = new Set(
-    (datos.lineasProduccion || [])
-      .filter((fila) => clasificarProducto(fila.grupo, fila.cuenta, parametros) === "mision")
-      .map((fila) => String(fila.factura ?? "").trim())
-  );
+  const misionAnt = datos.misionAnteriorCalc || { facturas: 0, valorPorFactura: parametros.mision.valorFacturaAnterior, valor: 0, lineas: [] };
 
   const claves = new Set(detalleFacturas.map((fila) => fila.evento).filter(Boolean));
   const margenesEventos = [...claves].map((clave) => {
@@ -1008,9 +1038,10 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
     btlAnteriorDetalle: [],
     btlAnteriorTasaSupuesta: false,
     misionAnterior: {
-      facturas: facturasMisionAnterior.size,
-      valorPorFactura: parametros.mision.valorFacturaAnterior,
-      valorTotal: facturasMisionAnterior.size * parametros.mision.valorFacturaAnterior,
+      facturas: misionAnt.facturas,
+      valorPorFactura: misionAnt.valorPorFactura,
+      valorTotal: misionAnt.valor,
+      lineas: misionAnt.lineas || [],
     },
     margenesEventos,
     totalesFacturas: {

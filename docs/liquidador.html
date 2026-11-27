@@ -7598,13 +7598,38 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const prefijo = String(parametros?.anticipos?.prefijoCuenta || "27209");
     return prefijo.length > 0 && codigo.startsWith(prefijo);
   }
+  function misionEsquemaAnterior(filas, comercial, mes, parametros) {
+    const vistas = /* @__PURE__ */ new Set();
+    const lineas = [];
+    (filas || []).forEach((fila2) => {
+      if (asesorVacio(fila2) || !mismaPersona(fila2.asesor, comercial)) return;
+      if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision") return;
+      if (!(fila2.fecha instanceof Date) || !fechaEnMes(fila2.fecha, mes)) return;
+      const numero2 = String(fila2.factura ?? "").trim();
+      const clave5 = numero2 || `misi-${fila2.hoja || ""}-${fila2.numeroFila || lineas.length}`;
+      if (vistas.has(clave5)) return;
+      vistas.add(clave5);
+      lineas.push(fila2);
+    });
+    const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+    return {
+      facturas: lineas.length,
+      lineas,
+      valorPorFactura: valorUnitario,
+      valor: lineas.length * valorUnitario
+    };
+  }
   function produccionAnterior(filas, comercial, mes, parametros) {
     const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
     const lineasSinAnticipos = lineas.filter((fila2) => !esCuentaAnticipo(fila2.cuenta, parametros));
     const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
+    const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
     return {
-      produccion: sumar(lineas),
-      produccionSinAnticipos: sumar(lineasSinAnticipos),
+      produccion: sumar(lineas) + mision.valor,
+      produccionSinAnticipos: sumar(lineasSinAnticipos) + mision.valor,
+      produccionBase: sumar(lineas),
+      produccionBaseSinAnticipos: sumar(lineasSinAnticipos),
+      mision,
       lineas,
       lineasSinAnticipos
     };
@@ -8029,7 +8054,9 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         produccion: calculo.produccion,
         produccionComision: calculo.produccionComision,
         produccionArchivo: produccionMes.produccion,
+        produccionBase: produccionMes.produccionBase,
         produccionSinAnticipos: produccionMes.produccionSinAnticipos,
+        mision: produccionMes.mision,
         manual,
         cumplimiento: calculo.cumplimiento,
         tasa: calculo.tasa,
@@ -8057,7 +8084,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       ponderado,
       tope,
       lineasProduccion: produccionMes.lineas,
-      misionDesdeProduccion
+      misionDesdeProduccion,
+      misionAnteriorCalc: produccionMes.mision
     });
     const trabajados = Number(comercial.diasTrabajados);
     const diasMes = Number(comercial.diasMes);
@@ -8253,9 +8281,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const ingresoBtlAnterior = null;
     const tasaBtlAnterior = parametros.anterior?.tasaBtl ?? null;
     const btlAnterior = null;
-    const facturasMisionAnterior = new Set(
-      (datos.lineasProduccion || []).filter((fila2) => clasificarProducto(fila2.grupo, fila2.cuenta, parametros) === "mision").map((fila2) => String(fila2.factura ?? "").trim())
-    );
+    const misionAnt = datos.misionAnteriorCalc || { facturas: 0, valorPorFactura: parametros.mision.valorFacturaAnterior, valor: 0, lineas: [] };
     const claves = new Set(detalleFacturas.map((fila2) => fila2.evento).filter(Boolean));
     const margenesEventos = [...claves].map((clave5) => {
       const evento = eventos2.find((item) => textoClave(item.evento) === textoClave(clave5));
@@ -8298,9 +8324,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       btlAnteriorDetalle: [],
       btlAnteriorTasaSupuesta: false,
       misionAnterior: {
-        facturas: facturasMisionAnterior.size,
-        valorPorFactura: parametros.mision.valorFacturaAnterior,
-        valorTotal: facturasMisionAnterior.size * parametros.mision.valorFacturaAnterior
+        facturas: misionAnt.facturas,
+        valorPorFactura: misionAnt.valorPorFactura,
+        valorTotal: misionAnt.valor,
+        lineas: misionAnt.lineas || []
       },
       margenesEventos,
       totalesFacturas: {
@@ -12882,12 +12909,17 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       <p>Falta la meta mensual de la política anterior.</p>`;
     }
     const baseComision = tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion;
+    const misionAnt = tramo.mision || resultado.misionAnterior || {};
+    const nMision = Number(misionAnt.facturas) || 0;
+    const valorMision = Number(misionAnt.valor ?? misionAnt.valorTotal) || 0;
+    const notaMision = nMision ? `<li><span>Misión (esquema anterior)</span><span class="dinero">${nMision} × ${moneda(misionAnt.valorPorFactura ?? obtenerParametros().mision?.valorFacturaAnterior)} = ${moneda(valorMision)}</span></li>` : "";
     return `
-    <p>${escaparHtml(fuente)} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
+    <p>${escaparHtml(fuente)}${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(tramo.produccionArchivo, control?.base)}</p>
     ${tablaAnteriorImpresion([
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
       ["Producción (con anticipos 27209)", moneda(tramo.produccion)],
+      ...nMision ? [["Misión (N × valor factura anterior)", moneda(valorMision)]] : [],
       ["Cumplimiento", porcentaje2(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje2(tramo.tasa)],
       ["Base comisión (sin anticipos)", moneda(baseComision)],
@@ -12897,6 +12929,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(tramo.comision)}</span></li>
       <li><span>Meta mensual</span><span class="dinero">${moneda(tramo.meta)} <button type="button" class="boton boton--texto" data-ir="parametros">✎</button></span></li>
       <li><span>Producción (cumplimiento)</span><span class="dinero">${moneda(tramo.produccion)} ${manual}</span></li>
+      ${notaMision}
       <li><span>Cumplimiento</span><span class="dinero">${porcentaje2(tramo.cumplimiento)}</span></li>
       <li><span>Tasa aplicada</span><span class="dinero">${porcentaje2(tramo.tasa)} <span class="ayuda-campo">tramo «${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span></span></li>
       <li><span>Base comisión (sin anticipos)</span><span class="dinero">${moneda(baseComision)}</span></li>
