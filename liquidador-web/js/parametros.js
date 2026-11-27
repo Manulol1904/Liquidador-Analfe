@@ -158,9 +158,10 @@ export const PARAMETROS_INICIALES = {
     ...clonarEquipo(EQUIPO_INICIAL.director),
     metodo: "totales",
     regla100: false,
-    metaBaseSocialEquipo: 560,
+    /** Meta de base social del director (fija; no es la suma de comerciales). */
+    metaBaseSocialEquipo: 576,
     /** Suma de cierres de base social del equipo (director). */
-    baseSocialCierreEquipo: 560,
+    baseSocialCierreEquipo: 570,
     metaEduAtEquipo: 280000000,
     metaMisionEquipo: 49600000,
     tasaAnterior: 0.015,
@@ -672,7 +673,7 @@ function htmlFormulario() {
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
       campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Suma de cierres del equipo", ayuda: "Base computable = suma de cierres de base social del equipo (personas)" }),
-      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social (referencia)", ayuda: "Solo referencia. El cálculo usa la suma de las metas de base social del mes de los comerciales" }),
+      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del director", ayuda: "Meta fija del director (p. ej. 576). No usa la suma de metas de los comerciales" }),
       campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
       campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
       `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,

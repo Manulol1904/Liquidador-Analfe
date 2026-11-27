@@ -56,24 +56,24 @@ describe("meta misión director", () => {
 });
 
 describe("meta base social director", () => {
-  it("suma las metas de base social del mes de los comerciales", () => {
+  it("usa la meta fija del director (576), no la suma de comerciales", () => {
+    assert.equal(p.director.metaBaseSocialEquipo, 576);
     const stubs = [
       { ...resultadoStub({ nombre: "A", misionMeta: 1, eduAt: 10 }), baseSocial: { cierre: 90, meta: 91, cumplimiento: 90 / 91, neutral: false } },
       { ...resultadoStub({ nombre: "B", misionMeta: 1, eduAt: 10 }), baseSocial: { cierre: 100, meta: 102, cumplimiento: 100 / 102, neutral: false } },
       { ...resultadoStub({ nombre: "C", misionMeta: 1, eduAt: 10 }), baseSocial: { cierre: 88, meta: 89, cumplimiento: 88 / 89, neutral: false } },
     ];
     const dir = metodosDirector(stubs, p, "2026-10");
-    assert.equal(dir.puntos.baseMeta, 91 + 102 + 89);
-    assert.notEqual(dir.puntos.baseMeta, p.director.metaBaseSocialEquipo);
+    assert.equal(dir.puntos.baseMeta, 576);
+    assert.notEqual(dir.puntos.baseMeta, 91 + 102 + 89);
   });
 
-  it("ignora neutrales (primer mes) al sumar la meta", () => {
-    const stubs = [
-      { ...resultadoStub({ nombre: "A", misionMeta: 1, eduAt: 10 }), baseSocial: { cierre: 90, meta: 91, cumplimiento: 90 / 91, neutral: false } },
-      { ...resultadoStub({ nombre: "Nuevo", misionMeta: 1, eduAt: 10 }), baseSocial: { cierre: null, meta: null, cumplimiento: 1, neutral: true } },
-    ];
+  it("con cierre fijo 570 cumple contra meta 576", () => {
+    const stubs = [resultadoStub({ nombre: "A", misionMeta: 1, eduAt: 10 })];
     const dir = metodosDirector(stubs, p, "2026-10");
-    assert.equal(dir.puntos.baseMeta, 91);
+    assert.equal(dir.puntos.baseCierre, 570);
+    assert.equal(dir.puntos.baseMeta, 576);
+    assert.ok(Math.abs(dir.puntos.baseCumplimiento - 570 / 576) < 1e-9);
   });
 });
 

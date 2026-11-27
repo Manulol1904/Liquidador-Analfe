@@ -1161,33 +1161,33 @@ export function metodosDirector(resultados, parametros, mes) {
   };
   const sinDato = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre === null);
   const medidos = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre !== null);
-  // Meta del director = suma de metas de base social del mes de los comerciales (no neutrales).
-  const conMeta = resultados.filter((item) => !item.baseSocial?.neutral);
-  const metaEquipo = !conMeta.length || conMeta.some((item) => item.baseSocial?.meta === null || item.baseSocial?.meta === undefined)
+  // Meta del director = parámetro fijo (p. ej. 576), no la suma de comerciales.
+  const metaFijaCrudo = parametros.director.metaBaseSocialEquipo;
+  const metaEquipo = metaFijaCrudo === null || metaFijaCrudo === undefined || metaFijaCrudo === ""
     ? null
-    : conMeta.reduce((s, item) => s + (Number(item.baseSocial.meta) || 0), 0);
-  if (metaEquipo === null) faltantes.push("meta de base social del equipo (faltan metas de comerciales)");
+    : Number(metaFijaCrudo);
+  if (!(metaEquipo > 0)) faltantes.push("meta de base social del director (Parámetros)");
   const cierreFijoCrudo = parametros.director.baseSocialCierreEquipo;
   const cierreFijo = cierreFijoCrudo === null || cierreFijoCrudo === undefined || cierreFijoCrudo === ""
     ? null
     : Number(cierreFijoCrudo);
   if (Number.isFinite(cierreFijo)) {
-    // Suma de cierres del equipo (Parámetros): p. ej. 560.
-    const cumplimiento = metaEquipo ? cierreFijo / metaEquipo : 0;
+    // Suma de cierres del equipo (Parámetros): p. ej. 570.
+    const cumplimiento = metaEquipo > 0 ? cierreFijo / metaEquipo : 0;
     // Regla del 100 % también para el director en base social.
-    puntos.baseSocial = metaEquipo === null ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
+    puntos.baseSocial = !(metaEquipo > 0) ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
     puntos.baseCierre = cierreFijo;
-    puntos.baseMeta = metaEquipo;
-    puntos.baseCumplimiento = metaEquipo === null ? null : cumplimiento;
+    puntos.baseMeta = metaEquipo > 0 ? metaEquipo : null;
+    puntos.baseCumplimiento = !(metaEquipo > 0) ? null : cumplimiento;
   } else if (sinDato.length || !medidos.length) {
     faltantes.push("base social del equipo");
   } else {
     const cierre = medidos.reduce((s, item) => s + item.baseSocial.cierre, 0);
-    const cumplimiento = metaEquipo ? cierre / metaEquipo : 0;
-    puntos.baseSocial = metaEquipo === null ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
+    const cumplimiento = metaEquipo > 0 ? cierre / metaEquipo : 0;
+    puntos.baseSocial = !(metaEquipo > 0) ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
     puntos.baseCierre = cierre;
-    puntos.baseMeta = metaEquipo;
-    puntos.baseCumplimiento = metaEquipo === null ? null : cumplimiento;
+    puntos.baseMeta = metaEquipo > 0 ? metaEquipo : null;
+    puntos.baseCumplimiento = !(metaEquipo > 0) ? null : cumplimiento;
   }
   const faltantesTotales = [...faltantes, ...ponderado.faltantes];
   // Si falta una venta o la base social, el director queda pendiente y no se compara con el esquema anterior.
