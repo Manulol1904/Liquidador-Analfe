@@ -235,14 +235,14 @@
     const paramsAnticipo = { anticipos: { prefijoCuenta: "27209" } };
     const produccionHernando = produccionAnterior(muestraProduccion, comercialHernando, "2026-10", paramsAnticipo);
     probar("producción (cumplimiento) incluye el anticipo 27209", produccionHernando.produccion, 140);
-    probar("base comisión excluye el anticipo 27209", produccionHernando.produccionSinAnticipos, 40);
+    probar("base comisión = valor total (incluye anticipo)", produccionHernando.produccionSinAnticipos, 140);
     probar("producción anterior lista el anticipo en el total", produccionHernando.lineas.some((fila) => fila.factura === "A"), true);
     probar("producción anterior deja fuera la hoja complementaria", produccionHernando.lineas.some((fila) => fila.factura === "C"), false);
     probar("producción anterior deja fuera la fila sin fecha", produccionHernando.lineas.some((fila) => fila.factura === "E"), false);
     probar("producción anterior deja fuera otro mes", produccionHernando.lineas.some((fila) => fila.factura === "F"), false);
-    const comisionAnticipo = comisionAnteriorTramos(100, produccionHernando.produccion, reglasAnterior, produccionHernando.produccionSinAnticipos);
+    const comisionAnticipo = comisionAnteriorTramos(100, produccionHernando.produccion, reglasAnterior, produccionHernando.produccion);
     probar("cumplimiento con anticipos", comisionAnticipo.cumplimiento, 1.4);
-    probar("comisión sin anticipos", comisionAnticipo.comision, 40 * comisionAnticipo.tasa);
+    probar("comisión sobre valor total", comisionAnticipo.comision, 140 * comisionAnticipo.tasa);
 
     const totalMes = produccionTotalMes([
       filaMes("H", 252848440 - 3910000 - 1000, {}),
@@ -252,9 +252,9 @@
       filaMes("L", 800, { asesor: "" }),
       filaMes("M", 800, { fecha: null }),
     ], "2026-10", paramsAnticipo);
-    probar("total del mes (comisión director) excluye anticipo 27209", totalMes.base, 252847440);
-    probar("total producido con anticipo queda aparte", totalMes.baseConAnticipos, 252848440);
-    probar("total del mes no lista el anticipo en base comisión", totalMes.lineas.some((fila) => fila.factura === "J"), false);
+    probar("total del mes (comisión director) incluye anticipo 27209", totalMes.base, 252848440);
+    probar("total producido = base (mismo valor)", totalMes.baseConAnticipos, 252848440);
+    probar("total del mes lista el anticipo en la base", totalMes.lineas.some((fila) => fila.factura === "J"), true);
     probar("total del mes deja fuera la hoja BTL", totalMes.lineas.some((fila) => fila.factura === "K"), false);
     probar("total del mes deja fuera el total sin asesor", totalMes.lineas.some((fila) => fila.factura === "L"), false);
 
