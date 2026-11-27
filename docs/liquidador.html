@@ -5093,7 +5093,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       costos: tarjetaParam("Costos y margen", ["costos", "margen.factorPorDefecto"], camposParam(
         campo("costos.ica", p.costos.ica, { titulo: "ICA", unidad: "porcentaje", ayuda: "Tasa sobre el ingreso" }),
         campo("costos.gmf", p.costos.gmf, { titulo: "GMF", unidad: "porcentaje", ayuda: "Tasa sobre el costo directo" }),
-        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: no se inventa un margen" })
+        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si no hay informe PRODUCTOS, Edu/AT usa la BASE cancelada del Excel (100 %). Con PRODUCTOS cargado, cada factura debe tener margen" })
       ), "ICA y GMF se restan al armar el costo total del evento.") + tarjetaParam("Misión", ["mision"], camposParam(
         campo("mision.valorFacturaNueva", p.mision.valorFacturaNueva, { titulo: "Factura nueva", unidad: "pesos", ayuda: "Valor reconocido por factura de Misión" }),
         campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Factura anterior", unidad: "pesos", ayuda: "Base del esquema anterior por factura" })
@@ -7941,12 +7941,14 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         const clave5 = eventoDeFila(fila2, facturaAEvento);
         const margenEvento = clave5 && margenes.has(clave5) ? margenes.get(clave5) : null;
         const factorDefecto = parametros.margen.factorPorDefecto;
-        if (margenEvento === null && (factorDefecto === null || factorDefecto === void 0 || factorDefecto === "")) {
+        const hayMargenesCargados = margenes.size > 0;
+        const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
+        if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
           eduPendiente = true;
           avisos.push(clave5 ? `La factura ${fila2.factura || "sin número"} no está en el informe de producción.` : `La factura ${fila2.factura || "sin número"} no tiene evento.`);
           return;
         }
-        const factor = margenEvento === null ? Number(factorDefecto) : factorMargen(margenEvento, parametros.margen);
+        const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
         eduReconocida += (Number(fila2.base) || 0) * factor;
         return;
       }
@@ -8119,10 +8121,12 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const clave5 = eventoDeFila(fila2, facturaAEvento);
     const margenEvento = clave5 && margenes.has(clave5) ? margenes.get(clave5) : null;
     const factorDefecto = parametros.margen.factorPorDefecto;
-    if (margenEvento === null && (factorDefecto === null || factorDefecto === void 0 || factorDefecto === "")) {
+    const hayMargenesCargados = margenes && margenes.size > 0;
+    const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
+    if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
       return { clave: clave5, margenEvento: null, factor: null };
     }
-    const factor = margenEvento === null ? Number(factorDefecto) : factorMargen(margenEvento, parametros.margen);
+    const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
     return { clave: clave5, margenEvento, factor };
   }
   function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2, datos) {
@@ -8149,10 +8153,13 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       if (producto === "eduAt" && elegible) {
         uso = "Edu/AT · política nueva";
         baseEdu += base;
-        if (edu.factor === null) margenFaltante = true;
-        else ventaReconocida2 = base * edu.factor;
-        if (edu.margenEvento === null) margenFaltante = true;
-        else basePorMargen += base * edu.margenEvento;
+        if (edu.factor === null) {
+          margenFaltante = true;
+        } else {
+          ventaReconocida2 = base * edu.factor;
+          if (edu.margenEvento !== null) basePorMargen += base * edu.margenEvento;
+          else if (margenes.size > 0) margenFaltante = true;
+        }
       } else if (producto === "eduAt") {
         uso = "Edu/AT · no recaudada en el mes";
       } else if (producto === "mision" && complementaria) {

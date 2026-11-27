@@ -598,14 +598,20 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
       const clave = eventoDeFila(fila, facturaAEvento);
       const margenEvento = clave && margenes.has(clave) ? margenes.get(clave) : null;
       const factorDefecto = parametros.margen.factorPorDefecto;
-      if (margenEvento === null && (factorDefecto === null || factorDefecto === undefined || factorDefecto === "")) {
+      const hayMargenesCargados = margenes.size > 0;
+      const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
+      // Sin informe de márgenes: la venta reconocida es la BASE del Excel (CANCELADA + pago en el mes).
+      // Con márgenes cargados, cada factura debe aparecer en el informe (o usar factor por defecto).
+      if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
         eduPendiente = true;
         avisos.push(clave
           ? `La factura ${fila.factura || "sin número"} no está en el informe de producción.`
           : `La factura ${fila.factura || "sin número"} no tiene evento.`);
         return;
       }
-      const factor = margenEvento === null ? Number(factorDefecto) : factorMargen(margenEvento, parametros.margen);
+      const factor = margenEvento !== null
+        ? factorMargen(margenEvento, parametros.margen)
+        : (sinFactorDefecto ? 1 : Number(factorDefecto));
       eduReconocida += (Number(fila.base) || 0) * factor;
       return;
     }
@@ -805,10 +811,15 @@ function factorDeEdu(fila, margenes, facturaAEvento, parametros) {
   const clave = eventoDeFila(fila, facturaAEvento);
   const margenEvento = clave && margenes.has(clave) ? margenes.get(clave) : null;
   const factorDefecto = parametros.margen.factorPorDefecto;
-  if (margenEvento === null && (factorDefecto === null || factorDefecto === undefined || factorDefecto === "")) {
+  const hayMargenesCargados = margenes && margenes.size > 0;
+  const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
+  // Alineado con liquidarComercial: sin márgenes cargados, factor 1 = BASE del Excel.
+  if (margenEvento === null && sinFactorDefecto && hayMargenesCargados) {
     return { clave, margenEvento: null, factor: null };
   }
-  const factor = margenEvento === null ? Number(factorDefecto) : factorMargen(margenEvento, parametros.margen);
+  const factor = margenEvento !== null
+    ? factorMargen(margenEvento, parametros.margen)
+    : (sinFactorDefecto ? 1 : Number(factorDefecto));
   return { clave, margenEvento, factor };
 }
 
@@ -838,10 +849,14 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
     if (producto === "eduAt" && elegible) {
       uso = "Edu/AT · política nueva";
       baseEdu += base;
-      if (edu.factor === null) margenFaltante = true;
-      else ventaReconocida = base * edu.factor;
-      if (edu.margenEvento === null) margenFaltante = true;
-      else basePorMargen += base * edu.margenEvento;
+      if (edu.factor === null) {
+        margenFaltante = true;
+      } else {
+        ventaReconocida = base * edu.factor;
+        if (edu.margenEvento !== null) basePorMargen += base * edu.margenEvento;
+        // Sin informe de márgenes (factor 1 por BASE del Excel) no hay margen comprobado que mostrar.
+        else if (margenes.size > 0) margenFaltante = true;
+      }
     } else if (producto === "eduAt") {
       uso = "Edu/AT · no recaudada en el mes";
     } else if (producto === "mision" && complementaria) {
