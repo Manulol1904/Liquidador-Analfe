@@ -227,19 +227,27 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   };
 }
 
+/** Grupo Jornada Analfista: entra a la política nueva (eduAt), no a la producción del esquema anterior. */
+export function esJornadaAnalfista(fila, parametros) {
+  const nombre = texto(fila?.grupo);
+  const marcas = (parametros?.productos || []).find((item) => item.clave === "jornada")?.marcas || ["jornada"];
+  return (marcas.length ? marcas : ["jornada"]).some((parte) => nombre.includes(texto(parte)));
+}
+
 /**
  * Filas de Facturación que suman a la producción del esquema anterior.
- * Fuera: Misión (va por CANTIDAD × valor fijo), BTL y actividad cultural (bolos, etc.).
+ * Fuera: Misión (va por CANTIDAD × valor fijo), BTL, cultural y Jornada Analfista (esta va a la política nueva).
  */
 export function cuentaEnProduccionAnterior(fila, parametros) {
+  if (esJornadaAnalfista(fila, parametros)) return false;
   const producto = clasificarProducto(fila?.grupo, fila?.cuenta, parametros);
   return producto !== "mision" && producto !== "btl" && producto !== "cultural";
 }
 
 /**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE CANCELADA de la hoja elegida (sin Misión/BTL/cultural) + Misión (CANTIDAD × valorFacturaAnterior).
- * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209 de Educación/AT).
+ * Suma BASE CANCELADA de la hoja elegida (sin Misión/BTL/cultural/Jornada) + Misión (CANTIDAD × valorFacturaAnterior).
+ * Jornada Analfista no entra aquí: cuenta en la política nueva.
  * NO CANCELADA no entra. BTL/bolos y cultural no entran a esta producción.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
@@ -293,8 +301,8 @@ export function misionEsquemaAnteriorEquipo(filas, mes, parametros) {
 
 /**
  * Total de producción del mes para la comisión anterior del director (tasa × base total).
- * CANCELADA de Facturación (Edu/AT, Jornada Analfista, anticipos 27209 edu…) + Misión (N × $1.000.000).
- * Excluye BTL/cultural y la BASE cruda de Misión.
+ * CANCELADA de Facturación (Edu/AT, anticipos 27209 edu…) + Misión (N × $1.000.000).
+ * Excluye BTL/cultural, Jornada Analfista (política nueva) y la BASE cruda de Misión.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)

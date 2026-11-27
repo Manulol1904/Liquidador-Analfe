@@ -7641,7 +7641,13 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       valor: unidades * valorUnitario
     };
   }
+  function esJornadaAnalfista(fila2, parametros) {
+    const nombre = texto(fila2?.grupo);
+    const marcas = (parametros?.productos || []).find((item) => item.clave === "jornada")?.marcas || ["jornada"];
+    return (marcas.length ? marcas : ["jornada"]).some((parte) => nombre.includes(texto(parte)));
+  }
   function cuentaEnProduccionAnterior(fila2, parametros) {
+    if (esJornadaAnalfista(fila2, parametros)) return false;
     const producto = clasificarProducto(fila2?.grupo, fila2?.cuenta, parametros);
     return producto !== "mision" && producto !== "btl" && producto !== "cultural";
   }
@@ -13622,7 +13628,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const valorMision = Number(anterior.mision?.valor) || 0;
     const notaMision = nMision ? `<li><span>Misión (CANCELADA × $1.000.000)</span><span class="dinero">${nMision} unidades = ${moneda(valorMision)}</span></li>` : "";
     return `
-    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; incluye Jornada Analfista)${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(anterior.base, control?.total)}</p>
+    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; sin Jornada/BTL)${nMision ? ` + Misión (${nMision} × $1.000.000)` : ""} ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
       <li><span>Base comisión (Facturación + Misión)</span><span class="dinero">${moneda(anterior.base)}</span></li>

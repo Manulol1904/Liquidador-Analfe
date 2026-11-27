@@ -1355,7 +1355,7 @@ function bloqueAnteriorDirector(director) {
     ? `<li><span>Misión (CANCELADA × $1.000.000)</span><span class="dinero">${nMision} unidades = ${moneda(valorMision)}</span></li>`
     : "";
   return `
-    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; incluye Jornada Analfista)${nMision ? ` + Misión (${nMision})` : ""} ${marcaHoja4(anterior.base, control?.total)}</p>
+    <p>Fuente: Facturación (${anterior.facturas || 0} facturas; sin Jornada/BTL)${nMision ? ` + Misión (${nMision} × $1.000.000)` : ""} ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
       <li><span>Base comisión (Facturación + Misión)</span><span class="dinero">${moneda(anterior.base)}</span></li>
