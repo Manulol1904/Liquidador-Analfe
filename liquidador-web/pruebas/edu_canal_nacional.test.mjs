@@ -7,10 +7,13 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { ventaEduAtReconocida, metodosDirector, clasificarProducto } from "../js/calculos.js";
 import { PARAMETROS_INICIALES } from "../js/parametros.js";
-import { texto } from "../js/utilidades.js";
 
 const p = structuredClone(PARAMETROS_INICIALES);
 const fecha = new Date(Date.UTC(2026, 9, 15, 5, 0, 0));
+
+function esCanal(asesor) {
+  return /direccion|dirección/i.test(String(asesor || ""));
+}
 
 describe("Edu/AT canal nacional en política nueva", () => {
   it("Jornada Analfista cuenta como eduAt", () => {
@@ -33,13 +36,10 @@ describe("Edu/AT canal nacional en política nueva", () => {
 
     assert.equal(ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map()), 230_256_640);
 
-    const delEquipo = new Set(
-      ["Hernando Rozo", "Tatiana Acuña", "Lynette Arango", "Oriette Henriquez", "Consuelo Castro"].map((n) => texto(n)),
-    );
-    const sinCanal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => delEquipo.has(texto(asesor)));
+    const sinCanal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => !esCanal(asesor));
     assert.equal(sinCanal, 226_346_640);
 
-    const canal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => !delEquipo.has(texto(asesor)));
+    const canal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => esCanal(asesor));
     assert.equal(canal, 3_910_000);
 
     const stubs = [
