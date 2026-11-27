@@ -5174,7 +5174,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
         campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Suma de cierres del equipo", ayuda: "Base computable = suma de cierres de base social del equipo (personas)" }),
-        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Meta de personas del equipo para el director comercial" }),
+        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social (referencia)", ayuda: "Solo referencia. El cálculo usa la suma de las metas de base social del mes de los comerciales" }),
         campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
         campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
         `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,
@@ -8381,25 +8381,26 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     };
     const sinDato = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre === null);
     const medidos = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre !== null);
+    const conMeta = resultados.filter((item) => !item.baseSocial?.neutral);
+    const metaEquipo = !conMeta.length || conMeta.some((item) => item.baseSocial?.meta === null || item.baseSocial?.meta === void 0) ? null : conMeta.reduce((s, item) => s + (Number(item.baseSocial.meta) || 0), 0);
+    if (metaEquipo === null) faltantes2.push("meta de base social del equipo (faltan metas de comerciales)");
     const cierreFijoCrudo = parametros.director.baseSocialCierreEquipo;
     const cierreFijo = cierreFijoCrudo === null || cierreFijoCrudo === void 0 || cierreFijoCrudo === "" ? null : Number(cierreFijoCrudo);
     if (Number.isFinite(cierreFijo)) {
-      const meta = parametros.director.metaBaseSocialEquipo;
-      const cumplimiento = meta ? cierreFijo / meta : 0;
-      puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
+      const cumplimiento = metaEquipo ? cierreFijo / metaEquipo : 0;
+      puntos.baseSocial = metaEquipo === null ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
       puntos.baseCierre = cierreFijo;
-      puntos.baseMeta = meta;
-      puntos.baseCumplimiento = cumplimiento;
+      puntos.baseMeta = metaEquipo;
+      puntos.baseCumplimiento = metaEquipo === null ? null : cumplimiento;
     } else if (sinDato.length || !medidos.length) {
       faltantes2.push("base social del equipo");
     } else {
       const cierre = medidos.reduce((s, item) => s + item.baseSocial.cierre, 0);
-      const meta = parametros.director.metaBaseSocialEquipo;
-      const cumplimiento = meta ? cierre / meta : 0;
-      puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
+      const cumplimiento = metaEquipo ? cierre / metaEquipo : 0;
+      puntos.baseSocial = metaEquipo === null ? null : puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, true);
       puntos.baseCierre = cierre;
-      puntos.baseMeta = meta;
-      puntos.baseCumplimiento = cumplimiento;
+      puntos.baseMeta = metaEquipo;
+      puntos.baseCumplimiento = metaEquipo === null ? null : cumplimiento;
     }
     const faltantesTotales = [...faltantes2, ...ponderado.faltantes];
     const scoreTotales = faltantesTotales.length || [puntos.ventas, puntos.baseSocial, puntos.serfiscal, puntos.innovacion, puntos.satisfaccion].some((n) => n === null) ? null : score([puntos.ventas, puntos.baseSocial, puntos.serfiscal, puntos.innovacion, puntos.satisfaccion]);
@@ -13362,10 +13363,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const s55 = `
     ${seccionDirector("5.5 Base social del equipo", `${pts(director.puntos.baseSocial)} de ${decimal(pesos4.baseSocial, 0)} pts`, `
       ${tablaHtml(["Concepto", "Valor", "Cumplimiento", "Peso", "Puntos"], `
-        <tr><td>Base computable del equipo (suma de cierres)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos4.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
-        <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
-      ${verFormula(`Puntos = ${decimal(pesos4.baseSocial, 0)} × mín(suma de cierres ÷ meta; ${porcentaje2(tope)}) con regla del 100 % (bajo 100 % → 0). Suma de cierres = ${entero(parametros.director.baseSocialCierreEquipo)}.`)}
-      <p class="ayuda-campo">Suma de cierres y meta del equipo: Parámetros → Director.</p>
+        <tr><td>Base computable del equipo (suma de cierres)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "regla100")}</td><td class="num" rowspan="2">${decimal(pesos4.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
+        <tr><td>Meta del equipo (suma de metas del mes)</td><td class="num">${director.puntos.baseMeta == null ? "Pendiente" : entero(director.puntos.baseMeta)}</td></tr>`)}
+      ${verFormula(`Puntos = ${decimal(pesos4.baseSocial, 0)} × mín(suma de cierres ÷ meta; ${porcentaje2(tope)}) con regla del 100 % (bajo 100 % → 0). Meta = suma de metas de base social del mes de los comerciales (${director.puntos.baseMeta == null ? "pendiente" : entero(director.puntos.baseMeta)}).`)}
+      <p class="ayuda-campo">Suma de cierres: Parámetros → Director. Meta: suma automática de las metas del mes de cada comercial.</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
     const serMedidos = equipo.filter((item) => !item.neutrales.serfiscal);
     const innMedidos = equipo.filter((item) => !item.neutrales.innovacion);

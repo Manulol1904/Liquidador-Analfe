@@ -672,7 +672,7 @@ function htmlFormulario() {
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
       campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Suma de cierres del equipo", ayuda: "Base computable = suma de cierres de base social del equipo (personas)" }),
-      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Meta de personas del equipo para el director comercial" }),
+      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social (referencia)", ayuda: "Solo referencia. El cálculo usa la suma de las metas de base social del mes de los comerciales" }),
       campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
       campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
       `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,

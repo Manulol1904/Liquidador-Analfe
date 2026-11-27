@@ -1123,10 +1123,10 @@ function seccionesDirector(liquidacion) {
   const s55 = `
     ${seccionDirector("5.5 Base social del equipo", `${pts(director.puntos.baseSocial)} de ${decimal(pesos.baseSocial, 0)} pts`, `
       ${tablaHtml(["Concepto", "Valor", "Cumplimiento", "Peso", "Puntos"], `
-        <tr><td>Base computable del equipo (suma de cierres)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
-        <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
-      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(suma de cierres ÷ meta; ${porcentaje(tope)}) con regla del 100 % (bajo 100 % → 0). Suma de cierres = ${entero(parametros.director.baseSocialCierreEquipo)}.`)}
-      <p class="ayuda-campo">Suma de cierres y meta del equipo: Parámetros → Director.</p>
+        <tr><td>Base computable del equipo (suma de cierres)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "regla100")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
+        <tr><td>Meta del equipo (suma de metas del mes)</td><td class="num">${director.puntos.baseMeta == null ? "Pendiente" : entero(director.puntos.baseMeta)}</td></tr>`)}
+      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(suma de cierres ÷ meta; ${porcentaje(tope)}) con regla del 100 % (bajo 100 % → 0). Meta = suma de metas de base social del mes de los comerciales (${director.puntos.baseMeta == null ? "pendiente" : entero(director.puntos.baseMeta)}).`)}
+      <p class="ayuda-campo">Suma de cierres: Parámetros → Director. Meta: suma automática de las metas del mes de cada comercial.</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
 
   // 5.6
