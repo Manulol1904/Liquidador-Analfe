@@ -4740,6 +4740,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       metodo: "totales",
       regla100: false,
       metaBaseSocialEquipo: 560,
+      /** Base computable del equipo para el director (no la suma de cierres individuales). */
+      baseSocialCierreEquipo: 560,
       metaEduAtEquipo: 28e7,
       metaMisionEquipo: 496e5,
       tasaAnterior: 0.015,
@@ -5147,6 +5149,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         "director.metodo",
         "director.regla100",
         "director.metaBaseSocialEquipo",
+        "director.baseSocialCierreEquipo",
         "director.metaEduAtEquipo",
         "director.metaMisionEquipo",
         "director.ajusteValor",
@@ -5169,7 +5172,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           <option value="false" ${d.regla100 ? "" : "selected"}>No</option>
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
-        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas (total del equipo para el director comercial)" }),
+        campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Base computable del equipo", ayuda: "Base social total del equipo para el director (personas). Vacío = suma de cierres medidos" }),
+        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Meta de personas del equipo para el director comercial" }),
         campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
         campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
         `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,
@@ -8259,8 +8263,19 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     };
     const sinDato = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre === null);
     const medidos = resultados.filter((item) => !item.baseSocial.neutral && item.baseSocial.cierre !== null);
-    if (sinDato.length || !medidos.length) faltantes2.push("base social del equipo");
-    else {
+    const cierreFijoCrudo = parametros.director.baseSocialCierreEquipo;
+    const cierreFijo = cierreFijoCrudo === null || cierreFijoCrudo === void 0 || cierreFijoCrudo === "" ? null : Number(cierreFijoCrudo);
+    if (Number.isFinite(cierreFijo)) {
+      const meta = parametros.director.metaBaseSocialEquipo;
+      const cumplimiento = meta ? cierreFijo / meta : 0;
+      puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, false);
+      puntos.baseCierre = cierreFijo;
+      puntos.baseCierreSuma = medidos.length ? medidos.reduce((s, item) => s + item.baseSocial.cierre, 0) : null;
+      puntos.baseMeta = meta;
+      puntos.baseCumplimiento = cumplimiento;
+    } else if (sinDato.length || !medidos.length) {
+      faltantes2.push("base social del equipo");
+    } else {
       const cierre = medidos.reduce((s, item) => s + item.baseSocial.cierre, 0);
       const meta = parametros.director.metaBaseSocialEquipo;
       const cumplimiento = meta ? cierre / meta : 0;
@@ -13224,10 +13239,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const s55 = `
     ${seccionDirector("5.5 Base social del equipo", `${pts(director.puntos.baseSocial)} de ${decimal(pesos4.baseSocial, 0)} pts`, `
       ${tablaHtml(["Concepto", "Valor", "Cumplimiento", "Peso", "Puntos"], `
-        <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos4.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
+        <tr><td>Base computable del equipo</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos4.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
         <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
-      ${verFormula(`Puntos = ${decimal(pesos4.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje2(tope)}) (sin regla del 100 %).`)}
-      <p class="ayuda-campo">Meta de base social del equipo (Parámetros): ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
+      ${verFormula(`Puntos = ${decimal(pesos4.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje2(tope)}) (sin regla del 100 %). Base computable = ${entero(parametros.director.baseSocialCierreEquipo)} (Parámetros).`)}
+      <p class="ayuda-campo">Base computable y meta del equipo se editan en Parámetros → Director.${director.puntos.baseCierreSuma != null ? ` Suma de cierres individuales: ${entero(director.puntos.baseCierreSuma)}.` : ""}</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
     const serMedidos = equipo.filter((item) => !item.neutrales.serfiscal);
     const innMedidos = equipo.filter((item) => !item.neutrales.innovacion);

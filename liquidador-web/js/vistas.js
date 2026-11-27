@@ -1115,10 +1115,10 @@ function seccionesDirector(liquidacion) {
   const s55 = `
     ${seccionDirector("5.5 Base social del equipo", `${pts(director.puntos.baseSocial)} de ${decimal(pesos.baseSocial, 0)} pts`, `
       ${tablaHtml(["Concepto", "Valor", "Cumplimiento", "Peso", "Puntos"], `
-        <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
+        <tr><td>Base computable del equipo</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
         <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
-      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje(tope)}) (sin regla del 100 %).`)}
-      <p class="ayuda-campo">Meta de base social del equipo (Parámetros): ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
+      ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje(tope)}) (sin regla del 100 %). Base computable = ${entero(parametros.director.baseSocialCierreEquipo)} (Parámetros).`)}
+      <p class="ayuda-campo">Base computable y meta del equipo se editan en Parámetros → Director.${director.puntos.baseCierreSuma != null ? ` Suma de cierres individuales: ${entero(director.puntos.baseCierreSuma)}.` : ""}</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
 
   // 5.6
