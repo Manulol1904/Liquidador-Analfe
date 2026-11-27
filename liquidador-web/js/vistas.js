@@ -1335,7 +1335,7 @@ function bloqueAnteriorDirector(director) {
     <p>Fuente: Facturación (${anterior.facturas || 0} facturas) ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
-      <li><span>Base: total de producción del mes</span><span class="dinero">${moneda(anterior.base)}</span></li>
+      <li><span>Base: total de producción del mes (sin anticipos 27209)</span><span class="dinero">${moneda(anterior.base)}</span></li>
       <li><span>Tasa</span><span class="dinero">${porcentaje(anterior.tasa)} <button type="button" class="boton boton--texto" data-ir="parametros">✎ Parámetros</button></span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(anterior.comision)}</span></li>
     </ul>

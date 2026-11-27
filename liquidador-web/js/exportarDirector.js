@@ -26,7 +26,7 @@ export function construirDatosDirector(liquidacion, parametros, filas, mes) {
   const d = liquidacion.director;
   const enc = encabezadoDirector(p.director);
   const [anio, numeroMes] = String(mes).split("-").map(Number);
-  const total = produccionTotalMes(filas || [], mes);
+  const total = produccionTotalMes(filas || [], mes, p);
   const tasa = p.director.tasaAnterior;
   // Facturación del mes (la base del esquema anterior).
   const facturas = total.lineas.map((fila) => ({

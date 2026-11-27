@@ -244,8 +244,9 @@
       filaMes("K", 500000, { elegida: false, hoja: "BTL" }),
       filaMes("L", 800, { asesor: "" }),
       filaMes("M", 800, { fecha: null }),
-    ], "2026-10");
-    probar("total del mes incluye dirección y anticipo", totalMes.base, 252848440);
+    ], "2026-10", { anticipos: { prefijoCuenta: "27209" } });
+    probar("total del mes incluye dirección y excluye anticipo 27209", totalMes.base, 252847440);
+    probar("total del mes no lista el anticipo", totalMes.lineas.some((fila) => fila.factura === "J"), false);
     probar("total del mes deja fuera la hoja BTL", totalMes.lineas.some((fila) => fila.factura === "K"), false);
     probar("total del mes deja fuera el total sin asesor", totalMes.lineas.some((fila) => fila.factura === "L"), false);
 

@@ -132,10 +132,20 @@ export function leerTasa(valor) {
   return numero > 1 ? numero / 100 : numero;
 }
 
+/** Anticipo (cuentas 27 / 27209…): prefijo en parametros.anticipos o en la clasificación BTL. */
+export function esCuentaAnticipo(cuenta, parametros) {
+  const codigo = String(cuenta || "").trim().split(/\s/)[0];
+  if (!codigo) return false;
+  const prefijoParam = parametros?.anticipos?.prefijoCuenta;
+  const prefijoClasif = (parametros?.clasificacion || []).find((regla) => regla.producto === "btl")?.cuentasPrefijo?.[0];
+  const prefijo = String(prefijoParam || prefijoClasif || "27209");
+  return prefijo.length > 0 && codigo.startsWith(prefijo);
+}
+
 /**
  * Producción de la política anterior, como la tabla dinámica Hoja4.
  * Suma BASE de la hoja elegida, del comercial, con fecha de facturación en el mes.
- * Entran todas las cuentas de esa hoja, incluidos los anticipos 27209.
+ * Entran todas las cuentas de esa hoja, incluidos los anticipos 27209 (solo esquema anterior).
  * No entran las hojas complementarias, las filas sin asesor, las sin fecha ni las de otro mes.
  */
 export function produccionAnterior(filas, comercial, mes) {
@@ -144,10 +154,14 @@ export function produccionAnterior(filas, comercial, mes) {
   return { produccion: lineas.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0), lineas };
 }
 
-/** Total de producción del mes: todas las filas con asesor y fecha en el mes de la hoja elegida. */
-export function produccionTotalMes(filas, mes) {
+/**
+ * Total de producción del mes (hoja elegida, con asesor y fecha en el mes).
+ * No cuenta anticipos / cuentas 27 (27209…): esos solo entran en la liquidación del esquema anterior.
+ */
+export function produccionTotalMes(filas, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
+    && !esCuentaAnticipo(fila.cuenta, parametros));
   const grupos = new Map();
   lineas.forEach((fila) => {
     const asesor = String(fila.asesor).trim();
@@ -1180,7 +1194,7 @@ export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento) {
     if (!deHojaElegida(fila, parametros) || asesorVacio(fila)) return;
     if (!(fila.fecha instanceof Date)) avisos.push(`La factura ${fila.factura || "sin número"} no tiene fecha.`);
   });
-  const totalMes = produccionTotalMes(filas, mes);
+  const totalMes = produccionTotalMes(filas, mes, parametros);
   const baseSinBtl = totalMes.base;
   const pagoAnterior = comisionAnteriorDirector(totalMes.base, parametros.director.tasaAnterior);
   const anterior = {
