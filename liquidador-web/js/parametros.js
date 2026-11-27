@@ -158,7 +158,7 @@ export const PARAMETROS_INICIALES = {
     metodo: "totales",
     regla100: false,
     metaBaseSocialEquipo: 560,
-    /** Base computable del equipo para el director (no la suma de cierres individuales). */
+    /** Suma de cierres de base social del equipo (director). */
     baseSocialCierreEquipo: 560,
     metaEduAtEquipo: 280000000,
     metaMisionEquipo: 49600000,
@@ -670,7 +670,7 @@ function htmlFormulario() {
           <option value="false" ${d.regla100 ? "" : "selected"}>No</option>
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
-      campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Base computable del equipo", ayuda: "Base social total del equipo para el director (personas). Vacío = suma de cierres medidos" }),
+      campo("director.baseSocialCierreEquipo", d.baseSocialCierreEquipo, { titulo: "Suma de cierres del equipo", ayuda: "Base computable = suma de cierres de base social del equipo (personas)" }),
       campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Meta de personas del equipo para el director comercial" }),
       campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
       campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),

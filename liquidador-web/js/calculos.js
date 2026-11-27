@@ -1087,12 +1087,11 @@ export function metodosDirector(resultados, parametros, mes) {
     ? null
     : Number(cierreFijoCrudo);
   if (Number.isFinite(cierreFijo)) {
-    // Base computable del equipo viene de Parámetros (p. ej. 560), no de la suma de cierres.
+    // Suma de cierres del equipo (Parámetros): p. ej. 560.
     const meta = parametros.director.metaBaseSocialEquipo;
     const cumplimiento = meta ? cierreFijo / meta : 0;
     puntos.baseSocial = puntosIndicador(parametros.pesos.baseSocial, cumplimiento, tope, false);
     puntos.baseCierre = cierreFijo;
-    puntos.baseCierreSuma = medidos.length ? medidos.reduce((s, item) => s + item.baseSocial.cierre, 0) : null;
     puntos.baseMeta = meta;
     puntos.baseCumplimiento = cumplimiento;
   } else if (sinDato.length || !medidos.length) {
