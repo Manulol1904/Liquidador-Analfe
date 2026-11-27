@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { ventaEduAtReconocida, metodosDirector, clasificarProducto } from "../js/calculos.js";
 import { PARAMETROS_INICIALES } from "../js/parametros.js";
+import { texto } from "../js/utilidades.js";
 
 const p = structuredClone(PARAMETROS_INICIALES);
 const fecha = new Date(Date.UTC(2026, 9, 15, 5, 0, 0));
@@ -29,25 +30,29 @@ describe("Edu/AT canal nacional en política nueva", () => {
       { elegida: true, asesor: "Direccion Comercial ", grupo: "Educación", cuenta: "27209504", base: 270_000, fecha, estado: "CANCELADA" },
       { elegida: true, asesor: "Tatiana Acuña", grupo: "BTL", cuenta: "27209528", base: 8_400_000, fecha, estado: "CANCELADA" },
     ];
-    const delEquipo = new Set(["hernando rozo", "tatiana acuña", "lynette arango", "oriette henriquez", "consuelo castro"]);
-    // texto() strips accents — use same helper via ventaEduAtReconocida filter
-    const totalArchivo = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map());
-    assert.equal(totalArchivo, 230_256_640);
 
-    const sinCanal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => {
-      const n = String(asesor || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return delEquipo.has(n);
-    });
+    assert.equal(ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map()), 230_256_640);
+
+    const delEquipo = new Set(
+      ["Hernando Rozo", "Tatiana Acuña", "Lynette Arango", "Oriette Henriquez", "Consuelo Castro"].map((n) => texto(n)),
+    );
+    const sinCanal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => delEquipo.has(texto(asesor)));
     assert.equal(sinCanal, 226_346_640);
 
-    const canal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => {
-      const n = String(asesor || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return !delEquipo.has(n);
-    });
+    const canal = ventaEduAtReconocida(filas, "2026-10", p, new Map(), new Map(), (asesor) => !delEquipo.has(texto(asesor)));
     assert.equal(canal, 3_910_000);
 
     const stubs = [
-      { nombre: "A", ventas: { eduAt: sinCanal, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 }, metas: { eduAt: 1, mision: 1, congreso: 0, cultural: 0 }, puntos: { ventas: 0, baseSocial: 0, serfiscal: 0, innovacion: 0, satisfaccion: 0 }, baseSocial: { cierre: 90, meta: 91, cumplimiento: 1, neutral: false }, neutrales: {}, score: 100, comercial: {} },
+      {
+        nombre: "A",
+        ventas: { eduAt: sinCanal, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 },
+        metas: { eduAt: 1, mision: 1, congreso: 0, cultural: 0 },
+        puntos: { ventas: 0, baseSocial: 0, serfiscal: 0, innovacion: 0, satisfaccion: 0 },
+        baseSocial: { cierre: 90, meta: 91, cumplimiento: 1, neutral: false },
+        neutrales: {},
+        score: 100,
+        comercial: {},
+      },
     ];
     const dir = metodosDirector(stubs, p, "2026-10", { eduAtExtra: canal });
     assert.equal(dir.ventasEquipo.eduAt, 230_256_640);
