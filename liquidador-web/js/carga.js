@@ -519,10 +519,50 @@ function hojaPareceDetalleFacturacion(matriz) {
   return tiene("asesor") && tiene("base") && (tiene("grupo") || tiene("servicio") || tiene("cuenta"));
 }
 
-/** Lee del libro de Producción las hojas con filas ASESOR/BASE (Misión Internacional, etc.). */
+/** Hojas de apoyo que no deben entrar a la liquidación (anuladas, auxiliares, balances). */
+function hojaDetalleIgnorada(nombre) {
+  const n = normalizar(nombre).replace(/\s+/g, "");
+  return n.includes("anulad") || n.includes("auxiliar") || n.includes("balance") || n === "hoja2" || n === "hoja3" || n === "hoja4";
+}
+
+/**
+ * True si el libro es facturación nacional (Facturacion + Misión/BTL), no el informe PRODUCTOS de márgenes.
+ * Ej.: «FACTURACION A NIVEL NACIONAL MES DE OCTUBRE.xlsx» o «10-Produccion Saira…».
+ */
+export function libroEsFacturacionDetalle(libro) {
+  const nombres = Object.keys(libro || {});
+  if (!nombres.length) return false;
+  const utiles = nombres.filter((nombre) => !hojaDetalleIgnorada(nombre) && hojaPareceDetalleFacturacion(libro[nombre]));
+  if (!utiles.length) return false;
+  const tieneFact = utiles.some((nombre) => normalizar(nombre).includes("facturacion"));
+  const tieneMisi = utiles.some((nombre) => normalizar(nombre).includes("mision"));
+  return tieneFact || tieneMisi;
+}
+
+/**
+ * Arma filas de facturación desde un libro tipo nacional:
+ * hoja Facturacion (elegida) + Misión Int. / BTL (complementarias).
+ */
+export function armarFacturacionDesdeLibro(libro) {
+  const candidatos = Object.keys(libro || {}).filter((nombre) => !hojaDetalleIgnorada(nombre) && hojaPareceDetalleFacturacion(libro[nombre]));
+  if (!candidatos.length) return { filas: [], hojas: [], principal: "" };
+  const principal = candidatos.find((nombre) => normalizar(nombre).includes("facturacion"))
+    || candidatos.find((nombre) => !normalizar(nombre).includes("mision") && !normalizar(nombre).includes("btl"))
+    || candidatos[0];
+  const mapa = mapaAutomatico(libro[principal], CAMPOS_FACTURACION);
+  let filas = filasDesdeHoja(libro[principal], CAMPOS_FACTURACION, mapa, principal, true);
+  const extras = hojasComplementarias(libro, principal).filter((nombre) => !hojaDetalleIgnorada(nombre));
+  extras.forEach((nombre) => {
+    filas = filas.concat(filasDesdeHoja(libro[nombre], CAMPOS_FACTURACION, mapaAutomatico(libro[nombre], CAMPOS_FACTURACION), nombre, false));
+  });
+  return { filas, hojas: [principal, ...extras], principal };
+}
+
+/** Lee del libro las hojas con filas ASESOR/BASE (Misión Internacional, Facturación, etc.). */
 export function leerDetalleProduccion(libro) {
   const detalle = [];
   Object.keys(libro || {}).forEach((nombre) => {
+    if (hojaDetalleIgnorada(nombre)) return;
     const matriz = libro[nombre] || [];
     if (!hojaPareceDetalleFacturacion(matriz)) return;
     const mapa = mapaAutomatico(matriz, CAMPOS_FACTURACION);
@@ -876,12 +916,12 @@ export function iniciarCarga(contenedor) {
     <h2 class="titulo-pagina">Cargar datos</h2>
     <div class="cargar-archivos">
       <article class="tarjeta tarjeta-archivo">
-        ${zonaArchivo("facturacion", "Producción", true, "Facturación del mes (hoja Facturación).")}
+        ${zonaArchivo("facturacion", "Producción", true, "Facturación del mes (hoja Facturacion + Misión Int. / BTL). Sirve el Excel nacional «FACTURACION A NIVEL NACIONAL…».")}
         <div class="zona-error" data-error="facturacion"></div>
         <p class="nota-union" id="nota-resumen" hidden></p>
       </article>
       <article class="tarjeta tarjeta-archivo">
-        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe de producción: hoja PRODUCTOS (márgenes) y, si viene, el detalle de Misión Internacional (ASESOR/BASE) para la política nueva.")}
+        ${zonaArchivo("eventos", "Márgenes de eventos", true, "Informe PRODUCTOS (márgenes Edu/AT). Si subes aquí el Excel nacional de facturación, se carga como Facturación + Misión.")}
         <div class="zona-error" data-error="eventos"></div>
         <p class="nota-union" id="nota-union" hidden></p>
       </article>
@@ -965,10 +1005,14 @@ export function iniciarCarga(contenedor) {
       dato: facturas ? plural(facturas.facturas, "factura", "facturas") : "",
     });
     pintarTarjeta("eventos", {
-      estado: !produccion ? falta : union && union.unidas !== union.total ? aviso : cargado(nombresArchivo.eventos),
-      detalle: produccion ? nombresArchivo.eventos : "",
+      estado: !produccion ? falta : produccion.nacional ? aviso : union && union.unidas !== union.total ? aviso : cargado(nombresArchivo.eventos),
+      detalle: produccion ? (nombresArchivo.eventos || produccion.archivo || "") : "",
       dato: produccion
-        ? union ? `${union.unidas}/${union.total} unidas` : plural(produccion.eventosMes, "evento", "eventos")
+        ? union
+          ? `${union.unidas}/${union.total} unidas`
+          : produccion.nacional || (produccion.detalle && !produccion.eventosMes)
+            ? plural(produccion.detalle || 0, "línea", "líneas")
+            : plural(produccion.eventosMes, "evento", "eventos")
         : "",
     });
     pintarTarjeta("btl", {
@@ -1088,6 +1132,85 @@ export function iniciarCarga(contenedor) {
         facturas: new Set(filas.filter((fila) => !vacio(fila.asesor)).map((fila) => fila.factura)).size,
         mision: lineasMision.length,
       };
+      // Facturación nacional (Facturacion + Misión/BTL): permite ver resultados sin informe PRODUCTOS.
+      // Edu/AT queda pendiente de márgenes hasta que se cargue PRODUCTOS en la otra zona.
+      if (libroEsFacturacionDetalle(libro) && !resumenArchivos.eventos) {
+        avisosPorTipo.eventos = ["Facturación nacional cargada. Para márgenes Edu/AT sube el informe PRODUCTOS en Márgenes de eventos."];
+        vistas.eventos = { filas: [], mes, hojas: [], detalle: produccionDetalleCargada };
+        resumenArchivos.eventos = {
+          archivo: "(sin márgenes aún)",
+          hoja: "(facturación nacional)",
+          lineas: 0,
+          eventosMes: 0,
+          detalle: produccionDetalleCargada.length,
+          nacional: true,
+        };
+        pintarVistaTipo("eventos");
+      }
+    } else if (libroEsFacturacionDetalle(libro)) {
+      // Ej. «FACTURACION A NIVEL NACIONAL…» cargado en la zona de Producción:
+      // es facturación nacional (Facturacion + Misión Int. + BTL), no el informe PRODUCTOS.
+      const armadoFact = armarFacturacionDesdeLibro(libro);
+      produccionDetalleCargada = leerDetalleProduccion(libro);
+      if (armadoFact.filas.length) {
+        facturacionCargada = armadoFact.filas;
+        controlHoja4 = leerControlHoja4(libro);
+        pintarControlHoja4(armadoFact.filas, mes);
+        vistas.facturacion = { filas: armadoFact.filas, mes, hojas: armadoFact.hojas };
+        pintarVistaTipo("facturacion");
+        const sinAsesor = armadoFact.filas.filter((fila) => vacio(fila.asesor)).length;
+        const lineasMision = armadoFact.filas.filter((fila) => !vacio(fila.asesor) && (normalizar(fila.grupo).includes("misi") || String(fila.cuenta || "").trim().startsWith("41703001")));
+        avisosPorTipo.facturacion = [
+          `Se detectó facturación nacional en el archivo de Producción: se cargó como Facturación (${armadoFact.hojas.join(" + ")}).`,
+          ...(lineasMision.length ? [`Misión Internacional: ${lineasMision.length} líneas (suma de BASE para la política nueva).`] : []),
+        ];
+        resumenArchivos.facturacion = {
+          archivo: nombresArchivo.eventos,
+          hojas: armadoFact.hojas.join(" + "),
+          lineas: armadoFact.filas.filter((fila) => !vacio(fila.asesor)).length,
+          excluidas: sinAsesor,
+          facturas: new Set(armadoFact.filas.filter((fila) => !vacio(fila.asesor)).map((fila) => fila.factura)).size,
+          mision: lineasMision.length,
+        };
+      }
+      // Márgenes: si alguna hoja parece informe de eventos, úsala; si no, deja eventos vacíos.
+      const hojaEventos = Object.keys(libro).find((nombre) => {
+        const matriz = libro[nombre] || [];
+        const prueba = filasDesdeHoja(matriz, CAMPOS_EVENTOS, mapaAutomatico(matriz, CAMPOS_EVENTOS), nombre, true);
+        return pareceProduccion(prueba);
+      });
+      const avisos = [];
+      if (hojaEventos) {
+        const matrizEvt = libro[hojaEventos] || [];
+        const filasEvt = filasDesdeHoja(matrizEvt, CAMPOS_EVENTOS, mapaAutomatico(matrizEvt, CAMPOS_EVENTOS), hojaEventos, true);
+        const armado = armarProduccion(filasEvt, mes);
+        eventosCargados = armado.eventos;
+        facturaAEventoCargada = armado.facturaAEvento;
+        avisos.push(...advertenciasEventos(filasEvt, nombres, mes));
+        vistas.eventos = { filas: filasEvt, mes, hojas: [hojaEventos], detalle: produccionDetalleCargada };
+        resumenArchivos.eventos = {
+          archivo: nombresArchivo.eventos,
+          hoja: hojaEventos,
+          lineas: armado.eventos.length,
+          eventosMes: armado.eventos.filter((evento) => evento.delMes).length,
+          detalle: produccionDetalleCargada.length,
+        };
+      } else {
+        eventosCargados = [];
+        facturaAEventoCargada = new Map();
+        avisos.push("Este Excel es facturación nacional (Facturacion / Misión Int. / BTL). Se cargó como Facturación. Para márgenes Edu/AT carga el informe PRODUCTOS en Producción.");
+        vistas.eventos = { filas: [], mes, hojas: [], detalle: produccionDetalleCargada };
+        resumenArchivos.eventos = {
+          archivo: nombresArchivo.eventos,
+          hoja: "(facturación nacional)",
+          lineas: 0,
+          eventosMes: 0,
+          detalle: produccionDetalleCargada.length,
+          nacional: true,
+        };
+      }
+      avisosPorTipo.eventos = avisos;
+      pintarVistaTipo("eventos");
     } else if (pareceProduccion(filas)) {
       const armado = armarProduccion(filas, mes);
       eventosCargados = armado.eventos;
