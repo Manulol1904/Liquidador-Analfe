@@ -154,13 +154,11 @@ export function leerTasa(valor) {
   return numero > 1 ? numero / 100 : numero;
 }
 
-/** Anticipo (cuentas 27 / 27209…): prefijo en parametros.anticipos o en la clasificación BTL. */
+/** Anticipo (cuentas 27 / 27209…): prefijo en parametros.anticipos. */
 export function esCuentaAnticipo(cuenta, parametros) {
   const codigo = String(cuenta || "").trim().split(/\s/)[0];
   if (!codigo) return false;
-  const prefijoParam = parametros?.anticipos?.prefijoCuenta;
-  const prefijoClasif = (parametros?.clasificacion || []).find((regla) => regla.producto === "btl")?.cuentasPrefijo?.[0];
-  const prefijo = String(prefijoParam || prefijoClasif || "27209");
+  const prefijo = String(parametros?.anticipos?.prefijoCuenta || "27209");
   return prefijo.length > 0 && codigo.startsWith(prefijo);
 }
 
@@ -395,15 +393,15 @@ export function describirTramo(cumplimiento, reglas) {
   return "";
 }
 
-/** Recaudo de la política nueva: cancelada, pagada en el mes y sin anticipo. El prefijo de anticipo sale de la clasificación BTL. */
-export function esRecaudo(fila, mes, parametros) {
-  const codigo = String(fila.cuenta || "").trim().split(/\s/)[0];
-  const reglaBtl = (parametros?.clasificacion || []).find((regla) => regla.producto === "btl");
-  const prefijos = reglaBtl?.cuentasPrefijo || [];
-  if (prefijos.some((prefijo) => codigo.startsWith(prefijo))) return false;
+/**
+ * Recaudo de la política nueva: ESTADO exactamente CANCELADA y fecha de facturación en el mes.
+ * La BASE sale del Excel; no se filtra por mes de pago (una cancelada pagada en noviembre
+ * con factura de octubre cuenta en octubre). «NO CANCELADA» no entra.
+ */
+export function esRecaudo(fila, mes, _parametros) {
   if (texto(fila.estado) !== "cancelada") return false;
-  if (!(fila.fechaPago instanceof Date)) return false;
-  return fechaEnMes(fila.fechaPago, mes);
+  if (!(fila.fecha instanceof Date)) return false;
+  return fechaEnMes(fila.fecha, mes);
 }
 
 function asesorVacio(fila) {

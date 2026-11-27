@@ -114,7 +114,8 @@ export const PARAMETROS_INICIALES = {
   topeCongreso: 1,
   topeProducto: 1.2,
   clasificacion: [
-    { producto: "btl", grupos: ["btl"], cuentasPrefijo: ["27209"] },
+    // BTL por grupo o cuentas 41702…; los anticipos 27209 de Educación no son BTL (van con su grupo).
+    { producto: "btl", grupos: ["btl"], cuentasPrefijo: ["41702"] },
     { producto: "mision", grupos: ["misi"], cuentas: ["41703001", "41600521"] },
     { producto: "congreso", grupos: ["congres"] },
     { producto: "cultural", grupos: ["cultur"] },
