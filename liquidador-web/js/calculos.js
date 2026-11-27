@@ -196,53 +196,50 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
 
 /**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE de la hoja elegida, del comercial, CANCELADA con fecha de facturación en el mes,
- * más Misión CANCELADA: N facturas × valorFacturaAnterior (hoja Misión Int.).
- * - produccion: total con anticipos 27209 + Misión (para % de cumplimiento / tramo).
- * - produccionSinAnticipos: base de la comisión (sin cuentas 27) + Misión.
- * NO CANCELADA no entra. Tampoco BTL ni filas sin asesor / sin fecha / de otro mes.
+ * Suma BASE CANCELADA de la hoja elegida + Misión (N × valorFacturaAnterior).
+ * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209).
+ * NO CANCELADA no entra.
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
     && esCancelada(fila)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
-  const lineasSinAnticipos = lineas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
+  const base = sumar(lineas);
   return {
-    produccion: sumar(lineas) + mision.valor,
-    produccionSinAnticipos: sumar(lineasSinAnticipos) + mision.valor,
-    produccionBase: sumar(lineas),
-    produccionBaseSinAnticipos: sumar(lineasSinAnticipos),
+    produccion: base + mision.valor,
+    produccionSinAnticipos: base + mision.valor,
+    produccionBase: base,
+    produccionBaseSinAnticipos: base,
     mision,
     lineas,
-    lineasSinAnticipos,
+    lineasSinAnticipos: lineas,
   };
 }
 
 /**
- * Total de producción del mes para la comisión anterior del director (1,5 % × base).
- * La comisión del director se calcula sin anticipos / cuentas 27 (27209…).
- * Solo CANCELADA. baseConAnticipos queda disponible por si se necesita el total producido.
+ * Total de producción del mes para la comisión anterior del director (tasa × base total).
+ * Solo CANCELADA; incluye anticipos 27209.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
     && esCancelada(fila)
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
-  const lineas = lineasTodas.filter((fila) => !esCuentaAnticipo(fila.cuenta, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const grupos = new Map();
-  lineas.forEach((fila) => {
+  lineasTodas.forEach((fila) => {
     const asesor = String(fila.asesor).trim();
     const actual = grupos.get(asesor) || { asesor, base: 0, facturas: 0 };
     actual.base += Number(fila.base) || 0;
     actual.facturas += 1;
     grupos.set(asesor, actual);
   });
+  const total = sumar(lineasTodas);
   return {
-    base: sumar(lineas),
-    baseConAnticipos: sumar(lineasTodas),
-    lineas,
+    base: total,
+    baseConAnticipos: total,
+    lineas: lineasTodas,
     lineasTodas,
     porAsesor: [...grupos.values()],
   };
@@ -259,8 +256,8 @@ export function tasaPorTramo(cumplimiento, reglas) {
 
 /**
  * Comisión anterior por tramos.
- * Cumplimiento = producciónConAnticipos / meta (define la tasa).
- * Comisión = producciónSinAnticipos × tasa (si no se pasa, usa la misma producción).
+ * Cumplimiento = producción / meta (define la tasa).
+ * Comisión = producción × tasa (el total CANCELADA, sin restar anticipos).
  */
 export function comisionAnteriorTramos(meta, produccion, reglas, produccionComision) {
   const baseComision = produccionComision === undefined || produccionComision === null ? produccion : produccionComision;
@@ -727,9 +724,9 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     const delMes = comercial.anteriorMes?.[mes] || {};
     const manualValor = delMes.produccionManual;
     const manual = manualValor !== null && manualValor !== undefined && manualValor !== "" && Number.isFinite(Number(manualValor));
-    // Cumplimiento: BASE elegida (con 27) + Misión (N × valorFacturaAnterior). Comisión: sin anticipos + Misión.
+    // Cumplimiento y comisión: mismo total CANCELADA + Misión (incluye anticipos).
     const produccionUsada = manual ? Number(manualValor) : produccionMes.produccion;
-    const produccionComision = manual ? Number(manualValor) : produccionMes.produccionSinAnticipos;
+    const produccionComision = produccionUsada;
     const meta = delMes.meta === undefined ? null : delMes.meta;
     const calculo = comisionAnteriorTramos(meta, produccionUsada, reglas, produccionComision);
     pagoAnterior = calculo.comision;

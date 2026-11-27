@@ -1,13 +1,12 @@
 /**
  * Cuentas 27 / anticipos 27209 en esquema anterior:
- * - cumplimiento: producción total (con anticipos)
- * - comisión: base sin anticipos × tasa del tramo
+ * entran al total de producción y a la base de comisión (mismo valor).
  */
 import { produccionAnterior, produccionTotalMes, comisionAnteriorTramos, esCuentaAnticipo } from "../js/calculos.js";
 
 const mes = "2026-10";
 const fecha = new Date(2026, 9, 15);
-const parametros = { anticipos: { prefijoCuenta: "27209" }, clasificacion: [{ producto: "btl", cuentasPrefijo: ["27209"] }] };
+const parametros = { anticipos: { prefijoCuenta: "27209" }, clasificacion: [{ producto: "btl", cuentasPrefijo: ["41702"] }] };
 const reglas = {
   minimo: 0.8,
   tasaBajoMinimo: 0,
@@ -47,19 +46,18 @@ assert("esCuentaAnticipo 27209", esCuentaAnticipo("27209001 Ant. bolos", paramet
 assert("esCuentaAnticipo edu", esCuentaAnticipo("41600511", parametros) === false);
 
 const anterior = produccionAnterior(filas, comercial, mes, parametros);
-assert("producción (cumplimiento) incluye anticipo", anterior.produccion === 140);
-assert("producción sin anticipos excluye 27209", anterior.produccionSinAnticipos === 100);
-assert("lista completa incluye anticipo", anterior.lineas.some((f) => f.factura === "B"));
-assert("lista sin anticipos no incluye 27209", !anterior.lineasSinAnticipos.some((f) => f.factura === "B"));
+assert("producción incluye anticipo", anterior.produccion === 140);
+assert("comisión usa el mismo total", anterior.produccionSinAnticipos === 140);
+assert("lista incluye anticipo", anterior.lineas.some((f) => f.factura === "B"));
 
-// Meta 100 → cumplimiento 140% → tramo 9 %. Comisión = 100 × 9 % = 9 (no 140 × 9 %).
-const calculo = comisionAnteriorTramos(100, anterior.produccion, reglas, anterior.produccionSinAnticipos);
+// Meta 100 → cumplimiento 140% → tramo 9 %. Comisión = 140 × 9 % = 12,6.
+const calculo = comisionAnteriorTramos(100, anterior.produccion, reglas, anterior.produccion);
 assert("cumplimiento con anticipos", calculo.cumplimiento === 1.4);
-assert("tasa del tramo por cumplimiento con 27", calculo.tasa === 0.09);
-assert("comisión sobre base sin anticipos", calculo.comision === 9);
+assert("tasa del tramo por cumplimiento", calculo.tasa === 0.09);
+assert("comisión sobre valor total", calculo.comision === 12.6);
 
 const total = produccionTotalMes(filas, mes, parametros);
-assert("director: base comisión sin anticipo", total.base === 100);
-assert("director: total producido con anticipo", total.baseConAnticipos === 140);
+assert("director: base = total con anticipo", total.base === 140);
+assert("director: baseConAnticipos igual", total.baseConAnticipos === 140);
 
 console.log("anticipos_produccion.test.mjs: listo");

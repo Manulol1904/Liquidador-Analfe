@@ -503,7 +503,7 @@ function bloquePoliticaAnterior(resultado) {
       </ul>
       <p>Falta la meta mensual de la política anterior.</p>`;
   }
-  const baseComision = tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion;
+  const baseComision = tramo.produccionComision ?? tramo.produccion;
   const misionAnt = tramo.mision || resultado.misionAnterior || {};
   const nMision = Number(misionAnt.facturas) || 0;
   const valorMision = Number(misionAnt.valor ?? misionAnt.valorTotal) || 0;
@@ -515,11 +515,11 @@ function bloquePoliticaAnterior(resultado) {
     ${tablaAnteriorImpresion([
       ["Comisión anterior", moneda(tramo.comision)],
       ["Meta mensual", moneda(tramo.meta)],
-      ["Producción (con anticipos 27209)", moneda(tramo.produccion)],
+      ["Producción (total CANCELADA)", moneda(tramo.produccion)],
       ...(nMision ? [["Misión (N × valor factura anterior)", moneda(valorMision)]] : []),
       ["Cumplimiento", porcentaje(tramo.cumplimiento)],
       ["Tasa aplicada", porcentaje(tramo.tasa)],
-      ["Base comisión (sin anticipos)", moneda(baseComision)],
+      ["Base comisión", moneda(baseComision)],
       ["Base × tasa", moneda(tramo.comision)],
     ])}
     <ul class="lista-concepto anterior-pantalla">
@@ -529,7 +529,7 @@ function bloquePoliticaAnterior(resultado) {
       ${notaMision}
       <li><span>Cumplimiento</span><span class="dinero">${porcentaje(tramo.cumplimiento)}</span></li>
       <li><span>Tasa aplicada</span><span class="dinero">${porcentaje(tramo.tasa)} <span class="ayuda-campo">tramo «${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span></span></li>
-      <li><span>Base comisión (sin anticipos)</span><span class="dinero">${moneda(baseComision)}</span></li>
+      <li><span>Base comisión</span><span class="dinero">${moneda(baseComision)}</span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(tramo.comision)}</span></li>
     </ul>
     <details class="no-imprimir">
@@ -765,7 +765,7 @@ function tarjetasPagoImpresion(resultado) {
     ? tarjeta("Esquema anterior", "No aplica", [["Motivo", "No se compara"]])
     : tarjeta("Esquema anterior", resultado.pagoAnterior === null ? "Pendiente" : moneda(resultado.pagoAnterior), [
       ["Producción (cumplimiento)", moneda(tramo?.produccion)],
-      ["Base comisión (sin anticipos)", moneda(tramo?.produccionComision ?? tramo?.produccionSinAnticipos ?? tramo?.produccion)],
+      ["Base comisión", moneda(tramo?.produccionComision ?? tramo?.produccion)],
       ["Tasa aplicada", tramo?.tasa === null || tramo?.tasa === undefined ? "Pendiente" : porcentaje(tramo.tasa)],
     ], { paga: esquema === "anterior" });
   const claseDif = resultado.diferencia === null ? "" : resultado.diferencia < 0 ? "diferencia--negativa" : "diferencia--positiva";
@@ -1348,7 +1348,7 @@ function bloqueAnteriorDirector(director) {
     <p>Fuente: Facturación (${anterior.facturas || 0} facturas) ${marcaHoja4(anterior.base, control?.total)}</p>
     <ul class="lista-concepto">
       <li><span>Comisión anterior</span><span class="dinero kpi-numero">${moneda(anterior.comision)}</span></li>
-      <li><span>Base comisión (sin anticipos 27209)</span><span class="dinero">${moneda(anterior.base)}</span></li>
+      <li><span>Base comisión (total CANCELADA)</span><span class="dinero">${moneda(anterior.base)}</span></li>
       <li><span>Tasa</span><span class="dinero">${porcentaje(anterior.tasa)} <button type="button" class="boton boton--texto" data-ir="parametros">✎ Parámetros</button></span></li>
       <li><span>Base × tasa</span><span class="dinero">${moneda(anterior.comision)}</span></li>
     </ul>
@@ -1798,7 +1798,7 @@ function tarjetaAnterior(resultado) {
       ["Producción (cumplimiento)", `<span class="dinero">${moneda(tramo.produccion)}</span>`],
       ["Cumplimiento", `<span class="dinero">${porcentaje(tramo.cumplimiento)}</span>`],
       ["Tasa del tramo", `<span class="dinero">${porcentaje(tramo.tasa)}</span> <span class="ayuda-campo">«${escaparHtml(describirTramo(tramo.cumplimiento, reglas))}»</span>`],
-      ["Base comisión (sin anticipos)", `<span class="dinero">${moneda(tramo.produccionComision ?? tramo.produccionSinAnticipos ?? tramo.produccion)}</span>`],
+      ["Base comisión", `<span class="dinero">${moneda(tramo.produccionComision ?? tramo.produccion)}</span>`],
     ]
     : [["Meta mensual", tramo && tramo.meta > 0 ? moneda(tramo.meta) : "Pendiente"], ["Falta", "la meta de la política anterior"]];
   // v21: la línea BTL solo aparece si el comercial tiene eventos BTL este mes (sin BTL, ni siquiera en $0).
