@@ -51,4 +51,49 @@ describe("misión desde producción", () => {
     assert.equal(detalle[0].asesor, "Tatiana Acuña");
     assert.equal(Number(detalle[0].base), 15_500_000);
   });
+
+  it("si no hay detalle de Producción, usa las filas de Facturación/Misión Int.", async () => {
+    const { liquidarComercial } = await import("../js/calculos.js");
+    const comercial = {
+      ...PARAMETROS_INICIALES.comerciales[0],
+      nombre: "Carolina Gómez",
+      nombreFacturacion: "Carolina Gomez",
+      satisfaccion: 80,
+      serfiscal: 100,
+      ofertasAprobadas: 0,
+      primerasVentas: 0,
+      metas: {
+        "2026-10": { eduAt: 1, mision: 49_600_000, congreso: 0 },
+        "2026-11": { eduAt: 0, mision: 0, congreso: 0 },
+        "2026-12": { eduAt: 0, mision: 0, congreso: 0 },
+      },
+    };
+    const filasFacturacion = [
+      {
+        elegida: false,
+        hoja: "Misión Int. ",
+        asesor: "Carolina Gomez",
+        grupo: "Misión Internacional ",
+        cuenta: "41703001 Ingreso Misión Internacional",
+        base: 42_384_081,
+        factura: "FV1",
+        fecha: new Date(Date.UTC(2026, 9, 5, 5, 0, 0)),
+        estado: "CANCELADA",
+      },
+      {
+        elegida: false,
+        hoja: "Misión Int. ",
+        asesor: "Carolina Gomez",
+        grupo: "Misión Internacional ",
+        cuenta: "41703001 Ingreso Misión Internacional",
+        base: 15_500_000,
+        factura: "FV2",
+        fecha: new Date(Date.UTC(2026, 9, 10, 5, 0, 0)),
+        estado: "CANCELADA",
+      },
+    ];
+    const r = liquidarComercial(comercial, filasFacturacion, "2026-10", PARAMETROS_INICIALES, new Map(), new Map(), [], []);
+    assert.equal(r.ventas.mision, 57_884_081);
+    assert.equal(r.mision.origen, "produccion");
+  });
 });

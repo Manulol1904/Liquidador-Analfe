@@ -2070,7 +2070,7 @@ function cuerpoVentas(resultado, imprimir = false) {
       factor: edu.factorReconocimiento,
       ventaReconocida: edu.ventaReconocida,
     })}
-    <p class="nota-mision">Misión Internacional (archivo de Producción): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
+    <p class="nota-mision">Misión Internacional (hoja Misión Int. / Producción · suma de BASE): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
 }
 
 /** v23 · Bandas de margen de Parámetros (sin valores quemados): menor al umbral bajo, entre umbrales, mayor al alto. */

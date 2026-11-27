@@ -613,12 +613,16 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     else ventas[producto] += Number(fila.base) || 0;
   });
 
+  // Preferir detalle del libro de Producción; si no hay, usar hoja Misión Int. del libro de Facturación (suma de BASE).
   misionDesdeProduccion = produccionMisionNueva(filasProduccionDetalle, comercial, mes, parametros);
+  if (!misionDesdeProduccion.lineas.length) {
+    misionDesdeProduccion = produccionMisionNueva(filas, comercial, mes, parametros);
+  }
   if (misionDesdeProduccion.lineas.length) {
     ventas.mision = misionDesdeProduccion.produccion;
     misionDesdeProduccion.lineas.forEach((fila, indice) => {
       const numero = String(fila.factura ?? "").trim();
-      facturasMision.add(numero || `prod-${fila.hoja || ""}-${indice}`);
+      facturasMision.add(numero || `misi-${fila.hoja || ""}-${indice}`);
     });
   } else {
     ventas.mision = 0;

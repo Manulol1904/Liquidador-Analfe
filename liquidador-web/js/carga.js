@@ -403,12 +403,14 @@ function sugerirColumnas(encabezados, campos) {
   return { mapa, avisos };
 }
 
-/** True si la fecha cae en el mes "AAAA-MM". Usa UTC cuando la fecha no trae hora. */
+/** True si la fecha cae en el mes "AAAA-MM". Usa UTC en fechas de solo-día (00:00 o 05:00 UTC típico de Excel CO). */
 export function fechaEnMes(fecha, mes) {
   const [anio, numeroMes] = mes.split("-").map(Number);
-  const sinHora = fecha.getUTCHours() === 0 && fecha.getUTCMinutes() === 0;
-  const anioFecha = sinHora ? fecha.getUTCFullYear() : fecha.getFullYear();
-  const mesFecha = sinHora ? fecha.getUTCMonth() + 1 : fecha.getMonth() + 1;
+  const utcH = fecha.getUTCHours();
+  const utcM = fecha.getUTCMinutes();
+  const soloDia = (utcH === 0 || utcH === 5) && utcM === 0 && fecha.getUTCSeconds() === 0;
+  const anioFecha = soloDia ? fecha.getUTCFullYear() : fecha.getFullYear();
+  const mesFecha = soloDia ? fecha.getUTCMonth() + 1 : fecha.getMonth() + 1;
   return anioFecha === anio && mesFecha === numeroMes;
 }
 
@@ -1056,10 +1058,22 @@ export function iniciarCarga(contenedor) {
         filas = filas.concat(filasDesdeHoja(libro[nombre], campos, mapaAutomatico(libro[nombre], campos), nombre, false));
       });
       facturacionCargada = filas;
+      // Si el libro trae hoja Misión Int. (ASESOR/BASE), también alimenta la política nueva.
+      // Solo rellena el detalle de producción si aún no hay uno cargado desde el archivo de Producción.
+      if (!produccionDetalleCargada.length) {
+        produccionDetalleCargada = leerDetalleProduccion(libro).filter((fila) => {
+          const producto = String(fila.grupo || "").toLowerCase() + " " + String(fila.cuenta || "").toLowerCase();
+          return producto.includes("misi") || String(fila.cuenta || "").trim().startsWith("41703001") || String(fila.cuenta || "").trim().startsWith("41600521");
+        });
+      }
       const avisos = advertenciasFacturacion(filas, mes, nombres, mapa.fecha !== "");
       avisosSugerencia.forEach((aviso) => {
         if (mapa[aviso.clave] === "") avisos.unshift(aviso.texto);
       });
+      const lineasMision = filas.filter((fila) => !vacio(fila.asesor) && (normalizar(fila.grupo).includes("misi") || String(fila.cuenta || "").trim().startsWith("41703001")));
+      if (lineasMision.length) {
+        avisos.push(`Misión Internacional: ${lineasMision.length} líneas en el libro (se usan para la política nueva con la suma de BASE).`);
+      }
       const sinAsesor = filas.filter((fila) => vacio(fila.asesor)).length;
       avisosPorTipo.facturacion = avisos;
       controlHoja4 = leerControlHoja4(libro);
@@ -1072,6 +1086,7 @@ export function iniciarCarga(contenedor) {
         lineas: filas.filter((fila) => !vacio(fila.asesor)).length,
         excluidas: sinAsesor,
         facturas: new Set(filas.filter((fila) => !vacio(fila.asesor)).map((fila) => fila.factura)).size,
+        mision: lineasMision.length,
       };
     } else if (pareceProduccion(filas)) {
       const armado = armarProduccion(filas, mes);

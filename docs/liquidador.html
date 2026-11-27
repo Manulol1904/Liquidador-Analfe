@@ -6459,9 +6459,11 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
   }
   function fechaEnMes(fecha, mes) {
     const [anio, numeroMes] = mes.split("-").map(Number);
-    const sinHora = fecha.getUTCHours() === 0 && fecha.getUTCMinutes() === 0;
-    const anioFecha = sinHora ? fecha.getUTCFullYear() : fecha.getFullYear();
-    const mesFecha = sinHora ? fecha.getUTCMonth() + 1 : fecha.getMonth() + 1;
+    const utcH = fecha.getUTCHours();
+    const utcM = fecha.getUTCMinutes();
+    const soloDia = (utcH === 0 || utcH === 5) && utcM === 0 && fecha.getUTCSeconds() === 0;
+    const anioFecha = soloDia ? fecha.getUTCFullYear() : fecha.getFullYear();
+    const mesFecha = soloDia ? fecha.getUTCMonth() + 1 : fecha.getMonth() + 1;
     return anioFecha === anio && mesFecha === numeroMes;
   }
   function comoFecha(valor) {
@@ -7002,10 +7004,20 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           filas = filas.concat(filasDesdeHoja(libro[nombre], campos, mapaAutomatico(libro[nombre], campos), nombre, false));
         });
         facturacionCargada = filas;
+        if (!produccionDetalleCargada.length) {
+          produccionDetalleCargada = leerDetalleProduccion(libro).filter((fila2) => {
+            const producto = String(fila2.grupo || "").toLowerCase() + " " + String(fila2.cuenta || "").toLowerCase();
+            return producto.includes("misi") || String(fila2.cuenta || "").trim().startsWith("41703001") || String(fila2.cuenta || "").trim().startsWith("41600521");
+          });
+        }
         const avisos = advertenciasFacturacion(filas, mes, nombres, mapa.fecha !== "");
         avisosSugerencia.forEach((aviso) => {
           if (mapa[aviso.clave] === "") avisos.unshift(aviso.texto);
         });
+        const lineasMision = filas.filter((fila2) => !vacio(fila2.asesor) && (normalizar(fila2.grupo).includes("misi") || String(fila2.cuenta || "").trim().startsWith("41703001")));
+        if (lineasMision.length) {
+          avisos.push(`Misión Internacional: ${lineasMision.length} líneas en el libro (se usan para la política nueva con la suma de BASE).`);
+        }
         const sinAsesor = filas.filter((fila2) => vacio(fila2.asesor)).length;
         avisosPorTipo.facturacion = avisos;
         controlHoja4 = leerControlHoja4(libro);
@@ -7017,7 +7029,8 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           hojas: [nombreHoja2, ...extras].join(" + "),
           lineas: filas.filter((fila2) => !vacio(fila2.asesor)).length,
           excluidas: sinAsesor,
-          facturas: new Set(filas.filter((fila2) => !vacio(fila2.asesor)).map((fila2) => fila2.factura)).size
+          facturas: new Set(filas.filter((fila2) => !vacio(fila2.asesor)).map((fila2) => fila2.factura)).size,
+          mision: lineasMision.length
         };
       } else if (pareceProduccion(filas)) {
         const armado = armarProduccion(filas, mes);
@@ -7837,11 +7850,14 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       else ventas[producto] += Number(fila2.base) || 0;
     });
     misionDesdeProduccion = produccionMisionNueva(filasProduccionDetalle, comercial, mes, parametros);
+    if (!misionDesdeProduccion.lineas.length) {
+      misionDesdeProduccion = produccionMisionNueva(filas, comercial, mes, parametros);
+    }
     if (misionDesdeProduccion.lineas.length) {
       ventas.mision = misionDesdeProduccion.produccion;
       misionDesdeProduccion.lineas.forEach((fila2, indice) => {
         const numero2 = String(fila2.factura ?? "").trim();
-        facturasMision.add(numero2 || `prod-${fila2.hoja || ""}-${indice}`);
+        facturasMision.add(numero2 || `misi-${fila2.hoja || ""}-${indice}`);
       });
     } else {
       ventas.mision = 0;
@@ -14041,7 +14057,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       factor: edu.factorReconocimiento,
       ventaReconocida: edu.ventaReconocida
     })}
-    <p class="nota-mision">Misión Internacional (archivo de Producción): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
+    <p class="nota-mision">Misión Internacional (hoja Misión Int. / Producción · suma de BASE): ${mision.facturas ?? 0} líneas · venta reconocida ${moneda(mision.ventaReconocida)}.</p>`;
   }
   function bandasMargen() {
     const reglas = obtenerParametros().margen || {};
