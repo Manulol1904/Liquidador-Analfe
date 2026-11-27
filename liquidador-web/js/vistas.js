@@ -1118,7 +1118,7 @@ function seccionesDirector(liquidacion) {
         <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
         <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
       ${verFormula(`Puntos = ${decimal(pesos.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje(tope)}) (sin regla del 100 %).`)}
-      <p class="aviso">Pendiente con la jefa: la meta de base social del equipo queda en 622 o en 524. Hoy Parámetros dice ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
+      <p class="ayuda-campo">Meta de base social del equipo (Parámetros): ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
 
   // 5.6

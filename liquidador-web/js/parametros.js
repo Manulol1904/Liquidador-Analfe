@@ -157,7 +157,7 @@ export const PARAMETROS_INICIALES = {
     ...clonarEquipo(EQUIPO_INICIAL.director),
     metodo: "totales",
     regla100: false,
-    metaBaseSocialEquipo: 622,
+    metaBaseSocialEquipo: 560,
     metaEduAtEquipo: 280000000,
     metaMisionEquipo: 49600000,
     tasaAnterior: 0.015,
@@ -580,7 +580,7 @@ function htmlFormulario() {
         campo("serfiscal.meta", p.serfiscal.meta, { titulo: "Meta SERFISCAL", unidad: "porcentaje-directo", ayuda: "Porcentaje esperado. 100 es la meta actual" }),
         campo("satisfaccionEsperada", p.satisfaccionEsperada, { titulo: "Satisfacción esperada", unidad: "porcentaje-directo", ayuda: "Resultado mínimo esperado" })
       ))
-      + `<p class="aviso">PENDIENTE con la jefa: método del score, si aplica la regla del 100 % y si la meta de base social queda en 622 o en 524.</p>`,
+      + `<p class="aviso">PENDIENTE con la jefa: método del score y si aplica la regla del 100 % en indicadores distintos de base social.</p>`,
     curva: tarjetaParam("Curva de pago (5.8)", ["curva.minimo", "curva.tope", "topeIndicador", "topeCongreso", "topeProducto", "curva.anclas"], `
         ${camposParam(
           campo("curva.minimo", p.curva.minimo, { titulo: "Score mínimo", unidad: "puntos", ayuda: "Se paga 0 si el score queda por debajo" }),
@@ -668,7 +668,7 @@ function htmlFormulario() {
           <option value="false" ${d.regla100 ? "" : "selected"}>No</option>
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
-      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas. Pendiente si queda en 622 o en 524" }),
+      campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas (total del equipo para el director comercial)" }),
       campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
       campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
       `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,

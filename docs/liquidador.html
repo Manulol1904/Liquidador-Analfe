@@ -4739,7 +4739,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       ...clonarEquipo(EQUIPO_INICIAL.director),
       metodo: "totales",
       regla100: false,
-      metaBaseSocialEquipo: 622,
+      metaBaseSocialEquipo: 560,
       metaEduAtEquipo: 28e7,
       metaMisionEquipo: 496e5,
       tasaAnterior: 0.015,
@@ -5075,7 +5075,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       ), "Cada peso es el máximo de puntos de ese indicador.") + tarjetaParam("Satisfacción y SERFISCAL", ["serfiscal.meta", "satisfaccionEsperada"], camposParam(
         campo("serfiscal.meta", p.serfiscal.meta, { titulo: "Meta SERFISCAL", unidad: "porcentaje-directo", ayuda: "Porcentaje esperado. 100 es la meta actual" }),
         campo("satisfaccionEsperada", p.satisfaccionEsperada, { titulo: "Satisfacción esperada", unidad: "porcentaje-directo", ayuda: "Resultado mínimo esperado" })
-      )) + `<p class="aviso">PENDIENTE con la jefa: método del score, si aplica la regla del 100 % y si la meta de base social queda en 622 o en 524.</p>`,
+      )) + `<p class="aviso">PENDIENTE con la jefa: método del score y si aplica la regla del 100 % en indicadores distintos de base social.</p>`,
       curva: tarjetaParam("Curva de pago (5.8)", ["curva.minimo", "curva.tope", "topeIndicador", "topeCongreso", "topeProducto", "curva.anclas"], `
         ${camposParam(
         campo("curva.minimo", p.curva.minimo, { titulo: "Score mínimo", unidad: "puntos", ayuda: "Se paga 0 si el score queda por debajo" }),
@@ -5169,7 +5169,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           <option value="false" ${d.regla100 ? "" : "selected"}>No</option>
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
-        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas. Pendiente si queda en 622 o en 524" }),
+        campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas (total del equipo para el director comercial)" }),
         campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
         campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
         `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,
@@ -13227,7 +13227,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         <tr><td>Base computable del equipo (suma de cierres medidos)</td><td class="num">${director.puntos.baseCierre == null ? "Pendiente" : entero(director.puntos.baseCierre)}</td><td class="num" rowspan="2">${director.puntos.baseCumplimiento == null ? "Pendiente" : distintivo(director.puntos.baseCumplimiento, "ventas")}</td><td class="num" rowspan="2">${decimal(pesos4.baseSocial, 0)}</td><td class="num" rowspan="2"><strong>${pts(director.puntos.baseSocial)}</strong></td></tr>
         <tr><td>Meta acumulada del equipo (Parámetros)</td><td class="num">${entero(parametros.director.metaBaseSocialEquipo)}</td></tr>`)}
       ${verFormula(`Puntos = ${decimal(pesos4.baseSocial, 0)} × mín(cierre ÷ meta; ${porcentaje2(tope)}) (sin regla del 100 %).`)}
-      <p class="aviso">Pendiente con la jefa: la meta de base social del equipo queda en 622 o en 524. Hoy Parámetros dice ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
+      <p class="ayuda-campo">Meta de base social del equipo (Parámetros): ${entero(parametros.director.metaBaseSocialEquipo)}.</p>
       <details class="detalle-equipo"><summary>Cómo se agrega desde el equipo</summary>${tablaPuntos(filasBase)}</details>`)}`;
     const serMedidos = equipo.filter((item) => !item.neutrales.serfiscal);
     const innMedidos = equipo.filter((item) => !item.neutrales.innovacion);
