@@ -4740,6 +4740,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       metodo: "totales",
       regla100: false,
       metaBaseSocialEquipo: 622,
+      metaEduAtEquipo: 28e7,
       metaMisionEquipo: 496e5,
       tasaAnterior: 0.015,
       tasaBtlAnterior: 63e-4,
@@ -5146,6 +5147,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         "director.metodo",
         "director.regla100",
         "director.metaBaseSocialEquipo",
+        "director.metaEduAtEquipo",
         "director.metaMisionEquipo",
         "director.ajusteValor",
         "director.ajusteMes",
@@ -5168,6 +5170,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
         campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas. Pendiente si queda en 622 o en 524" }),
+        campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
         campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
         `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,
         campo("director.ajusteValor", d.ajusteValor, { titulo: "Ajuste / reliquidación $", unidad: "pesos", ayuda: "Suma o resta a lo que se paga este mes (no cambia score ni factor)" }),
@@ -8214,14 +8217,17 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         else ventas[producto] += valor;
       });
     });
+    const metaEduAtCrudo = parametros.director.metaEduAtEquipo;
+    const metaEduAt = metaEduAtCrudo === null || metaEduAtCrudo === void 0 || metaEduAtCrudo === "" ? null : Number(metaEduAtCrudo);
     const metas = {
-      eduAt: resultados.every((item) => item.metas.eduAt !== null) ? resultados.reduce((s, item) => s + item.metas.eduAt, 0) : null,
+      eduAt: Number.isFinite(metaEduAt) ? metaEduAt : null,
       mision: resultados.every((item) => item.metas.mision !== null && item.metas.mision !== void 0) ? resultados.reduce((s, item) => s + (Number(item.metas.mision) || 0), 0) : null,
       congreso: resultados.every((item) => item.metas.congreso !== null) ? resultados.reduce((s, item) => s + (item.metas.congreso || 0), 0) : null,
       cultural: resultados.reduce((s, item) => s + (item.metas.cultural || 0), 0),
       pasantia: null,
       patrocinio: null
     };
+    if (metas.eduAt === null) faltantes2.push("meta Edu/AT del director (Parámetros)");
     if (metas.mision === null) faltantes2.push("meta de misión del equipo (faltan metas de comerciales)");
     if (ventas.pasantia === 0) metas.pasantia = 0;
     if (ventas.patrocinio === 0) metas.patrocinio = 0;
@@ -13193,7 +13199,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const s54 = `
     ${seccionDirector("5.4 Ventas del equipo", `${pts(director.puntos.ventas)} de ${decimal(pesos4.ventas, 0)} pts`, `
       ${tablaVentasPuntos({ detalle: director.detalleVentas, ventas: director.ventasEquipo, metas: director.metasEquipo, puntosVentas: director.puntos.ventas })}
-      ${verFormula(`Ventas y metas = suma del equipo (Misión con la meta del equipo de Parámetros). Puntos = ${decimal(pesos4.ventas, 0)} × Σ (peso × cumplimiento elegible) = ${pts(director.puntos.ventas)}.`)}
+      ${verFormula(`Ventas = suma del equipo. Meta Edu/AT del director = Parámetros (${moneda(parametros.director.metaEduAtEquipo)}); Misión = suma de metas de comerciales. Puntos = ${decimal(pesos4.ventas, 0)} × Σ (peso × cumplimiento elegible) = ${pts(director.puntos.ventas)}.`)}
       ${rentabilidadEquipo(director, equipo)}`, true)}`;
     const filasBase = equipo.map((item) => {
       const b = item.baseSocial || {};

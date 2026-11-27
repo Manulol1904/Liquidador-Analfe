@@ -1047,9 +1047,13 @@ export function metodosDirector(resultados, parametros, mes) {
       else ventas[producto] += valor;
     });
   });
-  // Meta misión del director = suma de las metas de misión de los comerciales (misma meta × N).
+  // Meta Edu/AT del director: parámetro fijo (metaEduAtEquipo). Meta misión = suma de comerciales.
+  const metaEduAtCrudo = parametros.director.metaEduAtEquipo;
+  const metaEduAt = metaEduAtCrudo === null || metaEduAtCrudo === undefined || metaEduAtCrudo === ""
+    ? null
+    : Number(metaEduAtCrudo);
   const metas = {
-    eduAt: resultados.every((item) => item.metas.eduAt !== null) ? resultados.reduce((s, item) => s + item.metas.eduAt, 0) : null,
+    eduAt: Number.isFinite(metaEduAt) ? metaEduAt : null,
     mision: resultados.every((item) => item.metas.mision !== null && item.metas.mision !== undefined)
       ? resultados.reduce((s, item) => s + (Number(item.metas.mision) || 0), 0)
       : null,
@@ -1058,6 +1062,7 @@ export function metodosDirector(resultados, parametros, mes) {
     pasantia: null,
     patrocinio: null,
   };
+  if (metas.eduAt === null) faltantes.push("meta Edu/AT del director (Parámetros)");
   if (metas.mision === null) faltantes.push("meta de misión del equipo (faltan metas de comerciales)");
   if (ventas.pasantia === 0) metas.pasantia = 0;
   if (ventas.patrocinio === 0) metas.patrocinio = 0;

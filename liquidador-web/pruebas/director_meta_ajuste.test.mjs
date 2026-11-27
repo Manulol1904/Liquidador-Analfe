@@ -35,6 +35,16 @@ describe("meta misión director", () => {
     assert.notEqual(dir.metasEquipo.mision, p.director.metaMisionEquipo);
   });
 
+  it("meta Edu/AT del director usa el parámetro fijo 280.000.000", () => {
+    const stubs = [
+      resultadoStub({ nombre: "A", misionMeta: 1, eduAt: 10 }),
+      resultadoStub({ nombre: "B", misionMeta: 1, eduAt: 20 }),
+    ];
+    const dir = metodosDirector(stubs, p, "2026-10");
+    assert.equal(p.director.metaEduAtEquipo, 280_000_000);
+    assert.equal(dir.metasEquipo.eduAt, 280_000_000);
+  });
+
   it("queda pendiente si algún comercial no tiene meta de misión", () => {
     const stubs = [
       resultadoStub({ nombre: "A", misionMeta: 49_600_000, eduAt: 10 }),

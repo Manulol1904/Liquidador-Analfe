@@ -1104,7 +1104,7 @@ function seccionesDirector(liquidacion) {
   const s54 = `
     ${seccionDirector("5.4 Ventas del equipo", `${pts(director.puntos.ventas)} de ${decimal(pesos.ventas, 0)} pts`, `
       ${tablaVentasPuntos({ detalle: director.detalleVentas, ventas: director.ventasEquipo, metas: director.metasEquipo, puntosVentas: director.puntos.ventas })}
-      ${verFormula(`Ventas y metas = suma del equipo (Misión con la meta del equipo de Parámetros). Puntos = ${decimal(pesos.ventas, 0)} × Σ (peso × cumplimiento elegible) = ${pts(director.puntos.ventas)}.`)}
+      ${verFormula(`Ventas = suma del equipo. Meta Edu/AT del director = Parámetros (${moneda(parametros.director.metaEduAtEquipo)}); Misión = suma de metas de comerciales. Puntos = ${decimal(pesos.ventas, 0)} × Σ (peso × cumplimiento elegible) = ${pts(director.puntos.ventas)}.`)}
       ${rentabilidadEquipo(director, equipo)}`, true)}`;
 
   // 5.5

@@ -158,6 +158,7 @@ export const PARAMETROS_INICIALES = {
     metodo: "totales",
     regla100: false,
     metaBaseSocialEquipo: 622,
+    metaEduAtEquipo: 280000000,
     metaMisionEquipo: 49600000,
     tasaAnterior: 0.015,
     tasaBtlAnterior: 0.0063,
@@ -650,7 +651,8 @@ function htmlFormulario() {
         </div>`, "La meta mensual es por comercial. Si escribes una producción manual, reemplaza la del archivo."),
     director: tarjetaParam("Director comercial", [
       "director.basico", "director.oportunidad", "director.metodo", "director.regla100",
-      "director.metaBaseSocialEquipo", "director.metaMisionEquipo", "director.ajusteValor", "director.ajusteMes", "director.ajusteNota",
+      "director.metaBaseSocialEquipo", "director.metaEduAtEquipo", "director.metaMisionEquipo",
+      "director.ajusteValor", "director.ajusteMes", "director.ajusteNota",
       "director.tasaAnterior", "director.tasaBtlAnterior", "director.tramosAnterior",
     ], camposParam(
       `<label class="campo-param"><span class="campo-param__etiqueta">Nombre</span><span class="caja-campo"><input class="calculado campo-calculado" readonly value="${escaparHtml(d.nombre)}"></span></label>`,
@@ -667,6 +669,7 @@ function htmlFormulario() {
           <option value="true" ${d.regla100 ? "selected" : ""}>Sí</option>
         </select></span></label>`,
       campo("director.metaBaseSocialEquipo", d.metaBaseSocialEquipo, { titulo: "Meta base social del equipo", ayuda: "Personas. Pendiente si queda en 622 o en 524" }),
+      campo("director.metaEduAtEquipo", d.metaEduAtEquipo, { titulo: "Meta Edu/AT del equipo", unidad: "pesos", ayuda: "Meta de Educación y asistencia técnica del director comercial" }),
       campo("director.metaMisionEquipo", d.metaMisionEquipo, { titulo: "Meta Misión (referencia)", unidad: "pesos", ayuda: "Solo referencia. El cálculo usa la suma de las metas de misión de los comerciales" }),
       `<p class="ayuda-campo">Meta de misión del director = suma de las metas de misión de cada comercial del mes (no este campo fijo).</p>`,
       campo("director.ajusteValor", d.ajusteValor, { titulo: "Ajuste / reliquidación $", unidad: "pesos", ayuda: "Suma o resta a lo que se paga este mes (no cambia score ni factor)" }),
