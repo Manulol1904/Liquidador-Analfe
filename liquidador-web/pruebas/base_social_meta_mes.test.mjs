@@ -47,4 +47,29 @@ describe("meta base social por mes", () => {
     assert.equal(r.baseSocial.metaOrigen, "manual");
     assert.equal(r.baseSocial.metaCalculada, 88);
   });
+
+  it("regla del 100 %: bajo 100 % de cumplimiento → 0 puntos", () => {
+    const comercial = {
+      ...p.comerciales[0],
+      baseSocialInicial: 87,
+      ingresos: 0,
+      retiros: 0,
+      baseSocialMes: { "2026-10": { meta: 200 } },
+      satisfaccion: 80,
+      serfiscal: 100,
+      ofertasAprobadas: 0,
+      primerasVentas: 0,
+    };
+    const bajo = liquidarComercial(comercial, [], "2026-10", p, new Map(), new Map(), []);
+    assert.ok(bajo.baseSocial.cumplimiento < 1);
+    assert.equal(bajo.puntos.baseSocial, 0);
+
+    const cumple = liquidarComercial({
+      ...comercial,
+      ingresos: 113,
+      baseSocialMes: { "2026-10": { meta: 100 } },
+    }, [], "2026-10", p, new Map(), new Map(), []);
+    assert.ok(cumple.baseSocial.cumplimiento >= 1);
+    assert.ok(cumple.puntos.baseSocial > 0);
+  });
 });
