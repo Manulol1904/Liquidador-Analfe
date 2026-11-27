@@ -2114,7 +2114,7 @@ function bloqueRentabilidadEdu({ ventaRecaudada, meta, cumplimiento, margen, fac
   const bandasHtml = bandas.map((item) => `<li class="banda-margen${banda && banda.clave === item.clave ? " banda-margen--aplica" : ""}"><span>${escaparHtml(item.texto)}</span><strong>reconoce ${porcentaje(item.factor)}</strong></li>`).join("");
   const significado = hayMargen
     ? `De cada peso recaudado en Educación y asistencia técnica, cuenta para la meta lo que permite el margen del evento. El margen comprobado (${porcentaje(margen)}) es el promedio del margen de sus eventos, ponderado por lo facturado${banda ? `, y cae en la banda «${escaparHtml(banda.texto)}»` : ""}. El factor de reconocimiento (${textoValor(factor, porcentaje)}) es la venta reconocida ÷ la venta recaudada; cada factura se reconoce con la banda de su propio evento.`
-    : "Pendiente: falta el margen de uno o más eventos (archivo de márgenes). Sin margen no se puede saber qué parte de la venta se reconoce.";
+    : "Sin margen en el informe: esas facturas se reconocen al 100 % de la BASE.";
   return `
     <section class="rentabilidad-edu" aria-label="${escaparHtml(titulo)}">
       <h3 class="rentabilidad-edu__titulo">${escaparHtml(titulo)}</h3>

@@ -62,15 +62,16 @@ describe("Edu/AT desde canceladas del Excel", () => {
     assert.equal(r.eduAt.ventaReconocida, 20_992_200);
   });
 
-  it("con márgenes cargados y factura (no anticipo) ausente: pendiente", () => {
+  it("sin margen del evento: reconoce el 100 % de la BASE (no pendiente)", () => {
     const filas = [filaEdu({ base: 1_800_000, factura: "A" })];
     const margenes = new Map([["999", 0.2]]);
     const r = liquidarComercial(comercial, filas, "2026-10", PARAMETROS_INICIALES, margenes, new Map(), [], []);
-    assert.equal(r.ventas.eduAt, null);
-    assert.ok(r.faltantes.includes("eduAt"));
+    assert.equal(r.ventas.eduAt, 1_800_000);
+    assert.equal(r.eduAt.ventaReconocida, 1_800_000);
+    assert.equal(r.faltantes.includes("eduAt"), false);
   });
 
-  it("anticipo 27209 sin evento no bloquea márgenes del resto", () => {
+  it("con margen en unas y sin margen en otras: mezcla factor y 100 %", () => {
     const filas = [
       filaEdu({ base: 1_000_000, factura: "A", cuenta: "41601103 Seminario" }),
       filaEdu({ base: 500_000, factura: "B", cuenta: "27209515 Ant. Diplomado" }),

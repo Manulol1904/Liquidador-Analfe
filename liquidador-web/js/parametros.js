@@ -599,7 +599,7 @@ function htmlFormulario() {
     costos: tarjetaParam("Costos y margen", ["costos", "margen.factorPorDefecto"], camposParam(
       campo("costos.ica", p.costos.ica, { titulo: "ICA", unidad: "porcentaje", ayuda: "Tasa sobre el ingreso" }),
       campo("costos.gmf", p.costos.gmf, { titulo: "GMF", unidad: "porcentaje", ayuda: "Tasa sobre el costo directo" }),
-        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si no hay informe PRODUCTOS, Edu/AT usa la BASE cancelada del Excel (100 %). Con PRODUCTOS cargado, cada factura debe tener margen" })
+        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si la factura no tiene margen en PRODUCTOS, Edu/AT reconoce el 100 % de la BASE" })
     ), "ICA y GMF se restan al armar el costo total del evento.")
       + tarjetaParam("Misión", ["mision"], camposParam(
         campo("mision.valorFacturaNueva", p.mision.valorFacturaNueva, { titulo: "Factura nueva", unidad: "pesos", ayuda: "Valor reconocido por factura de Misión" }),

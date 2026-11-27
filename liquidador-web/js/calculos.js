@@ -616,7 +616,6 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
     && sirveParaPoliticaNueva(fila));
   const ventas = { eduAt: 0, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 };
   const facturasMision = new Set();
-  let eduPendiente = false;
   let eduReconocida = 0;
   let misionDesdeProduccion = null;
 
@@ -627,18 +626,8 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
       const clave = eventoDeFila(fila, facturaAEvento);
       const margenEvento = clave && margenes.has(clave) ? margenes.get(clave) : null;
       const factorDefecto = parametros.margen.factorPorDefecto;
-      const hayMargenesCargados = margenes.size > 0;
       const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
-      const anticipo = esCuentaAnticipo(fila.cuenta, parametros);
-      // Anticipos 27209 no vienen en el informe PRODUCTOS: cuentan a la BASE (factor 1).
-      // Sin informe de márgenes: BASE del Excel. Con márgenes, el resto debe cruzar con el evento.
-      if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
-        eduPendiente = true;
-        avisos.push(clave
-          ? `La factura ${fila.factura || "sin número"} no está en el informe de producción.`
-          : `La factura ${fila.factura || "sin número"} no tiene evento.`);
-        return;
-      }
+      // Sin margen del evento: 100 % de la BASE (nunca queda pendiente).
       const factor = margenEvento !== null
         ? factorMargen(margenEvento, parametros.margen)
         : (sinFactorDefecto ? 1 : Number(factorDefecto));
@@ -663,7 +652,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
   } else {
     ventas.mision = 0;
   }
-  ventas.eduAt = eduPendiente ? null : eduReconocida;
+  ventas.eduAt = eduReconocida;
 
   const metas = metasDelMes(comercial, mes, parametros);
   const ponderado = cumplimientoVentas(ventas, metas, parametros.topeCongreso, parametros.topeProducto);
@@ -772,7 +761,7 @@ export function liquidarComercial(comercial, filas, mes, parametros, margenesEve
   const ficha = armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos || [], {
     anteriores,
     elegibles,
-    eduPendiente,
+    eduPendiente: false,
     eduReconocida,
     facturasMision,
     ponderado,
@@ -845,13 +834,8 @@ function factorDeEdu(fila, margenes, facturaAEvento, parametros) {
   const clave = eventoDeFila(fila, facturaAEvento);
   const margenEvento = clave && margenes.has(clave) ? margenes.get(clave) : null;
   const factorDefecto = parametros.margen.factorPorDefecto;
-  const hayMargenesCargados = margenes && margenes.size > 0;
   const sinFactorDefecto = factorDefecto === null || factorDefecto === undefined || factorDefecto === "";
-  const anticipo = esCuentaAnticipo(fila.cuenta, parametros);
-  // Alineado con liquidarComercial: anticipos o sin márgenes → factor 1 (BASE).
-  if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
-    return { clave, margenEvento: null, factor: null };
-  }
+  // Sin margen del evento: 100 % de la BASE (no pendiente).
   const factor = margenEvento !== null
     ? factorMargen(margenEvento, parametros.margen)
     : (sinFactorDefecto ? 1 : Number(factorDefecto));
@@ -871,7 +855,7 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
 
   let baseEdu = 0;
   let basePorMargen = 0;
-  let margenFaltante = false;
+  let baseConMargen = 0;
   const facturasMisionReconocidas = new Set();
   const detalleFacturas = filasFicha.map((fila) => {
     const producto = clasificarProducto(fila.grupo, fila.cuenta, parametros);
@@ -884,13 +868,10 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
     if (producto === "eduAt" && elegible) {
       uso = "Edu/AT · política nueva";
       baseEdu += base;
-      if (edu.factor === null) {
-        margenFaltante = true;
-      } else {
-        ventaReconocida = base * edu.factor;
-        if (edu.margenEvento !== null) basePorMargen += base * edu.margenEvento;
-        // Sin informe de márgenes (factor 1 por BASE del Excel) no hay margen comprobado que mostrar.
-        else if (margenes.size > 0) margenFaltante = true;
+      ventaReconocida = base * (edu.factor ?? 1);
+      if (edu.margenEvento !== null) {
+        basePorMargen += base * edu.margenEvento;
+        baseConMargen += base;
       }
     } else if (producto === "eduAt") {
       uso = "Edu/AT · no recaudada en el mes";
@@ -938,12 +919,13 @@ function armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento,
   ];
   // El sort de detalleFacturas se hace después de agregar las líneas de Misión de Producción.
   const ventaRecaudada = baseEdu;
-  const ventaReconocida = datos.eduPendiente ? null : datos.eduReconocida;
+  const ventaReconocida = datos.eduReconocida;
   const eduAt = {
     ventaRecaudada,
     ventaReconocida,
-    margenComprobado: margenFaltante || ventaRecaudada === 0 ? null : basePorMargen / ventaRecaudada,
-    factorReconocimiento: ventaReconocida === null || ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada,
+    // Solo promedia eventos con margen conocido; el resto ya entró al 100 % de BASE.
+    margenComprobado: baseConMargen === 0 ? null : basePorMargen / baseConMargen,
+    factorReconocimiento: ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada,
   };
 
   const lineasMisionProd = datos.misionDesdeProduccion?.lineas || [];

@@ -5094,7 +5094,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       costos: tarjetaParam("Costos y margen", ["costos", "margen.factorPorDefecto"], camposParam(
         campo("costos.ica", p.costos.ica, { titulo: "ICA", unidad: "porcentaje", ayuda: "Tasa sobre el ingreso" }),
         campo("costos.gmf", p.costos.gmf, { titulo: "GMF", unidad: "porcentaje", ayuda: "Tasa sobre el costo directo" }),
-        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si no hay informe PRODUCTOS, Edu/AT usa la BASE cancelada del Excel (100 %). Con PRODUCTOS cargado, cada factura debe tener margen" })
+        campo("margen.factorPorDefecto", p.margen.factorPorDefecto, { titulo: "Factor de margen por defecto", unidad: "porcentaje", ayuda: "Vacío: si la factura no tiene margen en PRODUCTOS, Edu/AT reconoce el 100 % de la BASE" })
       ), "ICA y GMF se restan al armar el costo total del evento.") + tarjetaParam("Misión", ["mision"], camposParam(
         campo("mision.valorFacturaNueva", p.mision.valorFacturaNueva, { titulo: "Factura nueva", unidad: "pesos", ayuda: "Valor reconocido por factura de Misión" }),
         campo("mision.valorFacturaAnterior", p.mision.valorFacturaAnterior, { titulo: "Factura anterior", unidad: "pesos", ayuda: "Base del esquema anterior por factura" })
@@ -7952,7 +7952,6 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const elegibles = filas.filter((fila2) => !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esRecaudo(fila2, mes, parametros) && sirveParaPoliticaNueva(fila2));
     const ventas = { eduAt: 0, mision: 0, congreso: 0, cultural: 0, pasantia: 0, patrocinio: 0 };
     const facturasMision = /* @__PURE__ */ new Set();
-    let eduPendiente = false;
     let eduReconocida = 0;
     let misionDesdeProduccion = null;
     elegibles.forEach((fila2) => {
@@ -7962,14 +7961,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
         const clave5 = eventoDeFila(fila2, facturaAEvento);
         const margenEvento = clave5 && margenes.has(clave5) ? margenes.get(clave5) : null;
         const factorDefecto = parametros.margen.factorPorDefecto;
-        const hayMargenesCargados = margenes.size > 0;
         const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
-        const anticipo = esCuentaAnticipo(fila2.cuenta, parametros);
-        if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
-          eduPendiente = true;
-          avisos.push(clave5 ? `La factura ${fila2.factura || "sin número"} no está en el informe de producción.` : `La factura ${fila2.factura || "sin número"} no tiene evento.`);
-          return;
-        }
         const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
         eduReconocida += (Number(fila2.base) || 0) * factor;
         return;
@@ -7990,7 +7982,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     } else {
       ventas.mision = 0;
     }
-    ventas.eduAt = eduPendiente ? null : eduReconocida;
+    ventas.eduAt = eduReconocida;
     const metas = metasDelMes(comercial, mes, parametros);
     const ponderado = cumplimientoVentas(ventas, metas, parametros.topeCongreso, parametros.topeProducto);
     const faltantes2 = [...ponderado.faltantes];
@@ -8080,7 +8072,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const ficha = armarFicha(comercial, filas, mes, parametros, margenes, facturaAEvento, eventos2 || [], {
       anteriores,
       elegibles,
-      eduPendiente,
+      eduPendiente: false,
       eduReconocida,
       facturasMision,
       ponderado,
@@ -8146,12 +8138,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     const clave5 = eventoDeFila(fila2, facturaAEvento);
     const margenEvento = clave5 && margenes.has(clave5) ? margenes.get(clave5) : null;
     const factorDefecto = parametros.margen.factorPorDefecto;
-    const hayMargenesCargados = margenes && margenes.size > 0;
     const sinFactorDefecto = factorDefecto === null || factorDefecto === void 0 || factorDefecto === "";
-    const anticipo = esCuentaAnticipo(fila2.cuenta, parametros);
-    if (margenEvento === null && sinFactorDefecto && hayMargenesCargados && !anticipo) {
-      return { clave: clave5, margenEvento: null, factor: null };
-    }
     const factor = margenEvento !== null ? factorMargen(margenEvento, parametros.margen) : sinFactorDefecto ? 1 : Number(factorDefecto);
     return { clave: clave5, margenEvento, factor };
   }
@@ -8166,7 +8153,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     });
     let baseEdu = 0;
     let basePorMargen = 0;
-    let margenFaltante = false;
+    let baseConMargen = 0;
     const facturasMisionReconocidas = /* @__PURE__ */ new Set();
     const detalleFacturas = filasFicha.map((fila2) => {
       const producto = clasificarProducto(fila2.grupo, fila2.cuenta, parametros);
@@ -8179,12 +8166,10 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       if (producto === "eduAt" && elegible) {
         uso = "Edu/AT · política nueva";
         baseEdu += base;
-        if (edu.factor === null) {
-          margenFaltante = true;
-        } else {
-          ventaReconocida2 = base * edu.factor;
-          if (edu.margenEvento !== null) basePorMargen += base * edu.margenEvento;
-          else if (margenes.size > 0) margenFaltante = true;
+        ventaReconocida2 = base * (edu.factor ?? 1);
+        if (edu.margenEvento !== null) {
+          basePorMargen += base * edu.margenEvento;
+          baseConMargen += base;
         }
       } else if (producto === "eduAt") {
         uso = "Edu/AT · no recaudada en el mes";
@@ -8231,12 +8216,13 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       "Solo esquema anterior"
     ];
     const ventaRecaudada = baseEdu;
-    const ventaReconocida = datos.eduPendiente ? null : datos.eduReconocida;
+    const ventaReconocida = datos.eduReconocida;
     const eduAt = {
       ventaRecaudada,
       ventaReconocida,
-      margenComprobado: margenFaltante || ventaRecaudada === 0 ? null : basePorMargen / ventaRecaudada,
-      factorReconocimiento: ventaReconocida === null || ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada
+      // Solo promedia eventos con margen conocido; el resto ya entró al 100 % de BASE.
+      margenComprobado: baseConMargen === 0 ? null : basePorMargen / baseConMargen,
+      factorReconocimiento: ventaRecaudada === 0 ? null : ventaReconocida / ventaRecaudada
     };
     const lineasMisionProd = datos.misionDesdeProduccion?.lineas || [];
     const valorRealMision = lineasMisionProd.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
@@ -14235,7 +14221,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
       ["Venta reconocida", textoValor(ventaReconocida, moneda)]
     ];
     const bandasHtml = bandas.map((item) => `<li class="banda-margen${banda && banda.clave === item.clave ? " banda-margen--aplica" : ""}"><span>${escaparHtml(item.texto)}</span><strong>reconoce ${porcentaje2(item.factor)}</strong></li>`).join("");
-    const significado = hayMargen ? `De cada peso recaudado en Educación y asistencia técnica, cuenta para la meta lo que permite el margen del evento. El margen comprobado (${porcentaje2(margen)}) es el promedio del margen de sus eventos, ponderado por lo facturado${banda ? `, y cae en la banda «${escaparHtml(banda.texto)}»` : ""}. El factor de reconocimiento (${textoValor(factor, porcentaje2)}) es la venta reconocida ÷ la venta recaudada; cada factura se reconoce con la banda de su propio evento.` : "Pendiente: falta el margen de uno o más eventos (archivo de márgenes). Sin margen no se puede saber qué parte de la venta se reconoce.";
+    const significado = hayMargen ? `De cada peso recaudado en Educación y asistencia técnica, cuenta para la meta lo que permite el margen del evento. El margen comprobado (${porcentaje2(margen)}) es el promedio del margen de sus eventos, ponderado por lo facturado${banda ? `, y cae en la banda «${escaparHtml(banda.texto)}»` : ""}. El factor de reconocimiento (${textoValor(factor, porcentaje2)}) es la venta reconocida ÷ la venta recaudada; cada factura se reconoce con la banda de su propio evento.` : "Sin margen en el informe: esas facturas se reconocen al 100 % de la BASE.";
     return `
     <section class="rentabilidad-edu" aria-label="${escaparHtml(titulo)}">
       <h3 class="rentabilidad-edu__titulo">${escaparHtml(titulo)}</h3>
