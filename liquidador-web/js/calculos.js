@@ -262,8 +262,39 @@ export function produccionAnterior(filas, comercial, mes, parametros) {
 }
 
 /**
+ * Misión del equipo (director): mismas reglas que el comercial, sin filtrar asesor.
+ * CANCELADA (o sin ESTADO) + misión completa × CANTIDAD × valorFacturaAnterior.
+ */
+export function misionEsquemaAnteriorEquipo(filas, mes, parametros) {
+  const vistas = new Set();
+  const lineas = [];
+  (filas || []).forEach((fila) => {
+    if (asesorVacio(fila)) return;
+    if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
+    if (!estadoPermiteMisionAnterior(fila)) return;
+    if (!esMisionCompletaAnterior(fila, parametros)) return;
+    if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
+    const numero = String(fila.factura ?? "").trim();
+    const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
+    if (vistas.has(clave)) return;
+    vistas.add(clave);
+    lineas.push(fila);
+  });
+  const valorUnitario = Number(parametros?.mision?.valorFacturaAnterior) || 0;
+  const unidades = lineas.reduce((suma, fila) => suma + cantidadMision(fila), 0);
+  return {
+    facturas: unidades,
+    unidades,
+    lineas,
+    valorPorFactura: valorUnitario,
+    valor: unidades * valorUnitario,
+  };
+}
+
+/**
  * Total de producción del mes para la comisión anterior del director (tasa × base total).
- * Solo CANCELADA; incluye anticipos 27209 de Educación/AT; excluye BTL/cultural/Misión.
+ * CANCELADA de Facturación (Edu/AT, Jornada Analfista, anticipos 27209 edu…) + Misión (N × $1.000.000).
+ * Excluye BTL/cultural y la BASE cruda de Misión.
  */
 export function produccionTotalMes(filas, mes, parametros) {
   const lineasTodas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila)
@@ -271,6 +302,7 @@ export function produccionTotalMes(filas, mes, parametros) {
     && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
     && cuentaEnProduccionAnterior(fila, parametros));
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
+  const mision = misionEsquemaAnteriorEquipo(filas, mes, parametros);
   const grupos = new Map();
   lineasTodas.forEach((fila) => {
     const asesor = String(fila.asesor).trim();
@@ -279,10 +311,13 @@ export function produccionTotalMes(filas, mes, parametros) {
     actual.facturas += 1;
     grupos.set(asesor, actual);
   });
-  const total = sumar(lineasTodas);
+  const baseFacturacion = sumar(lineasTodas);
+  const total = baseFacturacion + mision.valor;
   return {
     base: total,
+    baseFacturacion,
     baseConAnticipos: total,
+    mision,
     lineas: lineasTodas,
     lineasTodas,
     porAsesor: [...grupos.values()],
@@ -1416,6 +1451,8 @@ export function liquidarMes(filas, eventos, parametros, mes, facturaAEvento, fil
   const pagoAnterior = comisionAnteriorDirector(totalMes.base, parametros.director.tasaAnterior);
   const anterior = {
     base: totalMes.base,
+    baseFacturacion: totalMes.baseFacturacion,
+    mision: totalMes.mision,
     tasa: parametros.director.tasaAnterior,
     comision: pagoAnterior,
     facturas: totalMes.lineas.length,
