@@ -7611,7 +7611,6 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     (filas || []).forEach((fila2) => {
       if (asesorVacio(fila2) || !mismaPersona(fila2.asesor, comercial)) return;
       if (clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision") return;
-      if (!esCancelada(fila2)) return;
       if (!(fila2.fecha instanceof Date) || !fechaEnMes(fila2.fecha, mes)) return;
       const numero2 = String(fila2.factura ?? "").trim();
       const clave5 = numero2 || `misi-${fila2.hoja || ""}-${fila2.numeroFila || lineas.length}`;
@@ -7630,7 +7629,7 @@ window.ANALFE_EMPAQUETADO = "2026-11-27";
     };
   }
   function produccionAnterior(filas, comercial, mes, parametros) {
-    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes));
+    const lineas = filas.filter((fila2) => fila2.elegida === true && !asesorVacio(fila2) && mismaPersona(fila2.asesor, comercial) && esCancelada(fila2) && fila2.fecha instanceof Date && fechaEnMes(fila2.fecha, mes) && clasificarProducto(fila2.grupo, fila2.cuenta, parametros) !== "mision");
     const sumar = (lista) => lista.reduce((suma, fila2) => suma + (Number(fila2.base) || 0), 0);
     const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
     const base = sumar(lineas);

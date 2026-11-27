@@ -180,6 +180,7 @@ export function cantidadMision(fila) {
 /**
  * Misión del comercial en el mes (hoja Misión Int. u otras clasificadas como misión).
  * Esquema anterior: N = suma de CANTIDAD × valorFacturaAnterior (p. ej. 2 × $1.000.000).
+ * No exige CANCELADA: en Misión Int. también cuentan NO CANCELADA (la cantidad manda).
  */
 export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   const vistas = new Set();
@@ -187,7 +188,6 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
   (filas || []).forEach((fila) => {
     if (asesorVacio(fila) || !mismaPersona(fila.asesor, comercial)) return;
     if (clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision") return;
-    if (!esCancelada(fila)) return;
     if (!(fila.fecha instanceof Date) || !fechaEnMes(fila.fecha, mes)) return;
     const numero = String(fila.factura ?? "").trim();
     const clave = numero || `misi-${fila.hoja || ""}-${fila.numeroFila || lineas.length}`;
@@ -208,14 +208,15 @@ export function misionEsquemaAnterior(filas, comercial, mes, parametros) {
 
 /**
  * Producción del esquema anterior (comisión por tramos).
- * Suma BASE CANCELADA de la hoja elegida + Misión (suma CANTIDAD × valorFacturaAnterior).
+ * Suma BASE CANCELADA de la hoja elegida (sin Misión) + Misión (CANTIDAD × valorFacturaAnterior).
  * Cumplimiento y comisión usan el mismo total (incluye anticipos 27209).
- * NO CANCELADA no entra.
+ * Facturación: solo CANCELADA. Misión: todas las del mes (CANTIDAD × $1.000.000).
  */
 export function produccionAnterior(filas, comercial, mes, parametros) {
   const lineas = filas.filter((fila) => fila.elegida === true && !asesorVacio(fila) && mismaPersona(fila.asesor, comercial)
     && esCancelada(fila)
-    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes));
+    && fila.fecha instanceof Date && fechaEnMes(fila.fecha, mes)
+    && clasificarProducto(fila.grupo, fila.cuenta, parametros) !== "mision");
   const sumar = (lista) => lista.reduce((suma, fila) => suma + (Number(fila.base) || 0), 0);
   const mision = misionEsquemaAnterior(filas, comercial, mes, parametros);
   const base = sumar(lineas);

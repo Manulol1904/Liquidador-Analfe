@@ -46,7 +46,7 @@ describe("misión en producción esquema anterior", () => {
         base: 42_384_081,
         fecha,
         factura: "FV-C2",
-        estado: "CANCELADA",
+        // Hoja Misión Int. real: sin columna ESTADO
       },
     ];
     const carolina = { nombre: "Carolina Gómez", nombreFacturacion: "Carolina Gomez" };
@@ -54,6 +54,18 @@ describe("misión en producción esquema anterior", () => {
     assert.equal(m.facturas, 2);
     assert.equal(m.unidades, 2);
     assert.equal(m.valor, 2_000_000);
+  });
+
+  it("Misión Int. sin ESTADO suma el millón a la producción", () => {
+    const filas = [
+      { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 37_510_000, fecha, factura: "E1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1" },
+    ];
+    const ant = produccionAnterior(filas, comercial, "2026-10", p);
+    assert.equal(ant.mision.unidades, 1);
+    assert.equal(ant.mision.valor, 1_000_000);
+    assert.equal(ant.produccionBase, 37_510_000);
+    assert.equal(ant.produccion, 38_510_000);
   });
 
   it("suma CANTIDAD de varias facturas a valorFacturaAnterior", () => {
@@ -87,16 +99,34 @@ describe("misión en producción esquema anterior", () => {
     assert.equal(r.misionAnterior.valorTotal, 3_000_000);
   });
 
-  it("NO CANCELADA no entra a la producción del esquema anterior", () => {
+  it("NO CANCELADA de Facturación no entra; Misión NO CANCELADA sí (por CANTIDAD)", () => {
     const filas = [
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 2_000_000, fecha, factura: "E1", estado: "CANCELADA" },
       { elegida: true, hoja: "Facturacion ", asesor: "Hernando Rozo", grupo: "Educación", cuenta: "41601103", base: 900_000, fecha, factura: "E2", estado: "NO CANCELADA " },
       { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "M1", estado: "CANCELADA" },
-      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 2, base: 15_500_000, fecha, factura: "M2", estado: "NO CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Hernando Rozo", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 2, base: 42_384_081, fecha, factura: "M2", estado: "NO CANCELADA" },
     ];
     const ant = produccionAnterior(filas, comercial, "2026-10", p);
     assert.equal(ant.produccionBase, 2_000_000);
-    assert.equal(ant.mision.facturas, 1);
-    assert.equal(ant.produccion, 3_000_000);
+    assert.equal(ant.mision.facturas, 3);
+    assert.equal(ant.produccion, 5_000_000);
+  });
+
+  it("Carolina: 31.51M CANCELADA + 8 unidades de Misión = 39.51M", () => {
+    const carolina = { nombre: "Carolina Gómez", nombreFacturacion: "Carolina Gomez" };
+    const filas = [
+      { elegida: true, hoja: "Facturacion ", asesor: "Carolina Gomez", grupo: "Educación", cuenta: "41601103", base: 31_510_000, fecha, factura: "E1", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 2, base: 42_384_081, fecha, factura: "4344", estado: "NO CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "4351", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "4352", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 1_421_600, fecha, factura: "4353", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "4318", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "4319", estado: "CANCELADA" },
+      { elegida: false, hoja: "Misión Int. ", asesor: "Carolina Gomez", grupo: "Misión Internacional ", cuenta: "41703001", cantidad: 1, base: 15_500_000, fecha, factura: "4323", estado: "CANCELADA" },
+    ];
+    const ant = produccionAnterior(filas, carolina, "2026-10", p);
+    assert.equal(ant.mision.unidades, 8);
+    assert.equal(ant.mision.valor, 8_000_000);
+    assert.equal(ant.produccion, 39_510_000);
   });
 });
